@@ -33,7 +33,7 @@ export const SellerDashboardPage = () => {
       <header className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h1 className="text-3xl font-black">Seller Dashboard</h1>
-          <p className="text-sm text-[var(--text-muted)]">Manage active listings.</p>
+          <p className="text-sm text-(--text-muted)">Manage active listings.</p>
         </div>
         <Link to="/create-listing">
           <Button>Create Listing</Button>
@@ -45,7 +45,7 @@ export const SellerDashboardPage = () => {
           <Card key={item._id} className="space-y-3">
             <img src={item.imageUrl} alt={item.title} className="h-44 w-full rounded-xl object-cover" />
             <h2 className="text-xl font-black">{item.title}</h2>
-            <p className="text-lg font-bold text-[var(--primary)]">{formatCurrency(item.price)}</p>
+            <p className="text-lg font-bold text-(--primary)">{formatCurrency(item.price)}</p>
             <div className="grid grid-cols-3 gap-2">
               <Link to={`/create-listing?edit=${item._id}`}>
                 <Button variant="outline" size="sm" className="w-full">

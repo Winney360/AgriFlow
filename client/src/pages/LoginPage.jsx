@@ -23,9 +23,9 @@ export const LoginPage = () => {
   };
 
   return (
-    <section className="mx-auto max-w-md rounded-2xl border border-[var(--outline)] bg-[var(--surface)] p-5">
+    <section className="mx-auto max-w-md rounded-2xl border border-(--outline) bg-(--surface) p-5">
       <h1 className="text-2xl font-black">Login</h1>
-      <p className="mb-4 text-sm text-[var(--text-muted)]">Use your phone number and password.</p>
+      <p className="mb-4 text-sm text-(--text-muted)">Use your phone number and password.</p>
       <form onSubmit={onSubmit} className="space-y-3">
         <Input
           placeholder="Phone number"
@@ -43,8 +43,8 @@ export const LoginPage = () => {
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
         <Button className="w-full">Login</Button>
       </form>
-      <p className="mt-3 text-sm text-[var(--text-muted)]">
-        New account? <Link to="/signup" className="font-bold text-[var(--primary)]">Sign up</Link>
+      <p className="mt-3 text-sm text-(--text-muted)">
+        New account? <Link to="/signup" className="font-bold text-(--primary)">Sign up</Link>
       </p>
     </section>
   );

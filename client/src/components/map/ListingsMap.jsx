@@ -16,7 +16,7 @@ export const ListingsMap = ({ products }) => {
     : fallbackCenter;
 
   return (
-    <div className="h-80 overflow-hidden rounded-2xl border border-[var(--outline)] md:h-[460px]">
+    <div className="h-80 overflow-hidden rounded-2xl border border-(--outline) md:h-115">
       <MapContainer center={center} zoom={7} className="h-full w-full">
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -32,7 +32,7 @@ export const ListingsMap = ({ products }) => {
               <div className="space-y-1">
                 <p className="font-bold">{product.title}</p>
                 <p>{product.location.locationName || 'Unnamed location'}</p>
-                <Link to={`/products/${product._id}`} className="text-[var(--primary)] underline">
+                <Link to={`/products/${product._id}`} className="text-(--primary) underline">
                   View product
                 </Link>
               </div>

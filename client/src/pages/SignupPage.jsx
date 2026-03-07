@@ -28,9 +28,9 @@ export const SignupPage = () => {
   };
 
   return (
-    <section className="mx-auto max-w-md rounded-2xl border border-[var(--outline)] bg-[var(--surface)] p-5">
+    <section className="mx-auto max-w-md rounded-2xl border border-(--outline) bg-(--surface) p-5">
       <h1 className="text-2xl font-black">Create account</h1>
-      <p className="mb-4 text-sm text-[var(--text-muted)]">Phone and password are required. Email is optional.</p>
+      <p className="mb-4 text-sm text-(--text-muted)">Phone and password are required. Email is optional.</p>
       <form onSubmit={onSubmit} className="space-y-3">
         <Input
           placeholder="Name"
@@ -60,8 +60,8 @@ export const SignupPage = () => {
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
         <Button className="w-full">Sign up</Button>
       </form>
-      <p className="mt-3 text-sm text-[var(--text-muted)]">
-        Already have an account? <Link to="/login" className="font-bold text-[var(--primary)]">Login</Link>
+      <p className="mt-3 text-sm text-(--text-muted)">
+        Already have an account? <Link to="/login" className="font-bold text-(--primary)">Login</Link>
       </p>
     </section>
   );
