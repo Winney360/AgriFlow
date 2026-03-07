@@ -1,0 +1,60 @@
+import { createBrowserRouter } from 'react-router-dom';
+import { MainLayout } from '../components/layout/MainLayout';
+import { ProtectedRoute } from './ProtectedRoute';
+import { HomePage } from '../pages/HomePage';
+import { LoginPage } from '../pages/LoginPage';
+import { SignupPage } from '../pages/SignupPage';
+import { MarketplacePage } from '../pages/MarketplacePage';
+import { ProductDetailsPage } from '../pages/ProductDetailsPage';
+import { SellerDashboardPage } from '../pages/SellerDashboardPage';
+import { CreateListingPage } from '../pages/CreateListingPage';
+import { HistoryPage } from '../pages/HistoryPage';
+import { ProfilePage } from '../pages/ProfilePage';
+import { NotFoundPage } from '../pages/NotFoundPage';
+
+export const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <MainLayout />,
+    children: [
+      { index: true, element: <HomePage /> },
+      { path: 'marketplace', element: <MarketplacePage /> },
+      { path: 'products/:id', element: <ProductDetailsPage /> },
+      { path: 'login', element: <LoginPage /> },
+      { path: 'signup', element: <SignupPage /> },
+      {
+        path: 'dashboard',
+        element: (
+          <ProtectedRoute>
+            <SellerDashboardPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'create-listing',
+        element: (
+          <ProtectedRoute>
+            <CreateListingPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'history',
+        element: (
+          <ProtectedRoute>
+            <HistoryPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'profile',
+        element: (
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        ),
+      },
+      { path: '*', element: <NotFoundPage /> },
+    ],
+  },
+]);
