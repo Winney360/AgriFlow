@@ -16,40 +16,50 @@ const navItems = [
 export const MainLayout = () => {
   const location = useLocation();
   const { isAuthenticated, logout } = useAuth();
+  const isHomePage = location.pathname === '/';
 
   return (
     <div className="relative min-h-screen bg-(--bg) text-(--text)">
-      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        <div className="blob blob-one" />
-        <div className="blob blob-two" />
-        <div className="grain" />
-      </div>
-
-      <header className="sticky top-0 z-20 border-b border-(--outline) bg-[var(--surface)/0.9] backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <Link to="/" className="text-xl font-black tracking-tight text-(--primary)">
-            CropConnect
-          </Link>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            {isAuthenticated ? (
-              <Button variant="outline" size="sm" onClick={logout}>
-                Logout
-              </Button>
-            ) : (
-              <Link to="/login">
-                <Button size="sm">Login</Button>
-              </Link>
-            )}
-          </div>
+      {!isHomePage && (
+        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+          <div className="blob blob-one" />
+          <div className="blob blob-two" />
+          <div className="grain" />
         </div>
-      </header>
+      )}
 
-      <main className="mx-auto w-full max-w-6xl px-4 pb-24 pt-6">
+      {!isHomePage && (
+        <header className="sticky top-0 z-20 border-b border-(--outline) bg-[var(--surface)/0.9] backdrop-blur">
+          <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+            <Link to="/" className="text-xl font-black tracking-tight text-(--primary)">
+              CropConnect
+            </Link>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              {isAuthenticated ? (
+                <Button variant="outline" size="sm" onClick={logout}>
+                  Logout
+                </Button>
+              ) : (
+                <Link to="/login">
+                  <Button size="sm">Login</Button>
+                </Link>
+              )}
+            </div>
+          </div>
+        </header>
+      )}
+
+      <main className={isHomePage ? 'w-full' : 'mx-auto w-full max-w-6xl px-4 pb-24 pt-6'}>
         <Outlet />
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-(--outline) bg-[var(--surface)/0.95] p-2 backdrop-blur md:hidden">
+      <nav
+        className={cn(
+          'fixed bottom-0 left-0 right-0 z-30 border-t border-(--outline) bg-[var(--surface)/0.95] p-2 backdrop-blur md:hidden',
+          isHomePage && 'hidden',
+        )}
+      >
         <ul className="mx-auto flex max-w-md items-center justify-between">
           {navItems.map((item) => {
             const Icon = item.icon;
