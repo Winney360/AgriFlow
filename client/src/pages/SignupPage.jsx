@@ -99,7 +99,7 @@ export const SignupPage = () => {
           {step === 1 && (
             <>
               <div>
-                <h2 className="text-3xl font-black text-[#1f1f1f]">Join CropConnect Today.</h2>
+                <h2 className="text-3xl font-black text-[#1f1f1f]">Join AgriFlow Today.</h2>
                 <p className="mt-1 text-sm text-[#666]">Let's verify your identity and establish trust.</p>
               </div>
 
@@ -303,7 +303,7 @@ export const SignupPage = () => {
             <>
               <div>
                 <h2 className="text-3xl font-black text-[#1f1f1f]">Preferences.</h2>
-                <p className="mt-1 text-sm text-[#666]">How would you like to use CropConnect?</p>
+                <p className="mt-1 text-sm text-[#666]">How would you like to use AgriFlow?</p>
               </div>
 
               <div className="space-y-3">

@@ -33,7 +33,7 @@ export const LoginPage = () => {
       <div className="w-full max-w-sm rounded-lg border border-[#d8ddda] bg-white shadow-sm">
         <form onSubmit={onSubmit} className="space-y-4 px-6 py-6">
           <div>
-            <h1 className="text-3xl font-black text-[#1f1f1f]">Welcome Back to CropConnect.</h1>
+            <h1 className="text-3xl font-black text-[#1f1f1f]">Welcome Back to AgriFlow.</h1>
             <p className="mt-2 text-sm text-[#666]">Log in to manage your harvest or find local crops.</p>
           </div>
 

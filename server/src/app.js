@@ -29,7 +29,7 @@ app.use(morgan('dev'));
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
 app.get('/api/health', (_req, res) => {
-  res.json({ success: true, message: 'CropConnect API is healthy' });
+  res.json({ success: true, message: 'AgriFlow API is healthy' });
 });
 
 app.use('/api/auth', authRoutes);

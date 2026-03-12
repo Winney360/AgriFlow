@@ -5,19 +5,19 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('cropconnect_token'));
+  const [token, setToken] = useState(localStorage.getItem('agriflow_token'));
   const [loading, setLoading] = useState(true);
 
   const persistSession = (nextToken, nextUser) => {
-    localStorage.setItem('cropconnect_token', nextToken);
-    localStorage.setItem('cropconnect_user', JSON.stringify(nextUser));
+    localStorage.setItem('agriflow_token', nextToken);
+    localStorage.setItem('agriflow_user', JSON.stringify(nextUser));
     setToken(nextToken);
     setUser(nextUser);
   };
 
   const clearSession = () => {
-    localStorage.removeItem('cropconnect_token');
-    localStorage.removeItem('cropconnect_user');
+    localStorage.removeItem('agriflow_token');
+    localStorage.removeItem('agriflow_user');
     setToken(null);
     setUser(null);
   };
@@ -39,20 +39,20 @@ export const AuthProvider = ({ children }) => {
   const switchRole = async (role) => {
     const response = await authApi.switchRole(role);
     const updated = response.data.data;
-    localStorage.setItem('cropconnect_user', JSON.stringify(updated));
+    localStorage.setItem('agriflow_user', JSON.stringify(updated));
     setUser(updated);
   };
 
   const toggleNotifications = async (notificationEnabled) => {
     const response = await authApi.toggleNotifications(notificationEnabled);
     const updated = response.data.data;
-    localStorage.setItem('cropconnect_user', JSON.stringify(updated));
+    localStorage.setItem('agriflow_user', JSON.stringify(updated));
     setUser(updated);
   };
 
   useEffect(() => {
     const bootstrap = async () => {
-      const cachedUser = localStorage.getItem('cropconnect_user');
+      const cachedUser = localStorage.getItem('agriflow_user');
       if (cachedUser && token) {
         setUser(JSON.parse(cachedUser));
       }
@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }) => {
       try {
         const response = await authApi.me();
         const profile = response.data.data;
-        localStorage.setItem('cropconnect_user', JSON.stringify(profile));
+        localStorage.setItem('agriflow_user', JSON.stringify(profile));
         setUser(profile);
       } catch (_error) {
         clearSession();

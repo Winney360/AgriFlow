@@ -7,7 +7,7 @@ const startServer = async () => {
   await connectDatabase();
 
   app.listen(PORT, () => {
-    console.log(`CropConnect API running on port ${PORT}`);
+    console.log(`AgriFlow API running on port ${PORT}`);
   });
 };
 

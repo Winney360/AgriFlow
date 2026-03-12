@@ -154,7 +154,7 @@ export const HomePage = () => {
       <section className="min-h-screen border-b border-[#dce3df] bg-[#f7f8f7]">
         <div className="mx-auto w-full max-w-315 px-4 md:px-6">
           <header className="flex flex-wrap items-center gap-3 border-b border-[#e1e5e2] py-3">
-            <div className="text-2xl font-black text-[#2f6f5e]">CropConnect</div>
+            <div className="text-2xl font-black text-[#2f6f5e]">AgriFlow</div>
             <div className="min-w-55 flex-1 md:max-w-md md:pl-8">
               <div className="flex h-10 items-center rounded-md border border-[#d8ddda] bg-white px-3 text-[#79817e]">
                 <Search size={15} />
@@ -278,7 +278,7 @@ export const HomePage = () => {
       <section className="min-h-screen bg-[#f3f6f4]">
         <div className="mx-auto w-full max-w-315 px-4 md:px-6">
           <header className="flex flex-wrap items-center gap-3 border-b border-[#e1e5e2] py-3">
-            <div className="text-2xl font-black text-[#2f6f5e]">CropConnect</div>
+            <div className="text-2xl font-black text-[#2f6f5e]">AgriFlow</div>
             <div className="min-w-55 flex-1 md:max-w-md md:pl-8">
               <div className="flex h-10 items-center rounded-md border border-[#d8ddda] bg-white px-3 text-[#79817e]">
                 <Search size={15} />
@@ -399,7 +399,7 @@ export const HomePage = () => {
 
           <footer className="mt-8 grid grid-cols-2 gap-5 rounded-t-md bg-[#27333c] px-6 py-8 text-[#d3dde3] md:grid-cols-5">
             <div className="col-span-2 md:col-span-1">
-              <div className="text-xl font-black text-white">CropConnect</div>
+              <div className="text-xl font-black text-white">AgriFlow</div>
             </div>
             <div>
               <h4 className="font-bold text-white">About Us</h4>
@@ -415,7 +415,7 @@ export const HomePage = () => {
               <p className="mt-1 text-sm">Facebook</p>
               <p className="text-sm">Twitter</p>
             </div>
-            <div className="self-end text-sm text-[#aab7bf]">CopyrightCropConnect.com</div>
+            <div className="self-end text-sm text-[#aab7bf]">CopyrightAgriFlow.com</div>
           </footer>
         </div>
       </section>

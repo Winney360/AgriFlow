@@ -32,7 +32,7 @@ export const MainLayout = () => {
         <header className="sticky top-0 z-20 border-b border-(--outline) bg-[var(--surface)/0.9] backdrop-blur">
           <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
             <Link to="/" className="text-xl font-black tracking-tight text-(--primary)">
-              CropConnect
+              AgriFlow
             </Link>
             <div className="flex items-center gap-2">
               <ThemeToggle />

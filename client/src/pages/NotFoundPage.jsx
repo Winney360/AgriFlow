@@ -78,7 +78,7 @@ export const NotFoundPage = () => {
             Go to Crop Feed
           </Link>
           <span className="text-[#999]">•</span>
-          <a href="mailto:support@cropconnect.com" className="text-sm font-semibold text-[#333] hover:text-[#20a46b]">
+          <a href="mailto:support@agriflow.com" className="text-sm font-semibold text-[#333] hover:text-[#20a46b]">
             Contact Support
           </a>
           <span className="text-[#999]">•</span>
@@ -92,7 +92,7 @@ export const NotFoundPage = () => {
       <div className="absolute bottom-0 left-0 right-0 border-t border-[#d8ddda] bg-white">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 px-6 py-6 max-w-6xl mx-auto">
           <div className="col-span-2 lg:col-span-1">
-            <p className="text-sm font-black text-[#20a46b]">CropConnect</p>
+            <p className="text-sm font-black text-[#20a46b]">AgriFlow</p>
           </div>
           <div>
             <p className="text-xs font-bold text-[#333] mb-2">About Us</p>
@@ -113,7 +113,7 @@ export const NotFoundPage = () => {
           </div>
         </div>
         <div className="text-center text-xs text-[#999] py-3 border-t border-[#e0e5e1]">
-          <p>CopyrightCropConnect.com</p>
+          <p>CopyrightAgriFlow.com</p>
         </div>
       </div>
     </div>
