@@ -1,17 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import {
   MapPin,
   Search,
   Star,
   ArrowRight,
   MessageCircle,
-  Home,
-  Store,
-  Tractor,
-  History,
-  UserRound,
-  Plus,
 } from 'lucide-react';
 import { productApi } from '../lib/api';
 import { formatCurrency } from '../lib/utils';
@@ -41,28 +35,9 @@ const successStories = [
 ];
 
 export const HomePage = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const buyerNavItems = [
-    { to: '/', label: 'Home', icon: Home },
-    { to: '/marketplace', label: 'Marketplace', icon: Store },
-    { to: '/profile', label: 'Profile', icon: UserRound },
-  ];
-
-  const sellerNavItems = [
-    { to: '/', label: 'Home', icon: Home },
-    { to: '/dashboard', label: 'Dashboard', icon: Tractor },
-    { to: '/create-listing', label: 'Create', icon: Plus },
-    { to: '/history', label: 'History', icon: History },
-    { to: '/profile', label: 'Profile', icon: UserRound },
-  ];
-
-  const navItems = useMemo(() => {
-    if (!isAuthenticated || !user) return [];
-    return user.role === 'seller' ? sellerNavItems : buyerNavItems;
-  }, [user, isAuthenticated]);
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -126,35 +101,13 @@ export const HomePage = () => {
     <div className="bg-[#f7f8f7] text-[#1f1f1f]">
       <section className="min-h-screen border-b border-[#dce3df] bg-[#f7f8f7]">
         <div className="mx-auto w-full max-w-315 px-4 md:px-6">
-          <header className="flex flex-wrap items-center gap-3 border-b border-[#e1e5e2] py-3">
+          {!isAuthenticated && (
+            <header className="flex flex-wrap items-center gap-3 border-b border-[#e1e5e2] py-3">
             <div className="text-2xl font-black">
               <span className="text-[#1f9f6a]">Agri</span>
               <span className="text-[#1f1f1f]">Flow</span>
             </div>
-            
-            {isAuthenticated && (
-              <nav className="hidden flex-1 md:block md:pl-8">
-                <ul className="flex items-center gap-2">
-                  {navItems.map((item) => (
-                    <li key={item.to}>
-                      <NavLink
-                        to={item.to}
-                        className={({ isActive }) =>
-                          `rounded-md px-3 py-2 text-sm font-semibold transition-colors ${
-                            isActive
-                              ? 'bg-[#20a46b] text-white'
-                              : 'text-[#335c4f] hover:text-[#20a46b]'
-                          }`
-                        }
-                      >
-                        {item.label}
-                      </NavLink>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-            )}
-            
+
             <div className="min-w-55 flex-1 md:max-w-md md:pl-8">
               <div className="flex h-10 items-center rounded-md border border-[#d8ddda] bg-white px-3 text-[#79817e]">
                 <Search size={15} />
@@ -180,7 +133,8 @@ export const HomePage = () => {
                 </>
               )}
             </div>
-          </header>
+            </header>
+          )}
 
           <div className="grid grid-cols-1 overflow-hidden rounded-md border border-[#d8ddda] lg:grid-cols-2">
             <div className="bg-[#e4ece5] p-6 md:p-12">

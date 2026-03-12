@@ -50,7 +50,7 @@ export const MainLayout = () => {
 
   const onLogout = () => {
     logout();
-    navigate('/');
+    navigate('/', { replace: true });
   };
 
   return (
@@ -63,7 +63,7 @@ export const MainLayout = () => {
         </div>
       )}
 
-      {!isHomePage && (
+      {(!isHomePage || isAuthenticated) && (
         <header className="sticky top-0 z-20 border-b border-outline bg-[var(--surface)/0.9] backdrop-blur">
           <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
             <Link to="/" className="text-2xl font-black tracking-tight">
@@ -145,7 +145,7 @@ export const MainLayout = () => {
       <nav
         className={cn(
           'fixed bottom-0 left-0 right-0 z-30 border-t border-outline bg-[var(--surface)/0.95] p-2 backdrop-blur md:hidden',
-          isHomePage && 'hidden',
+          isHomePage && !isAuthenticated && 'hidden',
         )}
       >
         <ul className="mx-auto flex max-w-md items-center justify-between">
