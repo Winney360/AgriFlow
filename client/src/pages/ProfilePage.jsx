@@ -19,7 +19,7 @@ import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import { ENGLISH_MAP_ATTRIBUTION, ENGLISH_MAP_TILE_URL } from '../lib/mapTiles';
-import { formatCurrency } from '../lib/utils';
+import { formatCurrency, getListingEstimatedTotal, parseNumericValue } from '../lib/utils';
 import { productApi, emergencyRequestApi } from '../lib/api';
 
 const markerIcon = L.icon({
@@ -28,11 +28,6 @@ const markerIcon = L.icon({
   iconSize: [25, 41],
   iconAnchor: [12, 41],
 });
-
-const parseNumeric = (value) => {
-  const parsed = Number.parseFloat(String(value || '').replace(/[^\d.]/g, ''));
-  return Number.isFinite(parsed) ? parsed : 0;
-};
 
 const formatShortDate = (value) => {
   if (!value) return '—';
@@ -114,8 +109,11 @@ export const ProfilePage = () => {
 
   const soldHistory = historyListings.filter((item) => item.status === 'sold');
   const inactiveHistory = historyListings.filter((item) => item.status === 'inactive');
-  const totalSoldQuantity = soldHistory.reduce((sum, item) => sum + parseNumeric(item.quantity), 0);
-  const totalRevenue = soldHistory.reduce((sum, item) => sum + (Number(item.price) || 0), 0);
+  const totalSoldQuantity = soldHistory.reduce((sum, item) => sum + parseNumericValue(item.quantity), 0);
+  const totalRevenue = soldHistory.reduce(
+    (sum, item) => sum + getListingEstimatedTotal(item.price, item.quantity),
+    0,
+  );
   const totalClosedDeals = soldHistory.length + inactiveHistory.length;
   const performancePercent =
     totalClosedDeals > 0 ? Math.round((soldHistory.length / totalClosedDeals) * 100) : 0;
@@ -383,7 +381,12 @@ export const ProfilePage = () => {
                         <div className="space-y-1 p-2">
                           <p className="text-sm font-black text-[#17342a]">{listing.title}</p>
                           <p className="text-xs font-semibold text-[#567d70] capitalize">{listing.status}</p>
-                          <p className="text-xs font-black text-[#183e31]">{formatCurrency(listing.price)}</p>
+                          <p className="text-xs font-black text-[#183e31]">
+                            {formatCurrency(listing.price)} / unit
+                          </p>
+                          <p className="text-[11px] font-semibold text-[#4f776a]">
+                            Est. total {formatCurrency(getListingEstimatedTotal(listing.price, listing.quantity))}
+                          </p>
                           <p className="text-xs font-semibold text-[#4f776a]">{formatShortDate(listing.updatedAt)}</p>
                         </div>
                       </article>

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MoreHorizontal, Plus, Edit, Pause, Trash2, Eye, TrendingUp, MessageSquare, Package } from 'lucide-react';
 import { productApi } from '../lib/api';
-import { formatCurrency } from '../lib/utils';
+import { formatCurrency, getListingEstimatedTotal } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 
 const historyRangeOptions = [
@@ -178,7 +178,14 @@ export const SellerDashboardPage = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-left font-semibold text-[#1f1f1f]">{product.quantity}</td>
-                    <td className="px-6 py-4 text-left font-semibold text-[#1f1f1f]">{formatCurrency(product.price)}</td>
+                    <td className="px-6 py-4 text-left font-semibold text-[#1f1f1f]">
+                      <div>
+                        <p>{formatCurrency(product.price)} / unit</p>
+                        <p className="text-xs font-semibold text-[#666]">
+                          Est. total {formatCurrency(getListingEstimatedTotal(product.price, product.quantity))}
+                        </p>
+                      </div>
+                    </td>
                     <td className="px-6 py-4 text-left">
                       <div className="flex items-center gap-2">
                         <Link to={`/create-listing?edit=${product._id}`}>
