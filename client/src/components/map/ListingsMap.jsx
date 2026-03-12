@@ -1,7 +1,7 @@
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
 import L from 'leaflet';
 import { Link } from 'react-router-dom';
-import { ENGLISH_MAP_ATTRIBUTION, ENGLISH_MAP_TILE_URL } from '../../lib/mapTiles';
+import { ENGLISH_MAP_TILE_URL } from '../../lib/mapTiles';
 
 const markerIcon = L.icon({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
@@ -24,11 +24,8 @@ export const ListingsMap = ({ products }) => {
 
   return (
     <div className="h-80 overflow-hidden rounded-2xl border border-(--outline) md:h-115">
-      <MapContainer center={center} zoom={7} className="h-full w-full">
-        <TileLayer
-          attribution={ENGLISH_MAP_ATTRIBUTION}
-          url={ENGLISH_MAP_TILE_URL}
-        />
+      <MapContainer center={center} zoom={7} className="h-full w-full" attributionControl={false}>
+        <TileLayer url={ENGLISH_MAP_TILE_URL} />
         {mappableProducts.map((product) => (
           <Marker
             key={product._id}

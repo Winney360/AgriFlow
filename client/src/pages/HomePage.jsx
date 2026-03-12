@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import {
   Bell,
   CircleHelp,
-  ListChecks,
   MapPin,
   Search,
   SquareTerminal,
@@ -19,6 +18,9 @@ import { productApi } from '../lib/api';
 import { formatCurrency } from '../lib/utils';
 import { ListingsMap } from '../components/map/ListingsMap';
 import { useAuth } from '../context/AuthContext';
+import step1Image from '../assets/homepage/step1.png';
+import step2Image from '../assets/homepage/step2.png';
+import step3Image from '../assets/homepage/step3.png';
 
 const successStories = [
   {
@@ -223,37 +225,54 @@ export const HomePage = () => {
       <section className="min-h-screen bg-[#f3f6f4]">
         <div className="mx-auto w-full max-w-315 px-4 md:px-6">
           <section className="py-10 md:py-14">
-            <h2 className="text-center text-5xl font-black text-[#161616]">How It Works</h2>
-            <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
-              <article className="rounded-md bg-white p-5 text-center shadow-sm">
-                <div className="mx-auto mb-3 flex h-20 w-20 items-center justify-center rounded-full bg-[#e7f3ec] text-[#2ca06e]">
-                  <BadgeCheck size={34} />
-                </div>
-                <h3 className="text-2xl font-black">Step 1: List or Find</h3>
-                <p className="mt-2 text-sm text-[#4f5854]">
-                  List your harvest or browse nearby produce from trusted farmers in your area.
-                </p>
-              </article>
+            <div className="px-4 py-8 md:px-8 md:py-10">
+              <h2 className="text-center text-4xl font-black text-[#161616] md:text-5xl">How It Works</h2>
 
-              <article className="rounded-md bg-white p-5 text-center shadow-sm">
-                <div className="mx-auto mb-3 flex h-20 w-20 items-center justify-center rounded-full bg-[#e7f3ec] text-[#2ca06e]">
-                  <MessageCircle size={34} />
-                </div>
-                <h3 className="text-2xl font-black">Step 2: Connect via WhatsApp</h3>
-                <p className="mt-2 text-sm text-[#4f5854]">
-                  Contact sellers directly through WhatsApp to confirm price, quantity, and pickup details.
-                </p>
-              </article>
+              <div className="mt-8 grid grid-cols-1 items-start gap-5 md:grid-cols-[1fr_auto_1fr_auto_1fr]">
+                <article className="text-center">
+                  <img
+                    src={step1Image}
+                    alt="Step 1 List or Find"
+                    className="mx-auto h-28 w-auto object-contain mix-blend-multiply md:h-32"
+                  />
+                  <h3 className="mt-3 text-2xl font-black text-[#151515]">Step 1: List or Find</h3>
+                  <p className="mx-auto mt-2 max-w-57.5 text-sm leading-tight text-[#3e4642]">
+                    List or find produce in your area and view live market activity.
+                  </p>
+                </article>
 
-              <article className="rounded-md bg-white p-5 text-center shadow-sm">
-                <div className="mx-auto mb-3 flex h-20 w-20 items-center justify-center rounded-full bg-[#e7f3ec] text-[#2ca06e]">
+                <div className="hidden self-center text-[#92a29b] md:block" aria-hidden="true">
                   <ArrowRight size={34} />
                 </div>
-                <h3 className="text-2xl font-black">Step 3: Local Pickup</h3>
-                <p className="mt-2 text-sm text-[#4f5854]">
-                  Complete the trade through local pickup and build trust with verified location details.
-                </p>
-              </article>
+
+                <article className="text-center">
+                  <img
+                    src={step2Image}
+                    alt="Step 2 Connect via WhatsApp"
+                    className="mx-auto h-28 w-auto object-contain mix-blend-multiply md:h-32"
+                  />
+                  <h3 className="mt-3 text-2xl font-black text-[#151515]">Step 2: Connect via WhatsApp</h3>
+                  <p className="mx-auto mt-2 max-w-62.5 text-sm leading-tight text-[#3e4642]">
+                    Connect sellers and buyers directly on WhatsApp to agree on quantity and price.
+                  </p>
+                </article>
+
+                <div className="hidden self-center text-[#92a29b] md:block" aria-hidden="true">
+                  <ArrowRight size={34} />
+                </div>
+
+                <article className="text-center">
+                  <img
+                    src={step3Image}
+                    alt="Step 3 Local Pickup"
+                    className="mx-auto h-28 w-auto object-contain mix-blend-multiply md:h-32"
+                  />
+                  <h3 className="mt-3 text-2xl font-black text-[#151515]">Step 3: Local Pickup</h3>
+                  <p className="mx-auto mt-2 max-w-57.5 text-sm leading-tight text-[#3e4642]">
+                    Finalize the order and complete the trade with convenient local pickup.
+                  </p>
+                </article>
+              </div>
             </div>
           </section>
 
