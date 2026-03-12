@@ -24,8 +24,6 @@ api.interceptors.request.use((config) => {
 
 export const authApi = {
   signup: (payload) => api.post('/auth/signup', payload),
-  verifyPhone: (payload) => api.post('/auth/verify-phone', payload),
-  resendVerificationCode: (payload) => api.post('/auth/resend-verification-code', payload),
   login: (payload) => api.post('/auth/login', payload),
   me: () => api.get('/auth/me'),
   switchRole: (role) => api.patch('/auth/role', { role }),

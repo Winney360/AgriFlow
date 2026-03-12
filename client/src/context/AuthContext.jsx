@@ -24,11 +24,6 @@ export const AuthProvider = ({ children }) => {
 
   const signup = async (payload) => {
     const response = await authApi.signup(payload);
-    return response.data.data;
-  };
-
-  const verifyPhone = async (payload) => {
-    const response = await authApi.verifyPhone(payload);
     const { token: nextToken, user: nextUser } = response.data.data;
     persistSession(nextToken, nextUser);
     return nextUser;
@@ -61,11 +56,6 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('agriflow_user', JSON.stringify(updated));
     setUser(updated);
     return updated;
-  };
-
-  const resendVerificationCode = async (phoneNumber) => {
-    const response = await authApi.resendVerificationCode({ phoneNumber });
-    return response.data.data;
   };
 
   useEffect(() => {
@@ -101,13 +91,11 @@ export const AuthProvider = ({ children }) => {
       token,
       loading,
       signup,
-      verifyPhone,
       login,
       logout: clearSession,
       switchRole,
       toggleNotifications,
       updateProfile,
-      resendVerificationCode,
       isAuthenticated: Boolean(token),
     }),
     [user, token, loading],

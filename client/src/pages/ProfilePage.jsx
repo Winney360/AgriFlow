@@ -221,12 +221,11 @@ export const ProfilePage = () => {
               </div>
 
               <div className="space-y-3 p-4">
-                <p className="text-lg font-black text-[#0e2a1f]">Verification Status</p>
+                <p className="text-lg font-black text-[#0e2a1f]">Profile Details</p>
                 <div className="grid grid-cols-1 gap-2">
                   <div className="rounded-xl border border-[#cde5da] bg-[#edf8f3] px-3 py-2 text-sm font-bold text-[#1d5743]">
                     <span className="inline-flex items-center gap-1">
-                      {user.phoneVerified ? <Check size={14} /> : <ShieldCheck size={14} />}
-                      Contact: {user.phoneVerified ? 'Verified' : 'Pending verification'}
+                      <Phone size={14} /> Contact available
                     </span>
                   </div>
                   <div className="rounded-xl border border-[#cde5da] bg-[#edf8f3] px-3 py-2 text-sm font-bold text-[#1d5743]">
@@ -399,11 +398,10 @@ export const ProfilePage = () => {
           </div>
 
           <Card className="border-[#a9d4c2] bg-[#f8fbfa] p-4">
-            <h3 className="text-4xl leading-none font-black text-[#12281f]">Verification Status</h3>
+            <h3 className="text-4xl leading-none font-black text-[#12281f]">Contact & Location</h3>
             <div className="mt-3 space-y-2">
               <div className="flex items-center gap-2 rounded-lg bg-[#ebf7f2] px-3 py-2 font-bold text-[#18573f]">
-                {user.phoneVerified ? <Check size={16} /> : <Phone size={16} />}
-                Contact {user.phoneVerified ? 'Verified' : 'Not Verified'}
+                <Phone size={16} /> {user.phoneNumber || 'Phone number not added'}
               </div>
               <div className="flex items-center gap-2 rounded-lg bg-[#ebf7f2] px-3 py-2 font-bold text-[#18573f]">
                 {user.locationVerified ? <Check size={16} /> : <MapPin size={16} />}

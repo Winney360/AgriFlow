@@ -3,7 +3,6 @@ import { MapContainer, Marker, TileLayer } from 'react-leaflet';
 import L from 'leaflet';
 import {
   ArrowRight,
-  Check,
   LocateFixed,
   MapPin,
   MessageCircle,
@@ -27,7 +26,6 @@ export const MarketplacePage = () => {
   const [products, setProducts] = useState([]);
   const [geoBusy, setGeoBusy] = useState(false);
   const [geoError, setGeoError] = useState('');
-  const [verifiedOnly, setVerifiedOnly] = useState(true);
   const [mapView, setMapView] = useState(true);
   const [selectedTags, setSelectedTags] = useState(['maize']);
   const [filters, setFilters] = useState({
@@ -213,15 +211,7 @@ export const MarketplacePage = () => {
               <LocateFixed size={15} /> {geoBusy ? 'Finding...' : 'Find Near Me'}
             </Button>
 
-            <div className="mt-2 flex items-center justify-between">
-              <label className="flex items-center gap-2 text-sm font-black text-[#255143]">
-                <input
-                  type="checkbox"
-                  checked={verifiedOnly}
-                  onChange={() => setVerifiedOnly((prev) => !prev)}
-                />
-                Verified
-              </label>
+            <div className="mt-2 flex items-center justify-end">
               <label className="flex items-center gap-2 text-sm font-black text-[#255143]">
                 <span>Map View</span>
                 <button
@@ -301,12 +291,6 @@ export const MarketplacePage = () => {
               const unit = String(product.quantity || 'bag').toLowerCase().includes('kg')
                 ? 'kg'
                 : 'bag';
-              const showProduct =
-                !verifiedOnly || Boolean(product?.sellerId?.phoneNumber || product?.sellerId?.email);
-
-              if (!showProduct) {
-                return null;
-              }
 
               return (
                 <article key={product._id} className="overflow-hidden rounded-xl border border-[#cddfd7] bg-white">
@@ -351,16 +335,13 @@ export const MarketplacePage = () => {
 
         <aside className="space-y-3">
           <div className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-3">
-            <p className="text-4xl leading-none font-black text-[#1f9f6a]\">Local Trust & Verification</p>
-            <p className="mt-2 text-lg leading-tight font-bold text-[#1f9f6a]\">
-              Verify Local Trust. Verify on WhatsApp before payment.
+            <p className="text-4xl leading-none font-black text-[#1f9f6a]">Local Market Tips</p>
+            <p className="mt-2 text-lg leading-tight font-bold text-[#1f9f6a]">
+              Compare prices, confirm location details, and contact sellers directly before payment.
             </p>
-            <div className="mt-3 inline-flex items-center gap-1 rounded-lg bg-[#def3e8] px-3 py-2 text-sm font-black text-[#1f9f6a]\">
-              <Check size={14} /> JWT Verified
-            </div>
           </div>
 
-          <div className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-3\">
+          <div className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-3">
             <p className="text-4xl leading-none font-black text-[#1f9f6a]\">Request & Post Callout</p>
             <Button type="button" className="mt-3 h-10 w-full rounded-lg bg-[#1f9f6a]">
               Post Listing
