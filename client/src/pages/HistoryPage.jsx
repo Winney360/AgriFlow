@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { Download, Phone, Eye, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 import { productApi } from '../lib/api';
 import { formatCurrency } from '../lib/utils';
@@ -23,6 +23,69 @@ const statusConfig = {
   processing: { color: '#0066cc', bg: '#f0f7ff', text: 'Processing' },
 };
 
+const chartRangeOptions = [
+  { value: 'last3Months', label: 'Last 3 months' },
+  { value: 'last6Months', label: 'Last 6 months' },
+  { value: 'last12Months', label: 'Last 12 months' },
+  { value: 'last24Months', label: 'Last 24 months' },
+  { value: 'all', label: 'All time' },
+];
+
+const monthFormatter = new Intl.DateTimeFormat('en-KE', {
+  month: 'short',
+  year: '2-digit',
+});
+
+const getRangeStartDate = (range, now = new Date()) => {
+  const start = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  switch (range) {
+    case 'last3Months':
+      start.setMonth(start.getMonth() - 2);
+      return start;
+    case 'last6Months':
+      start.setMonth(start.getMonth() - 5);
+      return start;
+    case 'last12Months':
+      start.setMonth(start.getMonth() - 11);
+      return start;
+    case 'last24Months':
+      start.setMonth(start.getMonth() - 23);
+      return start;
+    case 'all':
+    default:
+      return null;
+  }
+};
+
+const getMonthKey = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+
+const createMonthlyBuckets = (startDate, endDate) => {
+  const cursor = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+  const last = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
+  const buckets = [];
+
+  while (cursor <= last) {
+    buckets.push({
+      key: getMonthKey(cursor),
+      date: new Date(cursor),
+      label: monthFormatter.format(cursor),
+      revenue: 0,
+      salesCount: 0,
+    });
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+
+  return buckets;
+};
+
+const buildAreaPath = (points, baselineY) => {
+  if (!points.length) return '';
+
+  const line = points.map((point) => `${point.x},${point.y}`).join(' L ');
+  return `M ${points[0].x},${baselineY} L ${line} L ${points[points.length - 1].x},${baselineY} Z`;
+};
+
 
 export const HistoryPage = () => {
   const [history, setHistory] = useState([]);
@@ -33,6 +96,9 @@ export const HistoryPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [chartCrop, setChartCrop] = useState('all');
+  const [chartSourceType, setChartSourceType] = useState('all');
+  const [chartTimeRange, setChartTimeRange] = useState('last12Months');
 
   const loadHistory = useCallback(async () => {
     setLoading(true);
@@ -77,6 +143,126 @@ export const HistoryPage = () => {
 
   // Dynamic crop list from real data
   const uniqueCrops = [...new Set(history.map((i) => i.title))];
+  const sourceTypes = useMemo(
+    () => [...new Set(history.map((item) => item.productType).filter(Boolean))],
+    [history],
+  );
+
+  const chartData = useMemo(() => {
+    const now = new Date();
+    const soldItems = history.filter((item) => item.status === 'sold');
+
+    const cropFiltered = soldItems.filter(
+      (item) => chartCrop === 'all' || item.title === chartCrop,
+    );
+
+    const sourceFiltered = cropFiltered.filter(
+      (item) => chartSourceType === 'all' || item.productType === chartSourceType,
+    );
+
+    const rangeStart = getRangeStartDate(chartTimeRange, now);
+    const timeFiltered = sourceFiltered.filter((item) => {
+      if (!rangeStart) return true;
+      const updated = new Date(item.updatedAt);
+      return !Number.isNaN(updated.getTime()) && updated >= rangeStart;
+    });
+
+    if (timeFiltered.length === 0) {
+      return {
+        buckets: [],
+        maxRevenue: 0,
+        totalRevenue: 0,
+        totalSales: 0,
+      };
+    }
+
+    const earliestDate = rangeStart
+      ? new Date(rangeStart)
+      : timeFiltered.reduce((min, item) => {
+          const d = new Date(item.updatedAt);
+          return d < min ? d : min;
+        }, new Date(timeFiltered[0].updatedAt));
+
+    const buckets = createMonthlyBuckets(earliestDate, now);
+    const bucketMap = new Map(buckets.map((bucket) => [bucket.key, bucket]));
+
+    for (const item of timeFiltered) {
+      const date = new Date(item.updatedAt);
+      if (Number.isNaN(date.getTime())) continue;
+
+      const key = getMonthKey(date);
+      const bucket = bucketMap.get(key);
+      if (!bucket) continue;
+
+      bucket.revenue += Number(item.price) || 0;
+      bucket.salesCount += 1;
+    }
+
+    const maxRevenue = buckets.reduce((max, bucket) => Math.max(max, bucket.revenue), 0);
+    const totalRevenue = buckets.reduce((sum, bucket) => sum + bucket.revenue, 0);
+    const totalSales = buckets.reduce((sum, bucket) => sum + bucket.salesCount, 0);
+
+    return {
+      buckets,
+      maxRevenue,
+      totalRevenue,
+      totalSales,
+    };
+  }, [history, chartCrop, chartSourceType, chartTimeRange]);
+
+  const areaChart = useMemo(() => {
+    if (chartData.buckets.length === 0) {
+      return null;
+    }
+
+    const width = 860;
+    const height = 260;
+    const padding = { top: 14, right: 18, bottom: 38, left: 54 };
+    const innerWidth = width - padding.left - padding.right;
+    const innerHeight = height - padding.top - padding.bottom;
+    const baselineY = padding.top + innerHeight;
+    const maxRevenue = Math.max(chartData.maxRevenue, 1);
+
+    const points = chartData.buckets.map((bucket, index) => {
+      const x =
+        chartData.buckets.length === 1
+          ? padding.left + innerWidth / 2
+          : padding.left + (index / (chartData.buckets.length - 1)) * innerWidth;
+      const y = baselineY - (bucket.revenue / maxRevenue) * innerHeight;
+      return {
+        x,
+        y,
+        revenue: bucket.revenue,
+        salesCount: bucket.salesCount,
+        label: bucket.label,
+      };
+    });
+
+    const yTicks = 4;
+    const yAxis = Array.from({ length: yTicks + 1 }, (_, index) => {
+      const ratio = index / yTicks;
+      const value = maxRevenue - ratio * maxRevenue;
+      const y = padding.top + ratio * innerHeight;
+      return { value, y };
+    });
+
+    const xLabels = points.filter((_, index) => {
+      if (points.length <= 6) return true;
+      const step = Math.ceil(points.length / 6);
+      return index % step === 0 || index === points.length - 1;
+    });
+
+    return {
+      width,
+      height,
+      baselineY,
+      points,
+      yAxis,
+      xLabels,
+      areaPath: buildAreaPath(points, baselineY),
+      linePath: `M ${points.map((point) => `${point.x},${point.y}`).join(' L ')}`,
+    };
+  }, [chartData]);
 
   // Client-side filtering
   const filteredHistory = history
@@ -424,28 +610,129 @@ export const HistoryPage = () => {
           <div className="rounded-lg border border-[#d8ddda] bg-white p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-black text-[#1f1f1f]">Recent Sales & Performance Chart</h2>
-              <div className="flex gap-3">
-                <select className="rounded-lg border border-[#d8ddda] bg-white px-3 py-2 text-sm font-semibold text-[#333] hover:border-[#20a46b]">
-                  <option>All Crops</option>
-                  {uniqueCrops.map((c) => (
-                    <option key={c}>{c}</option>
+              <div className="flex gap-3 flex-wrap justify-end">
+                <select
+                  value={chartCrop}
+                  onChange={(event) => setChartCrop(event.target.value)}
+                  className="rounded-lg border border-[#d8ddda] bg-white px-3 py-2 text-sm font-semibold text-[#333] hover:border-[#20a46b]"
+                  aria-label="Filter chart by crop"
+                >
+                  <option value="all">All Crops</option>
+                  {uniqueCrops.map((crop) => (
+                    <option key={crop} value={crop}>
+                      {crop}
+                    </option>
                   ))}
                 </select>
-                <select className="rounded-lg border border-[#d8ddda] bg-white px-3 py-2 text-sm font-semibold text-[#333] hover:border-[#20a46b]">
-                  <option>All Source Types</option>
+
+                <select
+                  value={chartSourceType}
+                  onChange={(event) => setChartSourceType(event.target.value)}
+                  className="rounded-lg border border-[#d8ddda] bg-white px-3 py-2 text-sm font-semibold text-[#333] hover:border-[#20a46b]"
+                  aria-label="Filter chart by source type"
+                >
+                  <option value="all">All Source Types</option>
+                  {sourceTypes.map((type) => (
+                    <option key={type} value={type}>
+                      {type[0].toUpperCase() + type.slice(1)}
+                    </option>
+                  ))}
                 </select>
-                <select className="rounded-lg border border-[#d8ddda] bg-white px-3 py-2 text-sm font-semibold text-[#333] hover:border-[#20a46b]">
-                  <option>Last 12 months</option>
+
+                <select
+                  value={chartTimeRange}
+                  onChange={(event) => setChartTimeRange(event.target.value)}
+                  className="rounded-lg border border-[#d8ddda] bg-white px-3 py-2 text-sm font-semibold text-[#333] hover:border-[#20a46b]"
+                  aria-label="Filter chart by time range"
+                >
+                  {chartRangeOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
 
-            <div className="h-64 rounded-lg border border-[#e0e5e1] bg-[#f9fbfa] flex items-center justify-center">
-              <div className="text-center">
-                <p className="text-sm text-[#999]">Sales & Revenue chart visualization</p>
-                <p className="text-xs text-[#ccc]">Area chart showing sales trend over time</p>
+            {areaChart ? (
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="rounded-lg border border-[#e0e5e1] bg-[#f9fbfa] px-3 py-2">
+                    <p className="text-xs font-semibold text-[#666]">Sales (records)</p>
+                    <p className="text-lg font-black text-[#1f1f1f]">{chartData.totalSales}</p>
+                  </div>
+                  <div className="rounded-lg border border-[#e0e5e1] bg-[#f9fbfa] px-3 py-2">
+                    <p className="text-xs font-semibold text-[#666]">Revenue</p>
+                    <p className="text-lg font-black text-[#1f1f1f]">{formatCurrency(chartData.totalRevenue)}</p>
+                  </div>
+                  <div className="rounded-lg border border-[#e0e5e1] bg-[#f9fbfa] px-3 py-2">
+                    <p className="text-xs font-semibold text-[#666]">Peak month revenue</p>
+                    <p className="text-lg font-black text-[#1f1f1f]">{formatCurrency(chartData.maxRevenue)}</p>
+                  </div>
+                </div>
+
+                <div className="h-64 rounded-lg border border-[#e0e5e1] bg-[#f9fbfa] p-2">
+                  <svg
+                    viewBox={`0 0 ${areaChart.width} ${areaChart.height}`}
+                    className="h-full w-full"
+                    role="img"
+                    aria-label="Sales and revenue area chart"
+                  >
+                    {areaChart.yAxis.map((tick) => (
+                      <g key={tick.y}>
+                        <line
+                          x1="54"
+                          y1={tick.y}
+                          x2={areaChart.width - 18}
+                          y2={tick.y}
+                          stroke="#e3e8e5"
+                          strokeWidth="1"
+                        />
+                        <text
+                          x="46"
+                          y={tick.y + 4}
+                          textAnchor="end"
+                          fontSize="11"
+                          fill="#6b7280"
+                        >
+                          {formatCurrency(tick.value)}
+                        </text>
+                      </g>
+                    ))}
+
+                    <path d={areaChart.areaPath} fill="#6bcf9c" fillOpacity="0.25" />
+                    <path d={areaChart.linePath} fill="none" stroke="#20a46b" strokeWidth="2.5" />
+
+                    {areaChart.points.map((point) => (
+                      <g key={`${point.label}-${point.x}`}>
+                        <circle cx={point.x} cy={point.y} r="3.5" fill="#20a46b" />
+                        <title>{`${point.label}: ${formatCurrency(point.revenue)} from ${point.salesCount} sale(s)`}</title>
+                      </g>
+                    ))}
+
+                    {areaChart.xLabels.map((label) => (
+                      <text
+                        key={`${label.label}-${label.x}`}
+                        x={label.x}
+                        y={areaChart.baselineY + 20}
+                        textAnchor="middle"
+                        fontSize="11"
+                        fill="#6b7280"
+                      >
+                        {label.label}
+                      </text>
+                    ))}
+                  </svg>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="h-64 rounded-lg border border-[#e0e5e1] bg-[#f9fbfa] flex items-center justify-center">
+                <div className="text-center">
+                  <p className="text-sm text-[#999]">No sold records found for selected filters</p>
+                  <p className="text-xs text-[#bbb]">Try changing crop, source type, or time range</p>
+                </div>
+              </div>
+            )}
           </div>
         </main>
       </div>
