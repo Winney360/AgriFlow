@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Bell,
   CircleHelp,
@@ -17,99 +18,6 @@ import {
 import { productApi } from '../lib/api';
 import { formatCurrency } from '../lib/utils';
 import { ListingsMap } from '../components/map/ListingsMap';
-
-const fallbackListings = [
-  {
-    _id: 'f-1',
-    title: 'Maize for Sale',
-    price: 4300,
-    imageUrl:
-      'https://images.unsplash.com/photo-1601593768799-76ea57f57b61?auto=format&fit=crop&w=600&q=80',
-    productType: 'Product',
-    location: { latitude: -1.12, longitude: 36.88, locationName: 'Athi River' },
-  },
-  {
-    _id: 'f-2',
-    title: 'Tomatoes',
-    price: 4300,
-    imageUrl:
-      'https://images.unsplash.com/photo-1546470427-e5ac89cd0b32?auto=format&fit=crop&w=600&q=80',
-    productType: 'Product',
-    location: { latitude: -0.1, longitude: 34.76, locationName: 'Kisumu' },
-  },
-  {
-    _id: 'f-3',
-    title: 'Potatoes',
-    price: 4300,
-    imageUrl:
-      'https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=600&q=80',
-    productType: 'Product',
-    location: { latitude: -0.42, longitude: 36.96, locationName: 'Nanyuki' },
-  },
-  {
-    _id: 'f-4',
-    title: 'Cassava',
-    price: 500,
-    imageUrl:
-      'https://images.unsplash.com/photo-1615484477878-7f980bdc5d80?auto=format&fit=crop&w=600&q=80',
-    productType: 'Product',
-    location: { latitude: -4.04, longitude: 39.67, locationName: 'Mombasa' },
-  },
-  {
-    _id: 'f-5',
-    title: 'Cabbage',
-    price: 4500,
-    imageUrl:
-      'https://images.unsplash.com/photo-1594282418426-e8fb93f953f3?auto=format&fit=crop&w=600&q=80',
-    productType: 'Product',
-    location: { latitude: -1.29, longitude: 36.82, locationName: 'Nairobi' },
-  },
-  {
-    _id: 'f-6',
-    title: 'Goats',
-    price: 780,
-    imageUrl:
-      'https://images.unsplash.com/photo-1588463021473-9f8147e6e54a?auto=format&fit=crop&w=600&q=80',
-    productType: 'Livestock',
-    location: { latitude: -0.52, longitude: 37.45, locationName: 'Meru' },
-  },
-  {
-    _id: 'f-7',
-    title: 'Livestock',
-    price: 700,
-    imageUrl:
-      'https://images.unsplash.com/photo-1500595046743-cd271d694d30?auto=format&fit=crop&w=600&q=80',
-    productType: 'Livestock',
-    location: { latitude: -0.72, longitude: 36.43, locationName: 'Nyahururu' },
-  },
-  {
-    _id: 'f-8',
-    title: 'Sweet Potatoes',
-    price: 876,
-    imageUrl:
-      'https://images.unsplash.com/photo-1598511726302-3c6f79f4f0a5?auto=format&fit=crop&w=600&q=80',
-    productType: 'Product',
-    location: { latitude: -1.03, longitude: 37.07, locationName: 'Machakos' },
-  },
-  {
-    _id: 'f-9',
-    title: 'Maize',
-    price: 4206,
-    imageUrl:
-      'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=600&q=80',
-    productType: 'Product',
-    location: { latitude: -1.37, longitude: 35.14, locationName: 'Narok' },
-  },
-  {
-    _id: 'f-10',
-    title: 'Corn',
-    price: 3400,
-    imageUrl:
-      'https://images.unsplash.com/photo-1551754655-cd27e38d2076?auto=format&fit=crop&w=600&q=80',
-    productType: 'Product',
-    location: { latitude: 0.52, longitude: 35.27, locationName: 'Eldoret' },
-  },
-];
 
 const successStories = [
   {
@@ -131,22 +39,26 @@ const successStories = [
 
 export const HomePage = () => {
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadProducts = async () => {
-      const response = await productApi.listActive();
-      setProducts(response.data.data || []);
+      try {
+        const response = await productApi.listActive();
+        setProducts(response.data.data || []);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    loadProducts().catch(() => setProducts(fallbackListings));
+    loadProducts().catch(() => {
+      setProducts([]);
+      setLoading(false);
+    });
   }, []);
 
   const listingData = useMemo(() => {
-    if (products.length) {
-      return products.slice(0, 10);
-    }
-
-    return fallbackListings;
+    return products.slice(0, 10);
   }, [products]);
 
   return (
@@ -177,21 +89,6 @@ export const HomePage = () => {
             </div>
           </header>
 
-          <div className="flex flex-wrap items-center gap-3 py-4 text-sm">
-            <span className="font-bold text-[#2a2a2a]">ROLE TOGGLE SWITCH</span>
-            <div className="flex flex-wrap items-center gap-2 rounded-full border border-[#d6ddd8] bg-white px-3 py-2">
-              <span>You are currently: <span className="font-semibold text-[#2f6f5e]">[Seller]</span></span>
-              <button
-                type="button"
-                className="relative h-7 w-14 rounded-full bg-[#20a46b]"
-                aria-label="Toggle role"
-              >
-                <span className="absolute right-1 top-1 h-5 w-5 rounded-full bg-white" />
-              </button>
-              <span>Switch role to Buyer</span>
-            </div>
-          </div>
-
           <div className="grid grid-cols-1 overflow-hidden rounded-md border border-[#d8ddda] lg:grid-cols-2">
             <div className="bg-[#e4ece5] p-6 md:p-12">
               <h1 className="max-w-xl text-4xl font-black leading-[1.08] text-[#131313] md:text-6xl">
@@ -201,28 +98,40 @@ export const HomePage = () => {
                 Connect directly with trusted local farmers and buyers through a simple agricultural marketplace built for nearby trade.
               </p>
               <div className="mt-7 flex flex-wrap gap-3">
-                <button
-                  type="button"
+                <Link
+                  to="/create-listing"
                   className="rounded-md bg-[#2ca06e] px-5 py-2.5 text-sm font-semibold text-white"
                 >
                   List Your Harvest
-                </button>
-                <button
-                  type="button"
+                </Link>
+                <Link
+                  to="/marketplace"
                   className="rounded-md border border-[#9db3a7] bg-[#ecf4ee] px-5 py-2.5 text-sm font-semibold text-[#335c4f]"
                 >
                   Find Near You
-                </button>
+                </Link>
               </div>
             </div>
             <div className="relative bg-white p-3">
               <ListingsMap products={listingData} />
-              <div className="pointer-events-none absolute left-4 top-4 rounded-md bg-white/95 px-3 py-2 text-sm shadow-sm">
-                <p className="font-bold">LIVE MARKET ACTIVITY</p>
-                <p className="text-[#2f6f5e]">Kiambu: 15 Active listings</p>
-              </div>
             </div>
           </div>
+
+          <section className="mt-6 rounded-md border border-[#d8ddda] bg-[#f2f5f3] p-5 text-center">
+            <p className="text-sm font-semibold uppercase tracking-wide text-[#3d5c50]">New to AgriFlow?</p>
+            <h2 className="mt-2 text-3xl font-black text-[#151515]">Get started in under 2 minutes</h2>
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-[#4f5854]">
+              Create an account to post your harvest, switch between buyer and seller roles, and connect with local farmers instantly.
+            </p>
+            <div className="mt-4 flex flex-wrap justify-center gap-3">
+              <Link to="/signup" className="rounded-md bg-[#2ca06e] px-5 py-2.5 text-sm font-semibold text-white">
+                Sign Up and Get Started
+              </Link>
+              <Link to="/login" className="rounded-md border border-[#9db3a7] bg-white px-5 py-2.5 text-sm font-semibold text-[#335c4f]">
+                Login
+              </Link>
+            </div>
+          </section>
 
           <section className="mt-6 rounded-md border border-[#d8ddda] bg-[#f2f5f3] p-4 md:p-6">
             <h2 className="mb-4 text-3xl font-black">BROWSE LISTINGS</h2>
@@ -252,8 +161,21 @@ export const HomePage = () => {
                 </div>
               </aside>
 
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
-                {listingData.map((item) => (
+              {loading ? (
+                <div className="rounded-md border border-[#d8ddda] bg-white p-8 text-center text-sm font-semibold text-[#4d5652]">
+                  Loading listings...
+                </div>
+              ) : null}
+
+              {!loading && listingData.length === 0 ? (
+                <div className="rounded-md border border-[#d8ddda] bg-white p-8 text-center text-sm font-semibold text-[#4d5652]">
+                  No active listings yet. Check back soon or post your first listing.
+                </div>
+              ) : null}
+
+              {!loading && listingData.length > 0 ? (
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
+                  {listingData.map((item) => (
                   <article key={item._id} className="overflow-hidden rounded-md border border-[#d8ddda] bg-white">
                     <img src={item.imageUrl} alt={item.title} className="h-24 w-full object-cover" />
                     <div className="space-y-1 p-2">
@@ -271,8 +193,9 @@ export const HomePage = () => {
                       </button>
                     </div>
                   </article>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : null}
             </div>
           </section>
         </div>

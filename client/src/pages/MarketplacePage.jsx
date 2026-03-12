@@ -70,50 +70,7 @@ export const MarketplacePage = () => {
     );
   };
 
-  const productFallbacks = [
-    {
-      _id: 'fallback-1',
-      title: 'White Maize (Kiambu)',
-      price: 4500,
-      quantity: 'Bag',
-      imageUrl:
-        'https://images.unsplash.com/photo-1601593768799-76ea57f57b61?auto=format&fit=crop&w=900&q=80',
-      location: { locationName: 'Juja, 12km', latitude: -1.102, longitude: 36.94 },
-      sellerId: { phoneNumber: '+254712345678' },
-    },
-    {
-      _id: 'fallback-2',
-      title: 'Raw Potatoes',
-      price: 4500,
-      quantity: 'Bag',
-      imageUrl:
-        'https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=900&q=80',
-      location: { locationName: 'Juja, 12km', latitude: -1.114, longitude: 36.89 },
-      sellerId: { phoneNumber: '+254712345679' },
-    },
-    {
-      _id: 'fallback-3',
-      title: 'Tomatoes (Kiambu)',
-      price: 4500,
-      quantity: 'Bag',
-      imageUrl:
-        'https://images.unsplash.com/photo-1561136594-7f68413baa99?auto=format&fit=crop&w=900&q=80',
-      location: { locationName: 'Juja, 12km', latitude: -1.13, longitude: 36.84 },
-      sellerId: { phoneNumber: '+254712345670' },
-    },
-    {
-      _id: 'fallback-4',
-      title: 'Cabbage (Kiambu)',
-      price: 4500,
-      quantity: 'Bag',
-      imageUrl:
-        'https://images.unsplash.com/photo-1594282486552-05a4f9c1c2df?auto=format&fit=crop&w=900&q=80',
-      location: { locationName: 'Juja, 12km', latitude: -1.143, longitude: 36.92 },
-      sellerId: { phoneNumber: '+254712345671' },
-    },
-  ];
-
-  const displayProducts = products.length ? products : productFallbacks;
+  const displayProducts = products;
 
   const mapProducts = useMemo(
     () =>
@@ -330,6 +287,12 @@ export const MarketplacePage = () => {
           </div>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {displayProducts.length === 0 ? (
+              <div className="col-span-full rounded-xl border border-[#cddfd7] bg-white p-6 text-center text-sm font-semibold text-[#33574a]">
+                No active listings available right now. Try adjusting your filters or check back soon.
+              </div>
+            ) : null}
+
             {displayProducts.map((product) => {
               const whatsappNumber = normalizePhoneForWhatsApp(product?.sellerId?.phoneNumber);
               const whatsappHref = whatsappNumber ? `https://wa.me/${whatsappNumber}` : '#';
