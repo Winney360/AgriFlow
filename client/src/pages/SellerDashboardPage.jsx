@@ -133,10 +133,10 @@ export const SellerDashboardPage = () => {
           </div>
         </div>
 
-        {/* Siew Crop Button */}
+        {/* View Crops Button */}
         <button className="flex items-center gap-2 rounded-lg border border-[#20a46b] bg-white px-4 py-2 font-semibold text-[#20a46b] hover:bg-[#f0f9f5]">
           <Eye size={16} />
-          Siew crop
+          View crops
         </button>
 
         {/* Active Listings Table */}

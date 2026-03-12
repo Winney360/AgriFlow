@@ -114,18 +114,18 @@ const fallbackListings = [
 const successStories = [
   {
     id: 1,
-    title: 'Dator and Farmer',
-    text: 'Lioo is the economy conitromiait ni tone showed and helpsusumuntar enatations on venae hasskovo and mtoursidiafow with the ner eocanions.',
+    title: 'Farmer Grace and Buyer Daniel',
+    text: 'AgriFlow helped us agree on pricing quickly, verify the pickup location, and complete payment with confidence.',
   },
   {
     id: 2,
-    title: 'Farmer and Buyer',
-    text: 'I was strawa my sonunned secitmrialdiles in brief osamntantadet woa exie is enat then mastery to mest ohtie ctimhanr bings and nodvemt.',
+    title: 'Farmer Ruth and Buyer James',
+    text: 'I listed my produce in the morning and received serious buyer inquiries the same day from nearby towns.',
   },
   {
     id: 3,
-    title: 'Jeonor and Buyer',
-    text: 'I wont is a fanrawt had i hord with scioord and sai soou manfowriowx liloes-noraso to toner corne our famnar with students room-owiwt buye.',
+    title: 'Farmer Peter and a School Kitchen',
+    text: 'The platform made it easy to supply fresh maize to a local school kitchen through a trusted local pickup arrangement.',
   },
 ];
 
@@ -158,7 +158,7 @@ export const HomePage = () => {
             <div className="min-w-55 flex-1 md:max-w-md md:pl-8">
               <div className="flex h-10 items-center rounded-md border border-[#d8ddda] bg-white px-3 text-[#79817e]">
                 <Search size={15} />
-                <span className="ml-2 text-sm">Search search...</span>
+                <span className="ml-2 text-sm">Search produce...</span>
               </div>
             </div>
             <div className="ml-auto flex items-center gap-3 text-[#5f6865]">
@@ -177,7 +177,7 @@ export const HomePage = () => {
           <div className="flex flex-wrap items-center gap-3 py-4 text-sm">
             <span className="font-bold text-[#2a2a2a]">ROLE TOGGLE SWITCH</span>
             <div className="flex flex-wrap items-center gap-2 rounded-full border border-[#d6ddd8] bg-white px-3 py-2">
-              <span>You are currently: <span className="font-semibold text-[#2f6f5e]">[Selfier]</span></span>
+              <span>You are currently: <span className="font-semibold text-[#2f6f5e]">[Seller]</span></span>
               <button
                 type="button"
                 className="relative h-7 w-14 rounded-full bg-[#20a46b]"
@@ -185,7 +185,7 @@ export const HomePage = () => {
               >
                 <span className="absolute right-1 top-1 h-5 w-5 rounded-full bg-white" />
               </button>
-              <span>Switch Ceior to (Buyer)</span>
+              <span>Switch role to Buyer</span>
             </div>
           </div>
 
@@ -195,7 +195,7 @@ export const HomePage = () => {
                 Connect Directly. Trade Locally.
               </h1>
               <p className="mt-4 max-w-xl text-[17px] text-[#3c4440]">
-                Connect Directly, agricultural marketplace impout regional and rogonovarial activity.
+                Connect directly with trusted local farmers and buyers through a simple agricultural marketplace built for nearby trade.
               </p>
               <div className="mt-7 flex flex-wrap gap-3">
                 <button
@@ -227,7 +227,7 @@ export const HomePage = () => {
               <aside className="space-y-4 rounded-md border border-[#d8ddda] bg-white p-3">
                 <div>
                   <label className="mb-1 block text-xs font-semibold text-[#4d5652]">Crop Types</label>
-                  <div className="rounded-md border border-[#d7ddda] px-3 py-2 text-sm">Gitseso</div>
+                  <div className="rounded-md border border-[#d7ddda] px-3 py-2 text-sm">Grains</div>
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-semibold text-[#4d5652]">Vendor</label>
@@ -236,8 +236,8 @@ export const HomePage = () => {
                 <div>
                   <label className="mb-1 block text-xs font-semibold text-[#4d5652]">Price Range</label>
                   <div className="flex items-center justify-between rounded-md border border-[#d7ddda] px-3 py-2 text-sm">
-                    <span>P7000</span>
-                    <span>50000</span>
+                    <span>Ksh 7,000</span>
+                    <span>Ksh 50,000</span>
                   </div>
                 </div>
                 <div>
@@ -282,7 +282,7 @@ export const HomePage = () => {
             <div className="min-w-55 flex-1 md:max-w-md md:pl-8">
               <div className="flex h-10 items-center rounded-md border border-[#d8ddda] bg-white px-3 text-[#79817e]">
                 <Search size={15} />
-                <span className="ml-2 text-sm">Search search...</span>
+                <span className="ml-2 text-sm">Search produce...</span>
               </div>
             </div>
             <div className="ml-auto flex items-center gap-3 text-[#5f6865]">
@@ -307,7 +307,7 @@ export const HomePage = () => {
                 </div>
                 <h3 className="text-2xl font-black">Step 1: List or Find</h3>
                 <p className="mt-2 text-sm text-[#4f5854]">
-                  List or nais ta its on seam for Farmere: and tivde market activity.
+                  List your harvest or browse nearby produce from trusted farmers in your area.
                 </p>
               </article>
 
@@ -317,7 +317,7 @@ export const HomePage = () => {
                 </div>
                 <h3 className="text-2xl font-black">Step 2: Connect via WhatsApp</h3>
                 <p className="mt-2 text-sm text-[#4f5854]">
-                  Connect cotorlva Gucset viu Whattehpp seller and regional in this wairiflow.
+                  Contact sellers directly through WhatsApp to confirm price, quantity, and pickup details.
                 </p>
               </article>
 
@@ -327,7 +327,7 @@ export const HomePage = () => {
                 </div>
                 <h3 className="text-2xl font-black">Step 3: Local Pickup</h3>
                 <p className="mt-2 text-sm text-[#4f5854]">
-                  Henaaio and hens and keal mrsvan taae with local pickup.
+                  Complete the trade through local pickup and build trust with verified location details.
                 </p>
               </article>
             </div>
@@ -371,7 +371,7 @@ export const HomePage = () => {
                   <h3 className="text-2xl font-black text-[#111]">JWT authentication</h3>
                 </div>
                 <p className="text-sm text-[#4f5854]">
-                  JWT authentication to complete with WhatsApp build I'trust.
+                  JWT authentication helps secure sign-in and supports trusted buyer and seller communication.
                 </p>
               </article>
 
@@ -381,7 +381,7 @@ export const HomePage = () => {
                   <h3 className="text-2xl font-black text-[#111]">GPS verification</h3>
                 </div>
                 <p className="text-sm text-[#4f5854]">
-                  GPS verification fez ana make curt and manually build trust.
+                  GPS verification helps buyers confirm pickup areas and supports stronger local trust.
                 </p>
               </article>
 
@@ -391,7 +391,7 @@ export const HomePage = () => {
                   <h3 className="text-2xl font-black text-[#111]">WhatsApp integration</h3>
                 </div>
                 <p className="text-sm text-[#4f5854]">
-                  WhatsApp integration amaiao you WhatsApp integratios.
+                  WhatsApp integration makes it easy to negotiate, confirm orders, and coordinate pickup.
                 </p>
               </article>
             </div>
@@ -415,7 +415,7 @@ export const HomePage = () => {
               <p className="mt-1 text-sm">Facebook</p>
               <p className="text-sm">Twitter</p>
             </div>
-            <div className="self-end text-sm text-[#aab7bf]">CopyrightAgriFlow.com</div>
+            <div className="self-end text-sm text-[#aab7bf]">Copyright AgriFlow.com</div>
           </footer>
         </div>
       </section>

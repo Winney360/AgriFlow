@@ -113,7 +113,7 @@ export const NotFoundPage = () => {
           </div>
         </div>
         <div className="text-center text-xs text-[#999] py-3 border-t border-[#e0e5e1]">
-          <p>CopyrightAgriFlow.com</p>
+          <p>Copyright AgriFlow.com</p>
         </div>
       </div>
     </div>

@@ -12,8 +12,8 @@ const fallbackHistory = [
     quantity: '50 bags',
     price: 4300,
     totalAmount: 4500,
-    saleDate: 'Local Wholesale',
-    buyer: 'Completed',
+    saleDate: '10 March 2026',
+    buyer: 'Green Harvest Ltd',
     status: 'completed',
   },
   {
@@ -23,8 +23,8 @@ const fallbackHistory = [
     quantity: '2,800kg',
     price: 4900,
     totalAmount: 4900,
-    saleDate: '11 MI March 2026',
-    buyer: 'Disputed',
+    saleDate: '11 March 2026',
+    buyer: 'Nairobi Fresh Market',
     status: 'disputed',
   },
   {
@@ -34,8 +34,8 @@ const fallbackHistory = [
     quantity: '2,800kg',
     price: 4300,
     totalAmount: 4900,
-    saleDate: '11 HI March 2026',
-    buyer: 'Disputed',
+    saleDate: '12 March 2026',
+    buyer: 'County Produce Hub',
     status: 'disputed',
   },
   {
@@ -45,8 +45,8 @@ const fallbackHistory = [
     quantity: '120 bags',
     price: 4300,
     totalAmount: 4500,
-    saleDate: '13 NI March 2026',
-    buyer: 'Canceled',
+    saleDate: '13 March 2026',
+    buyer: 'Riverside Buyers Group',
     status: 'canceled',
   },
   {
@@ -56,8 +56,8 @@ const fallbackHistory = [
     quantity: '50 bags',
     price: 4300,
     totalAmount: 4500,
-    saleDate: '15 NI March 2026',
-    buyer: 'Completed',
+    saleDate: '15 March 2026',
+    buyer: 'Farmers Choice Foods',
     status: 'completed',
   },
 ];
@@ -166,7 +166,7 @@ export const HistoryPage = () => {
           <div className="rounded-lg border border-[#d8ddda] bg-white p-4 space-y-3">
             <h3 className="text-sm font-black text-[#1f1f1f]">Status Filters</h3>
             <div className="space-y-2">
-              {['Completed', 'Canceled', 'Disputed', 'Processing', 'Westate'].map((status) => (
+              {['Completed', 'Canceled', 'Disputed', 'Processing', 'Pending Review'].map((status) => (
                 <label key={status} className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
@@ -184,7 +184,7 @@ export const HistoryPage = () => {
           <div className="rounded-lg border border-[#d8ddda] bg-white p-4 space-y-3">
             <h3 className="text-sm font-black text-[#1f1f1f]">Crop Type Filters</h3>
             <div className="space-y-2">
-              {['Tomatoes', 'Maize', 'Vindenn', 'Cassava'].map((crop) => (
+              {['Tomatoes', 'Maize', 'Onions', 'Cassava'].map((crop) => (
                 <label key={crop} className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
@@ -277,7 +277,7 @@ export const HistoryPage = () => {
                 </button>
                 <button className="flex items-center gap-1 rounded-lg border border-[#20a46b] bg-white px-3 py-2 text-sm font-semibold text-[#20a46b] hover:bg-[#f0f9f5]">
                   <Eye size={14} />
-                  Siew crop
+                  View crops
                 </button>
               </div>
             </div>
@@ -380,7 +380,7 @@ export const HistoryPage = () => {
                   <option>Maize</option>
                 </select>
                 <select className="rounded-lg border border-[#d8ddda] bg-white px-3 py-2 text-sm font-semibold text-[#333] hover:border-[#20a46b]">
-                  <option>All Sorune Type</option>
+                  <option>All Source Types</option>
                 </select>
                 <select className="rounded-lg border border-[#d8ddda] bg-white px-3 py-2 text-sm font-semibold text-[#333] hover:border-[#20a46b]">
                   <option>Last 12 months</option>

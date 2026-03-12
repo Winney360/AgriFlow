@@ -22,9 +22,9 @@ export const SignupPage = () => {
   });
 
   const passwordRequirements = [
-    { id: 1, text: '8 characters, 1 special character', met: form.password.length >= 8 && /[!@#$%^&*]/.test(form.password) },
-    { id: 2, text: '6 characters, 3 special character', met: form.password.length >= 6 && (form.password.match(/[!@#$%^&*]/g) || []).length >= 3 },
-    { id: 3, text: '3 characters, 1 special character', met: form.password.length >= 3 && /[!@#$%^&*]/.test(form.password) },
+    { id: 1, text: 'At least 8 characters and 1 special character', met: form.password.length >= 8 && /[!@#$%^&*]/.test(form.password) },
+    { id: 2, text: 'At least 6 characters and 3 special characters', met: form.password.length >= 6 && (form.password.match(/[!@#$%^&*]/g) || []).length >= 3 },
+    { id: 3, text: 'At least 3 characters and 1 special character', met: form.password.length >= 3 && /[!@#$%^&*]/.test(form.password) },
   ];
 
   const handleSendVerificationCode = async () => {
@@ -235,7 +235,7 @@ export const SignupPage = () => {
               </div>
 
               <div className="space-y-1 border-t border-[#e0e5e1] pt-3 text-center text-xs text-[#666]">
-                <p>For support, <span className="text-[#20a46b]">aboutUs</span>, <span className="text-[#20a46b]">Eonaor</span>, <span className="text-[#20a46b]">Contact Support</span></p>
+                <p>For support, <span className="text-[#20a46b]">About Us</span>, <span className="text-[#20a46b]">FAQ</span>, <span className="text-[#20a46b]">Contact Support</span></p>
                 <p>
                   Already have an account?{' '}
                   <Link to="/login" className="font-semibold text-[#20a46b]">
