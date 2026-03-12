@@ -1,5 +1,5 @@
 import express from 'express';
-import { authMiddleware } from '../middleware/authMiddleware.js';
+import { protect } from '../middleware/authMiddleware.js';
 import {
   createEmergencyRequest,
   listEmergencyRequests,
@@ -14,7 +14,7 @@ import {
 const router = express.Router();
 
 // All emergency request endpoints require authentication
-router.use(authMiddleware);
+router.use(protect);
 
 // Create a new emergency request
 router.post('/', createEmergencyRequest);
