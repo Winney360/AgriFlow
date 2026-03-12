@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet';
-import { Alert, AlertCircle, ChevronRight, MapPin, Plus } from 'lucide-react';
+import { AlertCircle, ChevronRight, MapPin, Plus } from 'lucide-react';
 import { emergencyRequestApi } from '../lib/api';
 import { ENGLISH_MAP_ATTRIBUTION, ENGLISH_MAP_TILE_URL } from '../lib/mapTiles';
 import { Input } from '../components/ui/input';
