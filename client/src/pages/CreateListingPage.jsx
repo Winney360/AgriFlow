@@ -6,7 +6,6 @@ import {
   AlertCircle,
   Camera,
   Check,
-  ChevronRight,
   List,
   MapPin,
   Plus,
@@ -179,14 +178,6 @@ export const CreateListingPage = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-sm font-semibold text-[#1f9f6a]">
-        <span>Crop Feed</span>
-        <ChevronRight size={14} />
-        <span>Map Search</span>
-        <ChevronRight size={14} />
-        <span className="text-[#123327]">{editId ? 'Edit Listing' : 'Create Listing'}</span>
-      </div>
-
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.2fr_1fr]">
         <form
           id="create-listing-form"

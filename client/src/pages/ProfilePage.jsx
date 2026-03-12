@@ -2,7 +2,6 @@ import { useState } from 'react';
 import {
   Bell,
   Check,
-  ChevronRight,
   CircleUserRound,
   Leaf,
   Mail,
@@ -83,16 +82,6 @@ export const ProfilePage = () => {
 
   return (
     <div className="space-y-5 pb-6">
-      <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-[#1d4739]/80">
-        <span>Crop Feed</span>
-        <ChevronRight size={14} />
-        <span>Map Search</span>
-        <ChevronRight size={14} />
-        <span>Messages</span>
-        <ChevronRight size={14} />
-        <span className="text-[#0f3528]">Profile</span>
-      </div>
-
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.7fr_1fr]">
         <div className="space-y-4">
           <h1 className="text-4xl font-black tracking-tight text-[#091f17]">Welcome & Overview</h1>

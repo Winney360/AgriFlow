@@ -13,6 +13,7 @@ const buyerNavItems = [
 ];
 
 const sellerNavItems = [
+  { to: '/', label: 'Home', icon: Home },
   { to: '/dashboard', label: 'Dashboard', icon: Tractor },
   { to: '/create-listing', label: 'Create', icon: Plus },
   { to: '/history', label: 'History', icon: History },
@@ -65,8 +66,9 @@ export const MainLayout = () => {
       {!isHomePage && (
         <header className="sticky top-0 z-20 border-b border-outline bg-[var(--surface)/0.9] backdrop-blur">
           <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
-            <Link to="/" className="text-xl font-black tracking-tight text-primary">
-              AgriFlow
+            <Link to="/" className="text-2xl font-black tracking-tight">
+              <span className="text-[#1f9f6a]">Agri</span>
+              <span className="text-[#1f1f1f]">Flow</span>
             </Link>
             {isAuthenticated ? (
               <nav className="hidden md:block">

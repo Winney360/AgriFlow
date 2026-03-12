@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Download, Phone, Eye, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 import { productApi } from '../lib/api';
 import { formatCurrency } from '../lib/utils';
@@ -107,21 +106,6 @@ export const HistoryPage = () => {
 
   return (
     <div className="min-h-screen bg-[#f7f8f7]">
-      {/* Breadcrumb */}
-      <div className="border-b border-[#d8ddda] bg-white px-6 py-3">
-        <div className="flex items-center gap-2 text-sm">
-          <Link to="/" className="text-[#20a46b] hover:underline">
-            Home
-          </Link>
-          <span className="text-[#999]">{`>`}</span>
-          <Link to="/dashboard" className="text-[#20a46b] hover:underline">
-            Dashboard
-          </Link>
-          <span className="text-[#999]">{`>`}</span>
-          <span className="font-semibold text-[#333]">Seller History</span>
-        </div>
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 px-6 py-6">
         {/* Left Sidebar */}
         <aside className="lg:col-span-1 space-y-4 h-fit sticky top-6">
