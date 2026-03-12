@@ -1,16 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import {
-  Bell,
-  CircleHelp,
   MapPin,
   Search,
-  SquareTerminal,
   Star,
-  User,
-  ChevronDown,
   ArrowRight,
   MessageCircle,
+  Home,
+  Store,
+  Tractor,
+  History,
+  UserRound,
+  Plus,
 } from 'lucide-react';
 import { productApi } from '../lib/api';
 import { formatCurrency } from '../lib/utils';
@@ -40,9 +41,28 @@ const successStories = [
 ];
 
 export const HomePage = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const buyerNavItems = [
+    { to: '/', label: 'Home', icon: Home },
+    { to: '/marketplace', label: 'Marketplace', icon: Store },
+    { to: '/profile', label: 'Profile', icon: UserRound },
+  ];
+
+  const sellerNavItems = [
+    { to: '/', label: 'Home', icon: Home },
+    { to: '/dashboard', label: 'Dashboard', icon: Tractor },
+    { to: '/create-listing', label: 'Create', icon: Plus },
+    { to: '/history', label: 'History', icon: History },
+    { to: '/profile', label: 'Profile', icon: UserRound },
+  ];
+
+  const navItems = useMemo(() => {
+    if (!isAuthenticated || !user) return [];
+    return user.role === 'seller' ? sellerNavItems : buyerNavItems;
+  }, [user, isAuthenticated]);
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -111,6 +131,30 @@ export const HomePage = () => {
               <span className="text-[#1f9f6a]">Agri</span>
               <span className="text-[#1f1f1f]">Flow</span>
             </div>
+            
+            {isAuthenticated && (
+              <nav className="hidden flex-1 md:block md:pl-8">
+                <ul className="flex items-center gap-2">
+                  {navItems.map((item) => (
+                    <li key={item.to}>
+                      <NavLink
+                        to={item.to}
+                        className={({ isActive }) =>
+                          `rounded-md px-3 py-2 text-sm font-semibold transition-colors ${
+                            isActive
+                              ? 'bg-[#20a46b] text-white'
+                              : 'text-[#335c4f] hover:text-[#20a46b]'
+                          }`
+                        }
+                      >
+                        {item.label}
+                      </NavLink>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            )}
+            
             <div className="min-w-55 flex-1 md:max-w-md md:pl-8">
               <div className="flex h-10 items-center rounded-md border border-[#d8ddda] bg-white px-3 text-[#79817e]">
                 <Search size={15} />
@@ -119,19 +163,7 @@ export const HomePage = () => {
             </div>
             <div className="ml-auto flex items-center gap-2">
               <ThemeToggle />
-              {isAuthenticated ? (
-                <div className="flex items-center gap-3 text-[#5f6865]">
-                  <SquareTerminal size={16} />
-                  <Bell size={16} />
-                  <CircleHelp size={16} />
-                  <div className="flex items-center gap-2 rounded-full bg-white px-2 py-1">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#d4e4d9]">
-                      <User size={14} />
-                    </div>
-                    <ChevronDown size={14} />
-                  </div>
-                </div>
-              ) : (
+              {!isAuthenticated && (
                 <>
                   <Link
                     to="/login"
@@ -191,87 +223,6 @@ export const HomePage = () => {
               <Link to="/login" className="rounded-md border border-[#9db3a7] bg-white px-5 py-2.5 text-sm font-semibold text-[#335c4f]">
                 Login
               </Link>
-            </div>
-          </section>
-
-          <section className="mt-6 rounded-md border border-[#d8ddda] bg-[#f2f5f3] p-4 md:p-6">
-            <h2 className="mb-4 text-3xl font-black">BROWSE LISTINGS</h2>
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[220px_1fr]">
-              <aside className="space-y-4 rounded-md border border-[#d8ddda] bg-white p-3">
-                <div>
-                  <label className="mb-1 block text-xs font-semibold text-[#4d5652]">Crop Types</label>
-                  <div className="rounded-md border border-[#d7ddda] px-3 py-2 text-sm">
-                    {listingInsights.cropTypes.length
-                      ? listingInsights.cropTypes.join(', ')
-                      : 'No crop types yet'}
-                  </div>
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-semibold text-[#4d5652]">Vendor</label>
-                  <div className="rounded-md border border-[#d7ddda] px-3 py-2 text-sm">
-                    {listingInsights.vendors.length
-                      ? listingInsights.vendors.join(', ')
-                      : 'No vendors yet'}
-                  </div>
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-semibold text-[#4d5652]">Price Range</label>
-                  <div className="flex items-center justify-between rounded-md border border-[#d7ddda] px-3 py-2 text-sm">
-                    <span>{listingInsights.minPrice ? formatCurrency(listingInsights.minPrice) : '-'}</span>
-                    <span>{listingInsights.maxPrice ? formatCurrency(listingInsights.maxPrice) : '-'}</span>
-                  </div>
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-semibold text-[#4d5652]">Location</label>
-                  <div className="space-y-2 text-sm">
-                    {listingInsights.locations.length ? (
-                      listingInsights.locations.map((location) => (
-                        <div key={location} className="rounded-md border border-[#d7ddda] px-3 py-2">
-                          {location}
-                        </div>
-                      ))
-                    ) : (
-                      <div className="rounded-md border border-[#d7ddda] px-3 py-2">No locations yet</div>
-                    )}
-                  </div>
-                </div>
-              </aside>
-
-              {loading ? (
-                <div className="rounded-md border border-[#d8ddda] bg-white p-8 text-center text-sm font-semibold text-[#4d5652]">
-                  Loading listings...
-                </div>
-              ) : null}
-
-              {!loading && listingData.length === 0 ? (
-                <div className="rounded-md border border-[#d8ddda] bg-white p-8 text-center text-sm font-semibold text-[#4d5652]">
-                  No active listings yet. Check back soon or post your first listing.
-                </div>
-              ) : null}
-
-              {!loading && listingData.length > 0 ? (
-                <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
-                  {listingData.map((item) => (
-                  <article key={item._id} className="overflow-hidden rounded-md border border-[#d8ddda] bg-white">
-                    <img src={item.imageUrl} alt={item.title} className="h-24 w-full object-cover" />
-                    <div className="space-y-1 p-2">
-                      <h3 className="line-clamp-1 text-[13px] font-bold leading-tight">{item.title}</h3>
-                      <p className="text-xs font-semibold text-[#1f1f1f]">{formatCurrency(item.price)}</p>
-                      <p className="line-clamp-1 flex items-center gap-1 text-[11px] text-[#68706d]">
-                        <MapPin size={10} />
-                        {item.location?.locationName || 'Location'}
-                      </p>
-                      <button
-                        type="button"
-                        className="inline-flex items-center gap-1 rounded-full bg-[#20a46b] px-2 py-1 text-[10px] font-semibold text-white"
-                      >
-                        WhatsApp CTA <MessageCircle size={10} />
-                      </button>
-                    </div>
-                  </article>
-                  ))}
-                </div>
-              ) : null}
             </div>
           </section>
         </div>

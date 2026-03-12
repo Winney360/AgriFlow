@@ -1,15 +1,20 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Store, Tractor, History, UserRound } from 'lucide-react';
+import { Home, Store, Tractor, History, UserRound, Plus } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../ui/button';
 import { cn } from '../../lib/utils';
 
-const navItems = [
+const buyerNavItems = [
   { to: '/', label: 'Home', icon: Home },
   { to: '/marketplace', label: 'Market', icon: Store },
-  { to: '/dashboard', label: 'Sell', icon: Tractor },
+  { to: '/profile', label: 'Profile', icon: UserRound },
+];
+
+const sellerNavItems = [
+  { to: '/dashboard', label: 'Dashboard', icon: Tractor },
+  { to: '/create-listing', label: 'Create', icon: Plus },
   { to: '/history', label: 'History', icon: History },
   { to: '/profile', label: 'Profile', icon: UserRound },
 ];
@@ -20,6 +25,11 @@ export const MainLayout = () => {
   const { isAuthenticated, user, logout, switchRole } = useAuth();
   const isHomePage = location.pathname === '/';
   const [roleBusy, setRoleBusy] = useState(false);
+
+  const navItems = useMemo(() => {
+    if (!isAuthenticated || !user) return buyerNavItems;
+    return user.role === 'seller' ? sellerNavItems : buyerNavItems;
+  }, [user, isAuthenticated]);
 
   const nextRole = user?.role === 'buyer' ? 'seller' : 'buyer';
   const roleSwitchChecked = user?.role === 'seller';
@@ -42,7 +52,7 @@ export const MainLayout = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-bg text-text">
+    <div className={cn('relative min-h-screen', !isHomePage && 'bg-bg text-text')}>
       {!isHomePage && (
         <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
           <div className="blob blob-one" />
@@ -53,11 +63,39 @@ export const MainLayout = () => {
 
       {!isHomePage && (
         <header className="sticky top-0 z-20 border-b border-outline bg-[var(--surface)/0.9] backdrop-blur">
-          <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+          <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
             <Link to="/" className="text-xl font-black tracking-tight text-primary">
               AgriFlow
             </Link>
-            <div className="flex items-center gap-2">
+            {isAuthenticated ? (
+              <nav className="hidden md:block">
+                <ul className="flex items-center gap-2">
+                  {navItems.map((item) => {
+                    const active =
+                      location.pathname === item.to ||
+                      location.pathname.startsWith(`${item.to}/`);
+
+                    return (
+                      <li key={`desktop-${item.to}`}>
+                        <NavLink
+                          to={item.to}
+                          className={cn(
+                            'rounded-lg px-3 py-2 text-sm font-semibold transition-colors',
+                            active ? 'bg-button text-white' : 'text-text-muted hover:text-text',
+                          )}
+                        >
+                          {item.label}
+                        </NavLink>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </nav>
+            ) : (
+              <div className="hidden flex-1 md:block" />
+            )}
+
+            <div className="ml-auto flex items-center gap-2">
               {isAuthenticated && user ? (
                 <button
                   type="button"
@@ -103,7 +141,7 @@ export const MainLayout = () => {
 
       <nav
         className={cn(
-          'fixed bottom-0 left-0 right-0 z-30 border-t border-(--outline) bg-[var(--surface)/0.95] p-2 backdrop-blur md:hidden',
+          'fixed bottom-0 left-0 right-0 z-30 border-t border-outline bg-[var(--surface)/0.95] p-2 backdrop-blur md:hidden',
           isHomePage && 'hidden',
         )}
       >
@@ -118,7 +156,7 @@ export const MainLayout = () => {
                   to={item.to}
                   className={cn(
                     'flex min-w-15 flex-col items-center gap-1 rounded-xl px-2 py-1 text-xs font-semibold',
-                    active ? 'bg-(--button) text-white' : 'text-(--text-muted)',
+                    active ? 'bg-button text-white' : 'text-text-muted',
                   )}
                 >
                   <Icon size={16} />

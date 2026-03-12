@@ -19,8 +19,9 @@ export const LoginPage = () => {
     setError('');
 
     try {
-      await login(form);
-      navigate('/marketplace');
+      const user = await login(form);
+      const redirectUrl = user.role === 'seller' ? '/dashboard' : '/marketplace';
+      navigate(redirectUrl);
     } catch (err) {
       setError(err?.response?.data?.message || 'Failed to login');
     }

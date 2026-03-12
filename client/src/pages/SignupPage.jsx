@@ -36,14 +36,15 @@ export const SignupPage = () => {
     }
 
     try {
-      await signup({
+      const user = await signup({
         name: form.name,
         phoneNumber: form.phoneNumber,
         password: form.password,
         email: form.email,
         role: form.role,
       });
-      navigate('/marketplace');
+      const redirectUrl = user.role === 'seller' ? '/dashboard' : '/marketplace';
+      navigate(redirectUrl);
     } catch (err) {
       setError(err?.response?.data?.message || 'Failed to create account');
     }
