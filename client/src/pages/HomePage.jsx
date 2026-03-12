@@ -15,6 +15,7 @@ import {
 import { productApi } from '../lib/api';
 import { formatCurrency } from '../lib/utils';
 import { ListingsMap } from '../components/map/ListingsMap';
+import { ThemeToggle } from '../components/layout/ThemeToggle';
 import { useAuth } from '../context/AuthContext';
 import step1Image from '../assets/homepage/step1.png';
 import step2Image from '../assets/homepage/step2.png';
@@ -116,34 +117,37 @@ export const HomePage = () => {
                 <span className="ml-2 text-sm">Search produce...</span>
               </div>
             </div>
-            {isAuthenticated ? (
-              <div className="ml-auto flex items-center gap-3 text-[#5f6865]">
-                <SquareTerminal size={16} />
-                <Bell size={16} />
-                <CircleHelp size={16} />
-                <div className="flex items-center gap-2 rounded-full bg-white px-2 py-1">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#d4e4d9]">
-                    <User size={14} />
+            <div className="ml-auto flex items-center gap-2">
+              <ThemeToggle />
+              {isAuthenticated ? (
+                <div className="flex items-center gap-3 text-[#5f6865]">
+                  <SquareTerminal size={16} />
+                  <Bell size={16} />
+                  <CircleHelp size={16} />
+                  <div className="flex items-center gap-2 rounded-full bg-white px-2 py-1">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#d4e4d9]">
+                      <User size={14} />
+                    </div>
+                    <ChevronDown size={14} />
                   </div>
-                  <ChevronDown size={14} />
                 </div>
-              </div>
-            ) : (
-              <div className="ml-auto flex items-center gap-2">
-                <Link
-                  to="/login"
-                  className="rounded-md border border-[#d8ddda] bg-white px-3 py-2 text-sm font-semibold text-[#335c4f]"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/signup"
-                  className="rounded-md bg-[#2ca06e] px-3 py-2 text-sm font-semibold text-white"
-                >
-                  Sign up
-                </Link>
-              </div>
-            )}
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className="rounded-md border border-[#d8ddda] bg-white px-3 py-2 text-sm font-semibold text-[#335c4f]"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="rounded-md bg-[#2ca06e] px-3 py-2 text-sm font-semibold text-white"
+                  >
+                    Sign up
+                  </Link>
+                </>
+              )}
+            </div>
           </header>
 
           <div className="grid grid-cols-1 overflow-hidden rounded-md border border-[#d8ddda] lg:grid-cols-2">

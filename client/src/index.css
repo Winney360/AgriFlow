@@ -1,31 +1,31 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #E5D9B6;
-  --surface: #f3ecd5;
-  --surface-soft: #ede3c6;
-  --text: #273126;
-  --text-muted: #4f5f4a;
-  --primary: #40513B;
-  --secondary: #628141;
-  --button: #628141;
-  --cta: #E67E22;
-  --outline: #b9ab85;
-  --accent-ring: #7aa75c;
+  --bg: #edf6f0;
+  --surface: #f7fcf8;
+  --surface-soft: #e6f3eb;
+  --text: #173429;
+  --text-muted: #3b6654;
+  --primary: #1f9f6a;
+  --secondary: #4db082;
+  --button: #1f9f6a;
+  --cta: #2a8f63;
+  --outline: #b7d9c8;
+  --accent-ring: #56b787;
 }
 
 .dark {
-  --bg: #1B211A;
-  --surface: #202a1f;
-  --surface-soft: #293326;
-  --text: #EBD5AB;
-  --text-muted: #c7b286;
-  --primary: #7AA75C;
-  --secondary: #8BAE66;
-  --button: #7AA75C;
-  --cta: #c97a35;
-  --outline: #3a4738;
-  --accent-ring: #8BAE66;
+  --bg: #0f1d17;
+  --surface: #142820;
+  --surface-soft: #1a3328;
+  --text: #d8f5e6;
+  --text-muted: #9fceb8;
+  --primary: #4fc48f;
+  --secondary: #62d39f;
+  --button: #4fc48f;
+  --cta: #3baa7b;
+  --outline: #254638;
+  --accent-ring: #62d39f;
 }
 
 * {
@@ -50,7 +50,7 @@ body {
 .blob-one {
   height: 240px;
   width: 240px;
-  background: #7AA75C;
+  background: #47bf8b;
   top: -40px;
   left: -30px;
 }
@@ -58,7 +58,7 @@ body {
 .blob-two {
   height: 320px;
   width: 320px;
-  background: #E67E22;
+  background: #2ea875;
   bottom: -80px;
   right: -60px;
 }
