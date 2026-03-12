@@ -65,6 +65,44 @@ export const HomePage = () => {
     return products.slice(0, 10);
   }, [products]);
 
+  const listingInsights = useMemo(() => {
+    const cropTypes = Array.from(
+      new Set(
+        listingData
+          .map((item) => item.productType)
+          .filter(Boolean),
+      ),
+    ).slice(0, 4);
+
+    const vendors = Array.from(
+      new Set(
+        listingData
+          .map((item) => item.sellerId?.name)
+          .filter(Boolean),
+      ),
+    ).slice(0, 4);
+
+    const locations = Array.from(
+      new Set(
+        listingData
+          .map((item) => item.location?.locationName)
+          .filter(Boolean),
+      ),
+    ).slice(0, 4);
+
+    const prices = listingData
+      .map((item) => Number(item.price))
+      .filter((price) => Number.isFinite(price) && price > 0);
+
+    return {
+      cropTypes,
+      vendors,
+      locations,
+      minPrice: prices.length ? Math.min(...prices) : null,
+      maxPrice: prices.length ? Math.max(...prices) : null,
+    };
+  }, [listingData]);
+
   return (
     <div className="bg-[#f7f8f7] text-[#1f1f1f]">
       <section className="min-h-screen border-b border-[#dce3df] bg-[#f7f8f7]">
@@ -160,24 +198,39 @@ export const HomePage = () => {
               <aside className="space-y-4 rounded-md border border-[#d8ddda] bg-white p-3">
                 <div>
                   <label className="mb-1 block text-xs font-semibold text-[#4d5652]">Crop Types</label>
-                  <div className="rounded-md border border-[#d7ddda] px-3 py-2 text-sm">Grains</div>
+                  <div className="rounded-md border border-[#d7ddda] px-3 py-2 text-sm">
+                    {listingInsights.cropTypes.length
+                      ? listingInsights.cropTypes.join(', ')
+                      : 'No crop types yet'}
+                  </div>
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-semibold text-[#4d5652]">Vendor</label>
-                  <div className="rounded-md border border-[#d7ddda] px-3 py-2 text-sm">Vendor</div>
+                  <div className="rounded-md border border-[#d7ddda] px-3 py-2 text-sm">
+                    {listingInsights.vendors.length
+                      ? listingInsights.vendors.join(', ')
+                      : 'No vendors yet'}
+                  </div>
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-semibold text-[#4d5652]">Price Range</label>
                   <div className="flex items-center justify-between rounded-md border border-[#d7ddda] px-3 py-2 text-sm">
-                    <span>Ksh 7,000</span>
-                    <span>Ksh 50,000</span>
+                    <span>{listingInsights.minPrice ? formatCurrency(listingInsights.minPrice) : '-'}</span>
+                    <span>{listingInsights.maxPrice ? formatCurrency(listingInsights.maxPrice) : '-'}</span>
                   </div>
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-semibold text-[#4d5652]">Location</label>
                   <div className="space-y-2 text-sm">
-                    <div className="rounded-md border border-[#d7ddda] px-3 py-2">GPS/Map</div>
-                    <div className="rounded-md border border-[#d7ddda] px-3 py-2">Map Hits</div>
+                    {listingInsights.locations.length ? (
+                      listingInsights.locations.map((location) => (
+                        <div key={location} className="rounded-md border border-[#d7ddda] px-3 py-2">
+                          {location}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="rounded-md border border-[#d7ddda] px-3 py-2">No locations yet</div>
+                    )}
                   </div>
                 </div>
               </aside>
@@ -241,8 +294,9 @@ export const HomePage = () => {
                   </p>
                 </article>
 
-                <div className="hidden self-center text-[#92a29b] md:block" aria-hidden="true">
-                  <ArrowRight size={34} />
+                <div className="hidden w-28 items-center self-center text-[#1f9f6a] md:flex" aria-hidden="true">
+                  <span className="h-0.5 w-20 bg-[#1f9f6a]" />
+                  <ArrowRight size={22} strokeWidth={2.8} />
                 </div>
 
                 <article className="text-center">
@@ -257,8 +311,9 @@ export const HomePage = () => {
                   </p>
                 </article>
 
-                <div className="hidden self-center text-[#92a29b] md:block" aria-hidden="true">
-                  <ArrowRight size={34} />
+                <div className="hidden w-28 items-center self-center text-[#1f9f6a] md:flex" aria-hidden="true">
+                  <span className="h-0.5 w-20 bg-[#1f9f6a]" />
+                  <ArrowRight size={22} strokeWidth={2.8} />
                 </div>
 
                 <article className="text-center">
