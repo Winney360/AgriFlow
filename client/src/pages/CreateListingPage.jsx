@@ -405,21 +405,8 @@ export const CreateListingPage = () => {
           ) : null}
 
           <div className="mt-4 flex flex-wrap gap-2 border-t border-[#dbe9e3] pt-4">
-            <Button type="button" variant="outline" className="h-10 rounded-lg border-[#bed8cd] text-[#2f5c4d]">
-              Previous
-            </Button>
-            <Button type="button" variant="outline" className="h-10 rounded-lg border-[#bed8cd] text-[#2f5c4d]">
-              Save Draft
-            </Button>
             <Button type="button" variant="outline" className="h-10 rounded-lg border-[#8cc8ae] text-[#1e6f4f]">
               Next Step: Visuals & Description
-            </Button>
-            <Button
-              type="submit"
-              className="h-10 rounded-lg bg-[#1f9f6a] px-5 font-black"
-              disabled={submitting}
-            >
-              {submitting ? 'Saving...' : editId ? 'Confirm and Update Listing' : 'Confirm and POST Listing'}
             </Button>
           </div>
         </form>
@@ -524,19 +511,6 @@ export const CreateListingPage = () => {
                   </MapContainer>
                 </div>
               </div>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-[#d3e5dc] bg-[#f7fcfa] p-4">
-            <p className="text-4xl leading-none font-black text-[#1b3a2d]">
-              Create listings directly from verified crop lists for enhanced Local Trust.
-            </p>
-            <p className="mt-2 text-lg font-bold text-[#2f5f50]">Verify on WhatsApp before post.</p>
-            <div className="mt-3 flex items-center justify-between rounded-xl bg-[#e7f4ee] p-3">
-              <span className="text-sm font-black text-[#1a7d57]">WhatsApp CTA</span>
-              <Button type="button" size="sm" className="h-8 rounded-lg bg-[#1f9f6a] px-3">
-                Open
-              </Button>
             </div>
           </div>
 
