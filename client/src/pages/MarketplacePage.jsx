@@ -3,7 +3,6 @@ import { MapContainer, Marker, TileLayer } from 'react-leaflet';
 import {
   ArrowRight,
   Check,
-  ChevronRight,
   LocateFixed,
   MapPin,
   MessageCircle,
@@ -109,18 +108,6 @@ export const MarketplacePage = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-[#2d5b4d]">
-        <span>[Crop Feed</span>
-        <ChevronRight size={14} />
-        <span>Map Search</span>
-        <ChevronRight size={14} />
-        <span>Post Listing</span>
-        <ChevronRight size={14} />
-        <span>Messages</span>
-        <ChevronRight size={14} />
-        <span className="text-[#123126]">Profile</span>
-      </div>
-
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[15rem_1fr_14rem]">
         <aside className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-3">
           <h1 className="text-[3rem] leading-[0.95] font-black tracking-tight text-[#1f9f6a] xl:hidden">

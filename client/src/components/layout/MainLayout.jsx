@@ -41,6 +41,7 @@ export const MainLayout = () => {
     setRoleBusy(true);
     try {
       await switchRole(nextRole);
+      navigate(nextRole === 'seller' ? '/dashboard' : '/marketplace');
     } finally {
       setRoleBusy(false);
     }
