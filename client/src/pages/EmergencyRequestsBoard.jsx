@@ -30,7 +30,7 @@ const EmergencyRequestCard = ({ request, onClaim, claimedBySelf }) => {
 
   return (
     <Card className="overflow-hidden p-0">
-      <div className="bg-gradient-to-r from-[#d83c31] to-[#f4a261] p-4 text-white">
+      <div className="bg-linear-to-r from-[#1f9f6a] to-[#27b883] p-4 text-white">
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="text-xl font-black">{request.title}</h2>
@@ -103,8 +103,8 @@ const EmergencyRequestCard = ({ request, onClaim, claimedBySelf }) => {
         )}
 
         {claimedBySelf && (
-          <div className="rounded-lg bg-[#e8f8f1] border border-[#a8d5bd] p-2">
-            <p className="text-xs font-bold text-[#0f3d2f]">✅ You have claimed this request</p>
+          <div className="rounded-lg bg-[#f0faf7] border-2 border-[#1f9f6a] p-2">
+            <p className="text-xs font-bold text-[#1f9f6a]">✅ You have claimed this request</p>
           </div>
         )}
       </div>
@@ -189,16 +189,16 @@ export const EmergencyRequestsBoard = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-sm font-semibold text-[#2f5f50]">
+      <div className="flex items-center gap-2 text-sm font-semibold text-[#1f9f6a]">
         <span>Community</span>
         <ChevronRight size={14} />
         <span className="text-[#123327]">Emergency Board</span>
       </div>
 
-      <div className="rounded-2xl border border-[#c83e35] bg-[#fff0ed] p-4 flex gap-2">
-        <AlertCircle size={20} className="text-[#c83e35] flex-shrink-0 mt-0.5" />
+      <div className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-4 flex gap-2">
+        <AlertCircle size={20} className="text-[#1f9f6a] shrink-0 mt-0.5" />
         <div>
-          <p className="font-bold text-[#c83e35]">Real-time Food Security</p>
+          <p className="font-bold text-[#1f9f6a]">Real-time Food Security</p>
           <p className="text-sm text-[#666] mt-1">
             These are critical needs from nearby communities. Help save lives during emergencies.
           </p>
@@ -214,8 +214,8 @@ export const EmergencyRequestsBoard = () => {
         </Button>
       )}
 
-      <div className="rounded-2xl border border-[#cfe3da] bg-white p-4 space-y-3">
-        <p className="font-bold text-[#1f1f1f]">Filters</p>
+      <div className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-4 space-y-3">
+        <p className="font-bold text-[#1f9f6a]">Filters</p>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <select
@@ -258,8 +258,8 @@ export const EmergencyRequestsBoard = () => {
       )}
 
       {requests.length === 0 ? (
-        <div className="rounded-2xl border border-[#dbe9e3] bg-[#f7fcfa] p-8 text-center">
-          <p className="text-lg font-bold text-[#2f5f50]">
+        <div className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-8 text-center">
+          <p className="text-lg font-bold text-[#1f9f6a]">
             👍 No emergency requests in your area right now.
           </p>
           <p className="text-sm text-[#666] mt-2">

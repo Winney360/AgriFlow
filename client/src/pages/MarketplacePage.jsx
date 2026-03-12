@@ -165,8 +165,8 @@ export const MarketplacePage = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[15rem_1fr_14rem]">
-        <aside className="rounded-2xl border border-[#cfe3da] bg-[#f8fcfa] p-3">
-          <h1 className="text-[3rem] leading-[0.95] font-black tracking-tight text-[#102d22] xl:hidden">
+        <aside className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-3">
+          <h1 className="text-[3rem] leading-[0.95] font-black tracking-tight text-[#1f9f6a] xl:hidden">
             Explore the Local Market.
           </h1>
 
@@ -193,11 +193,11 @@ export const MarketplacePage = () => {
             </div>
           </div>
 
-          <div className="mt-3 rounded-xl border border-[#d3e6dd] bg-white p-3">
-            <p className="text-4xl leading-none font-black text-[#123126]">Filters</p>
+          <div className="mt-3 rounded-xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-3">
+            <p className="text-4xl leading-none font-black text-[#1f9f6a]\">Filters</p>
 
             <div className="mt-2">
-              <p className="text-sm font-black text-[#2f5d4f]">Crop Type filters</p>
+              <p className="text-sm font-black text-[#1f9f6a]\">Crop Type filters</p>
               <div className="mt-1 space-y-1 text-sm font-semibold text-[#2c5548]">
                 {['maize', 'tomatoes', 'potatoes'].map((tag) => (
                   <label key={tag} className="flex items-center gap-2">
@@ -385,18 +385,18 @@ export const MarketplacePage = () => {
         </section>
 
         <aside className="space-y-3">
-          <div className="rounded-2xl border border-[#cfe3da] bg-[#f8fcfa] p-3">
-            <p className="text-4xl leading-none font-black text-[#132f24]">Local Trust & Verification</p>
-            <p className="mt-2 text-lg leading-tight font-bold text-[#2c594b]">
+          <div className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-3">
+            <p className="text-4xl leading-none font-black text-[#1f9f6a]\">Local Trust & Verification</p>
+            <p className="mt-2 text-lg leading-tight font-bold text-[#1f9f6a]\">
               Verify Local Trust. Verify on WhatsApp before payment.
             </p>
-            <div className="mt-3 inline-flex items-center gap-1 rounded-lg bg-[#def3e8] px-3 py-2 text-sm font-black text-[#156c49]">
+            <div className="mt-3 inline-flex items-center gap-1 rounded-lg bg-[#def3e8] px-3 py-2 text-sm font-black text-[#1f9f6a]\">
               <Check size={14} /> JWT Verified
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[#cfe3da] bg-[#f8fcfa] p-3">
-            <p className="text-4xl leading-none font-black text-[#132f24]">Request & Post Callout</p>
+          <div className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-3\">
+            <p className="text-4xl leading-none font-black text-[#1f9f6a]\">Request & Post Callout</p>
             <Button type="button" className="mt-3 h-10 w-full rounded-lg bg-[#1f9f6a]">
               Post Listing
             </Button>

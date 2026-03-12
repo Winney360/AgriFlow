@@ -179,7 +179,7 @@ export const CreateListingPage = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-sm font-semibold text-[#2f5f50]">
+      <div className="flex items-center gap-2 text-sm font-semibold text-[#1f9f6a]">
         <span>Crop Feed</span>
         <ChevronRight size={14} />
         <span>Map Search</span>
@@ -193,13 +193,13 @@ export const CreateListingPage = () => {
           onSubmit={onSubmit}
           className="rounded-2xl border border-[#cfe3da] bg-[#f7fcfa] p-4 shadow-[0_8px_22px_-16px_rgba(2,38,27,0.8)]"
         >
-          <h1 className="text-5xl leading-none font-black tracking-tight text-[#0f2a20]">
+          <h1 className="text-5xl leading-none font-black tracking-tight text-[#1f9f6a]">
             {editId ? 'Edit Listing.' : 'Create Listing.'}
           </h1>
 
           <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[11rem_1fr]">
-            <aside className="rounded-xl border border-[#d7e8e0] bg-white p-3">
-              <p className="text-lg font-black text-[#173d2f]">Steps</p>
+            <aside className="rounded-xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-3">
+              <p className="text-lg font-black text-[#1f9f6a]">Steps</p>
               <div className="mt-2 space-y-2 text-sm font-bold text-[#315f50]">
                 {['Details', 'Quantity & Price', 'Visuals & Description', 'Location', 'Review & Post'].map(
                   (step, index) => (
@@ -216,8 +216,8 @@ export const CreateListingPage = () => {
 
             <section className="space-y-4">
               <div className="grid grid-cols-1 gap-3 lg:grid-cols-[1.05fr_1fr]">
-                <div className="rounded-xl border border-[#d5e6df] bg-white p-3">
-                  <p className="text-lg font-black text-[#163d2e]">Product Selection</p>
+                <div className="rounded-xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-3">
+                  <p className="text-lg font-black text-[#1f9f6a]">Product Selection</p>
                   <label className="mt-2 flex h-11 items-center gap-2 rounded-xl border border-[#c9ddd4] bg-[#f8fcfa] px-3">
                     <Search size={16} className="text-[#638a7b]" />
                     <input
@@ -307,8 +307,8 @@ export const CreateListingPage = () => {
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-[#d5e6df] bg-white p-3">
-                  <p className="text-4xl leading-none font-black text-[#112d22]">Define Your Harvest & Price.</p>
+                <div className="rounded-xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-3">
+                  <p className="text-4xl leading-none font-black text-[#1f9f6a]">Define Your Harvest & Price.</p>
 
                   <div className="mt-4 space-y-4">
                     <div>
@@ -418,8 +418,8 @@ export const CreateListingPage = () => {
         </form>
 
         <section className="space-y-4">
-          <div className="rounded-2xl border border-[#d3e5dc] bg-[#f7fcfa] p-4">
-            <p className="text-4xl leading-none font-black text-[#122f24]">Visuals</p>
+          <div className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-4">
+            <p className="text-4xl leading-none font-black text-[#1f9f6a]">Visuals</p>
             <div className="mt-3 grid grid-cols-4 gap-2">
               {visualSlots.map((src) => (
                 <img key={src} src={src} alt="Crop visual" className="h-28 w-full rounded-xl object-cover" />
@@ -443,7 +443,7 @@ export const CreateListingPage = () => {
               Reminder: Photos of the actual crop required for verification.
             </p>
 
-            <p className="mt-4 text-4xl leading-none font-black text-[#122f24]">Description</p>
+            <p className="mt-4 text-4xl leading-none font-black text-[#1f9f6a]">Description</p>
             <textarea
               placeholder="Describe your produce, trust signals, and pickup plan."
               className="mt-3 min-h-26 w-full rounded-xl border border-[#c9ddd4] bg-white p-3 text-sm font-semibold text-[#1d4536] outline-none"
@@ -452,8 +452,8 @@ export const CreateListingPage = () => {
             />
           </div>
 
-          <div className="rounded-2xl border border-[#d3e5dc] bg-[#f7fcfa] p-4">
-            <p className="text-4xl leading-none font-black text-[#122f24]">Location</p>
+          <div className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-4">
+            <p className="text-4xl leading-none font-black text-[#1f9f6a]">Location</p>
             <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-[0.9fr_1.2fr]">
               <div className="rounded-xl border border-[#d6e8df] bg-[#ecf6f1] p-3">
                 <p className="text-4xl leading-none font-black text-[#123225]">Set Pickup Location.</p>

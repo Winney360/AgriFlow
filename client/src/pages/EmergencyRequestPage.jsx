@@ -99,7 +99,7 @@ export const EmergencyRequestPage = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-sm font-semibold text-[#2f5f50]">
+      <div className="flex items-center gap-2 text-sm font-semibold text-[#1f9f6a]">
         <span>Community</span>
         <ChevronRight size={14} />
         <span className="text-[#123327]">Emergency Request</span>
@@ -110,7 +110,7 @@ export const EmergencyRequestPage = () => {
           onSubmit={onSubmit}
           className="rounded-2xl border border-[#cfe3da] bg-[#f7fcfa] p-4 shadow-[0_8px_22px_-16px_rgba(2,38,27,0.8)]"
         >
-          <h1 className="text-5xl leading-none font-black tracking-tight text-[#0f2a20]">
+          <h1 className="text-5xl leading-none font-black tracking-tight text-[#1f9f6a]">
             Post Emergency Request.
           </h1>
 
@@ -125,8 +125,8 @@ export const EmergencyRequestPage = () => {
           </div>
 
           <section className="space-y-4 mt-4">
-            <div className="rounded-xl border border-[#d5e6df] bg-white p-3">
-              <p className="text-2xl font-black text-[#163d2e]">What do you need?</p>
+            <div className="rounded-xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-3">
+              <p className="text-2xl font-black text-[#1f9f6a]">What do you need?</p>
 
               <div className="mt-3 space-y-3">
                 <Input
@@ -137,13 +137,15 @@ export const EmergencyRequestPage = () => {
                   className="h-10"
                 />
 
+<div className="relative">
                 <Input
                   placeholder="Product type (e.g., Maize, Rice, Potatoes)"
                   value={form.productType}
                   onChange={(event) => setForm({ ...form, productType: event.target.value })}
                   required
-                  className="h-10"
+                  className="h-10 border-l-4 border-l-[#1f9f6a]"
                 />
+              </div>
 
                 <Input
                   placeholder="Quantity needed (e.g., 500 kg)"
@@ -162,8 +164,8 @@ export const EmergencyRequestPage = () => {
               </div>
             </div>
 
-            <div className="rounded-xl border border-[#d5e6df] bg-white p-3">
-              <p className="text-2xl font-black text-[#163d2e]">Search Radius</p>
+            <div className="rounded-xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-3">
+              <p className="text-2xl font-black text-[#1f9f6a]">Search Radius</p>
               <p className="text-sm text-[#4a6e60] mt-1">Farmers within this distance will be notified</p>
 
               <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -214,8 +216,8 @@ export const EmergencyRequestPage = () => {
         </form>
 
         <section className="space-y-4">
-          <div className="rounded-2xl border border-[#d3e5dc] bg-[#f7fcfa] p-4">
-            <p className="text-4xl leading-none font-black text-[#122f24]">Location</p>
+          <div className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-4">
+            <p className="text-4xl leading-none font-black text-[#1f9f6a]">Location</p>
             <p className="mt-2 text-sm text-[#4a6e60]">Click on the map to set your location</p>
 
             <MapContainer
