@@ -172,9 +172,9 @@ export const ProductDetailsPage = () => {
                   center={[product.location.latitude, product.location.longitude]}
                   zoom={12}
                   className="h-full w-full"
+                  attributionControl={false}
                 >
                   <TileLayer
-                    attribution={ENGLISH_MAP_ATTRIBUTION}
                     url={ENGLISH_MAP_TILE_URL}
                   />
                   <Marker position={[product.location.latitude, product.location.longitude]}>

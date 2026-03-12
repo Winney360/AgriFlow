@@ -501,8 +501,9 @@ export const ProfilePage = () => {
                   center={mapCenter}
                   zoom={10}
                   className="h-full w-full"
+                  attributionControl={false}
                 >
-                  <TileLayer attribution={ENGLISH_MAP_ATTRIBUTION} url={ENGLISH_MAP_TILE_URL} />
+                  <TileLayer url={ENGLISH_MAP_TILE_URL} />
                   {mapListings.map((listing) => (
                     <Marker
                       key={listing._id}

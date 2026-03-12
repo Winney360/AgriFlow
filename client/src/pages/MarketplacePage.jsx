@@ -147,9 +147,8 @@ export const MarketplacePage = () => {
               <span className="text-[#6b8d80]">x</span>
             </div>
             <div className="relative isolate h-42 overflow-hidden rounded-xl border border-[#d2e4db]">
-              <MapContainer center={center} zoom={10} className="h-full w-full">
+              <MapContainer center={center} zoom={10} className="h-full w-full" attributionControl={false}>
                 <TileLayer
-                  attribution={ENGLISH_MAP_ATTRIBUTION}
                   url={ENGLISH_MAP_TILE_URL}
                 />
                 {mapView
@@ -303,8 +302,8 @@ export const MarketplacePage = () => {
 
           {mapView ? (
             <div className="relative isolate overflow-hidden rounded-xl border border-[#cddfd7]" style={{ height: '480px' }}>
-              <MapContainer center={center} zoom={9} className="h-full w-full">
-                <TileLayer attribution={ENGLISH_MAP_ATTRIBUTION} url={ENGLISH_MAP_TILE_URL} />
+              <MapContainer center={center} zoom={9} className="h-full w-full" attributionControl={false}>
+                <TileLayer url={ENGLISH_MAP_TILE_URL} />
                 {mapProducts.map((product) => (
                   <Marker key={product._id} icon={markerIcon} position={[product.location.latitude, product.location.longitude]}>
                     <Popup>

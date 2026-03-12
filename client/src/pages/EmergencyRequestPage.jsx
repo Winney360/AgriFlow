@@ -225,8 +225,9 @@ export const EmergencyRequestPage = () => {
               zoom={7}
               scrollWheelZoom={false}
               className="mt-3 h-64 rounded-xl border border-[#c9ddd4] overflow-hidden"
+              attributionControl={false}
             >
-              <TileLayer attribution={ENGLISH_MAP_ATTRIBUTION} url={ENGLISH_MAP_TILE_URL} />
+              <TileLayer url={ENGLISH_MAP_TILE_URL} />
               <LocationPicker selected={marker} setSelected={(coords) => setForm({ ...form, latitude: coords[0], longitude: coords[1] })} />
             </MapContainer>
 

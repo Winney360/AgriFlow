@@ -497,9 +497,8 @@ export const CreateListingPage = () => {
                   </span>
                 </div>
                 <div className="h-60">
-                  <MapContainer center={marker} zoom={8} className="h-full w-full">
+                  <MapContainer center={marker} zoom={8} className="h-full w-full" attributionControl={false}>
                     <TileLayer
-                      attribution={ENGLISH_MAP_ATTRIBUTION}
                       url={ENGLISH_MAP_TILE_URL}
                     />
                     <LocationPicker
