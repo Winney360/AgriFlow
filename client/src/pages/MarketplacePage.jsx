@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { MapContainer, Marker, TileLayer } from 'react-leaflet';
+import L from 'leaflet';
 import {
   ArrowRight,
   Check,
@@ -14,6 +15,13 @@ import { Button } from '../components/ui/button';
 import { productApi } from '../lib/api';
 import { ENGLISH_MAP_ATTRIBUTION, ENGLISH_MAP_TILE_URL } from '../lib/mapTiles';
 import { normalizePhoneForWhatsApp } from '../lib/utils';
+
+const markerIcon = L.icon({
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+});
 
 export const MarketplacePage = () => {
   const [products, setProducts] = useState([]);
@@ -53,12 +61,21 @@ export const MarketplacePage = () => {
     setGeoBusy(true);
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setFilters((prev) => ({
-          ...prev,
+        const nextFilters = {
+          ...filters,
           lat: String(position.coords.latitude),
           lng: String(position.coords.longitude),
-          radiusKm: prev.radiusKm || '30',
-        }));
+          radiusKm: filters.radiusKm || '30',
+        };
+
+        setFilters(nextFilters);
+
+        const mergedSearch = [nextFilters.search, ...selectedTags].filter(Boolean).join(' ');
+        const params = Object.fromEntries(
+          Object.entries({ ...nextFilters, search: mergedSearch }).filter(([, value]) => value !== ''),
+        );
+
+        loadProducts(params).catch(() => setProducts([]));
         setGeoBusy(false);
       },
       () => {
@@ -129,6 +146,7 @@ export const MarketplacePage = () => {
                   ? mapProducts.slice(0, 4).map((product) => (
                       <Marker
                         key={product._id}
+                        icon={markerIcon}
                         position={[product.location.latitude, product.location.longitude]}
                       />
                     ))
@@ -138,10 +156,10 @@ export const MarketplacePage = () => {
           </div>
 
           <div className="mt-3 rounded-xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-3">
-            <p className="text-4xl leading-none font-black text-[#1f9f6a]\">Filters</p>
+            <p className="text-4xl leading-none font-black text-[#1f9f6a]">Filters</p>
 
             <div className="mt-2">
-              <p className="text-sm font-black text-[#1f9f6a]\">Crop Type filters</p>
+              <p className="text-sm font-black text-[#1f9f6a]">Crop Type filters</p>
               <div className="mt-1 space-y-1 text-sm font-semibold text-[#2c5548]">
                 {['maize', 'tomatoes', 'potatoes'].map((tag) => (
                   <label key={tag} className="flex items-center gap-2">
@@ -189,10 +207,7 @@ export const MarketplacePage = () => {
             <Button
               type="button"
               className="mt-3 h-10 w-full rounded-lg bg-[#1f9f6a]"
-              onClick={() => {
-                useMyLocation();
-                onApplyFilters();
-              }}
+              onClick={useMyLocation}
               disabled={geoBusy}
             >
               <LocateFixed size={15} /> {geoBusy ? 'Finding...' : 'Find Near Me'}

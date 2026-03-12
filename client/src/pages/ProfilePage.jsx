@@ -1,4 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
+import L from 'leaflet';
 import {
   Bell,
   Check,
@@ -6,79 +9,191 @@ import {
   Leaf,
   Mail,
   MapPin,
-  MessageCircle,
   Phone,
   Repeat2,
   Search,
   ShieldCheck,
-  Star,
   Wheat,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
+import { ENGLISH_MAP_ATTRIBUTION, ENGLISH_MAP_TILE_URL } from '../lib/mapTiles';
+import { formatCurrency } from '../lib/utils';
+import { productApi } from '../lib/api';
+
+const markerIcon = L.icon({
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+});
+
+const parseNumeric = (value) => {
+  const parsed = Number.parseFloat(String(value || '').replace(/[^\d.]/g, ''));
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const formatShortDate = (value) => {
+  if (!value) return '—';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '—';
+  return date.toLocaleDateString('en-KE', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+};
 
 export const ProfilePage = () => {
-  const { user, switchRole, toggleNotifications } = useAuth();
+  const navigate = useNavigate();
+  const { user, switchRole, toggleNotifications, updateProfile } = useAuth();
   const [busy, setBusy] = useState(false);
+  const [saveBusy, setSaveBusy] = useState(false);
+  const [activityBusy, setActivityBusy] = useState(false);
+  const [saveMessage, setSaveMessage] = useState('');
+  const [error, setError] = useState('');
+  const [activeListings, setActiveListings] = useState([]);
+  const [historyListings, setHistoryListings] = useState([]);
+  const [mapQuery, setMapQuery] = useState('');
+  const [profileForm, setProfileForm] = useState({
+    name: '',
+    email: '',
+    locationName: '',
+  });
+
+  useEffect(() => {
+    if (!user) return;
+    setProfileForm({
+      name: user.name || '',
+      email: user.email || '',
+      locationName: user.locationName || '',
+    });
+  }, [user]);
+
+  useEffect(() => {
+    if (!user || user.role !== 'seller') {
+      setActiveListings([]);
+      setHistoryListings([]);
+      return;
+    }
+
+    const loadSellerActivity = async () => {
+      setActivityBusy(true);
+      try {
+        const [activeRes, historyRes] = await Promise.all([
+          productApi.myActive(),
+          productApi.myHistory({ range: 'all' }),
+        ]);
+        setActiveListings(activeRes?.data?.data || []);
+        setHistoryListings(historyRes?.data?.data || []);
+      } catch {
+        setActiveListings([]);
+        setHistoryListings([]);
+      } finally {
+        setActivityBusy(false);
+      }
+    };
+
+    loadSellerActivity();
+  }, [user]);
+
+  const nextRole = user?.role === 'buyer' ? 'seller' : 'buyer';
+  const roleSwitchChecked = user?.role === 'seller';
+
+  const soldHistory = historyListings.filter((item) => item.status === 'sold');
+  const inactiveHistory = historyListings.filter((item) => item.status === 'inactive');
+  const totalSoldQuantity = soldHistory.reduce((sum, item) => sum + parseNumeric(item.quantity), 0);
+  const totalRevenue = soldHistory.reduce((sum, item) => sum + (Number(item.price) || 0), 0);
+  const totalClosedDeals = soldHistory.length + inactiveHistory.length;
+  const performancePercent =
+    totalClosedDeals > 0 ? Math.round((soldHistory.length / totalClosedDeals) * 100) : 0;
+
+  const recentListings = useMemo(() => {
+    return [...activeListings, ...historyListings]
+      .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+      .slice(0, 6);
+  }, [activeListings, historyListings]);
+
+  const recentActivity = useMemo(() => {
+    return recentListings.slice(0, 5).map((item) => {
+      const action = item.status === 'sold' ? 'Sold listing' : item.status === 'inactive' ? 'Archived listing' : 'Updated listing';
+      return {
+        id: item._id,
+        action,
+        title: item.title,
+        date: formatShortDate(item.updatedAt),
+      };
+    });
+  }, [recentListings]);
+
+  const mapListings = useMemo(() => {
+    const normalizedQuery = mapQuery.trim().toLowerCase();
+    const allListings = [...activeListings, ...historyListings].filter(
+      (item) => item.location?.latitude && item.location?.longitude,
+    );
+
+    if (!normalizedQuery) {
+      return allListings;
+    }
+
+    return allListings.filter((item) => {
+      const haystack = `${item.title} ${item.location?.locationName || ''}`.toLowerCase();
+      return haystack.includes(normalizedQuery);
+    });
+  }, [activeListings, historyListings, mapQuery]);
+
+  const mapCenter = useMemo(() => {
+    if (mapListings.length === 0) {
+      return [-1.286389, 36.817223];
+    }
+    return [mapListings[0].location.latitude, mapListings[0].location.longitude];
+  }, [mapListings]);
+
+  const onSwitchRole = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await switchRole(nextRole);
+      navigate(nextRole === 'seller' ? '/dashboard' : '/marketplace');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const onToggleNotifications = async () => {
+    if (busy || !user) return;
+    setBusy(true);
+    setSaveMessage('');
+    try {
+      await toggleNotifications(!user.notificationEnabled);
+      setSaveMessage('Notification preference updated.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const onSaveProfile = async () => {
+    if (!user) return;
+    setSaveBusy(true);
+    setError('');
+    setSaveMessage('');
+    try {
+      await updateProfile(profileForm);
+      setSaveMessage('Profile settings updated successfully.');
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Failed to update profile settings');
+    } finally {
+      setSaveBusy(false);
+    }
+  };
+
+  const profileImageUrl =
+    'https://images.unsplash.com/photo-1557862921-37829c790f19?auto=format&fit=crop&w=200&q=80';
 
   if (!user) {
     return <p className="py-10 text-center">Profile unavailable.</p>;
   }
-
-  const nextRole = user.role === 'buyer' ? 'seller' : 'buyer';
-  const roleSwitchChecked = user.role === 'seller';
-
-  const onSwitchRole = async () => {
-    setBusy(true);
-    await switchRole(nextRole);
-    setBusy(false);
-  };
-
-  const onToggleNotifications = async () => {
-    setBusy(true);
-    await toggleNotifications(!user.notificationEnabled);
-    setBusy(false);
-  };
-
-  const settingTiles = [
-    { icon: CircleUserRound, title: 'Account Info', detail: 'Email / Phone' },
-    { icon: MapPin, title: 'Address', detail: 'GPS & Manual' },
-    { icon: Bell, title: 'Notification Preferences', detail: 'WhatsApp / Email' },
-    { icon: ShieldCheck, title: 'Security', detail: 'Password' },
-    { icon: Repeat2, title: 'Role Settings', detail: 'Farmer / Buyer' },
-    { icon: Mail, title: 'Terms & Privacy', detail: 'Policy & Consent' },
-  ];
-
-  const recentListings = [
-    {
-      title: 'White Maize',
-      subtitle: 'Product',
-      price: 'Ksh 4,300/bag',
-      cta: 'WhatsApp CTA',
-      imageUrl:
-        'https://images.unsplash.com/photo-1601593768799-76ea57f57b61?auto=format&fit=crop&w=500&q=80',
-    },
-    {
-      title: 'Tomatoes',
-      subtitle: 'Product',
-      price: 'Ksh 4,300/bag',
-      cta: 'WhatsApp CTA',
-      imageUrl:
-        'https://images.unsplash.com/photo-1561136594-7f68413baa99?auto=format&fit=crop&w=500&q=80',
-    },
-    {
-      title: 'Cabbage',
-      subtitle: 'Product',
-      price: 'Ksh 4,200/bag',
-      cta: 'WhatsApp CTA',
-      imageUrl:
-        'https://images.unsplash.com/photo-1594282486552-05a4f9c1c2df?auto=format&fit=crop&w=500&q=80',
-    },
-  ];
-
-  const profileImageUrl =
-    'https://images.unsplash.com/photo-1557862921-37829c790f19?auto=format&fit=crop&w=200&q=80';
 
   return (
     <div className="space-y-5 pb-6">
@@ -97,38 +212,32 @@ export const ProfilePage = () => {
                 <div className="space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="text-3xl leading-none font-black text-[#0e2a1f]">{user.name}</p>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[#d9f0e7] px-2 py-1 text-xs font-bold text-[#156245]">
-                      <Check size={12} /> JWT Verified
-                    </span>
                   </div>
                   <p className="text-sm font-bold text-[#325749] capitalize">{user.role}</p>
-                  <div className="flex items-center gap-1 text-[#2aa76f]">
-                    <Star size={14} fill="currentColor" />
-                    <Star size={14} fill="currentColor" />
-                    <Star size={14} fill="currentColor" />
-                    <Star size={14} fill="currentColor" />
-                    <Star size={14} fill="currentColor" />
-                    <span className="ml-2 text-sm font-bold text-[#325749]">5.0 Stars, 28 Reviews</span>
-                  </div>
+                  <p className="text-sm font-semibold text-[#325749]">
+                    Active listings: {activeListings.length} | Closed listings: {historyListings.length}
+                  </p>
                 </div>
               </div>
 
               <div className="space-y-3 p-4">
-                <p className="text-lg font-black text-[#0e2a1f]">Trust & Verification Panel</p>
+                <p className="text-lg font-black text-[#0e2a1f]">Verification Status</p>
                 <div className="grid grid-cols-1 gap-2">
                   <div className="rounded-xl border border-[#cde5da] bg-[#edf8f3] px-3 py-2 text-sm font-bold text-[#1d5743]">
                     <span className="inline-flex items-center gap-1">
-                      <ShieldCheck size={14} /> JWT verification
+                      {user.phoneVerified ? <Check size={14} /> : <ShieldCheck size={14} />}
+                      Contact: {user.phoneVerified ? 'Verified' : 'Pending verification'}
                     </span>
                   </div>
                   <div className="rounded-xl border border-[#cde5da] bg-[#edf8f3] px-3 py-2 text-sm font-bold text-[#1d5743]">
                     <span className="inline-flex items-center gap-1">
-                      <MessageCircle size={14} /> Buyer trust: {user.role === 'seller' ? 'High' : 'Good'}
+                      {user.locationVerified ? <Check size={14} /> : <MapPin size={14} />}
+                      Location: {user.locationVerified ? 'Verified' : 'Add location in settings'}
                     </span>
                   </div>
                   <div className="rounded-xl border border-[#cde5da] bg-[#edf8f3] px-3 py-2 text-sm font-bold text-[#1d5743]">
                     <span className="inline-flex items-center gap-1">
-                      <Phone size={14} /> Contact: {user.phoneNumber || 'Not Added'}
+                      <Phone size={14} /> {user.phoneNumber || 'Not Added'}
                     </span>
                   </div>
                 </div>
@@ -138,24 +247,52 @@ export const ProfilePage = () => {
 
           <Card className="border-[#a9d4c2] bg-[#f8fbfa]">
             <h2 className="text-4xl leading-none font-black tracking-tight text-[#12281f]">Settings Overview</h2>
+
             <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {settingTiles.map((tile) => {
-                const Icon = tile.icon;
-                return (
-                  <div key={tile.title} className="flex items-start gap-3 rounded-xl bg-[#ecf6f1] p-3">
-                    <div className="rounded-full bg-[#d7ede3] p-2 text-[#13724f]">
-                      <Icon size={16} />
-                    </div>
-                    <div>
-                      <p className="font-black text-[#17342a]">{tile.title}</p>
-                      <p className="text-sm font-semibold text-[#46695d]">{tile.detail}</p>
-                    </div>
-                  </div>
-                );
-              })}
+              <label className="rounded-xl bg-[#ecf6f1] p-3">
+                <p className="mb-2 inline-flex items-center gap-2 font-black text-[#17342a]">
+                  <CircleUserRound size={16} /> Full Name
+                </p>
+                <input
+                  value={profileForm.name}
+                  onChange={(event) => setProfileForm((prev) => ({ ...prev, name: event.target.value }))}
+                  className="h-10 w-full rounded-lg border border-[#c6ddd2] bg-white px-3 text-sm font-semibold outline-none"
+                />
+              </label>
+
+              <label className="rounded-xl bg-[#ecf6f1] p-3">
+                <p className="mb-2 inline-flex items-center gap-2 font-black text-[#17342a]">
+                  <Mail size={16} /> Email
+                </p>
+                <input
+                  value={profileForm.email}
+                  onChange={(event) => setProfileForm((prev) => ({ ...prev, email: event.target.value }))}
+                  className="h-10 w-full rounded-lg border border-[#c6ddd2] bg-white px-3 text-sm font-semibold outline-none"
+                  placeholder="you@example.com"
+                />
+              </label>
+
+              <label className="rounded-xl bg-[#ecf6f1] p-3">
+                <p className="mb-2 inline-flex items-center gap-2 font-black text-[#17342a]">
+                  <MapPin size={16} /> Location
+                </p>
+                <input
+                  value={profileForm.locationName}
+                  onChange={(event) => setProfileForm((prev) => ({ ...prev, locationName: event.target.value }))}
+                  className="h-10 w-full rounded-lg border border-[#c6ddd2] bg-white px-3 text-sm font-semibold outline-none"
+                  placeholder="Town / Area"
+                />
+              </label>
             </div>
 
             <div className="mt-4 flex flex-wrap gap-2">
+              <Button
+                className="rounded-lg bg-[#1fa56f] px-6 font-bold"
+                onClick={onSaveProfile}
+                disabled={saveBusy}
+              >
+                <ShieldCheck size={16} /> {saveBusy ? 'Saving...' : 'Save Settings'}
+              </Button>
               <Button
                 className="rounded-lg bg-[#1fa56f] px-6 font-bold"
                 onClick={onToggleNotifications}
@@ -172,53 +309,73 @@ export const ProfilePage = () => {
                 <Repeat2 size={16} /> Switch to {nextRole}
               </Button>
             </div>
+            {saveMessage ? <p className="mt-3 text-sm font-semibold text-[#1c7d56]">{saveMessage}</p> : null}
+            {error ? <p className="mt-3 text-sm font-semibold text-red-600">{error}</p> : null}
           </Card>
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1.2fr]">
             <Card className="border-[#a9d4c2] bg-[#f8fbfa] p-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-3xl font-black text-[#12281f]">Local Trust</p>
-                  <p className="text-sm font-semibold text-[#3c6356]">
-                    Verify on WhatsApp before post/payment.
-                  </p>
+              <p className="text-3xl font-black text-[#12281f]">Recent Activity</p>
+              {activityBusy ? (
+                <p className="mt-3 text-sm font-semibold text-[#3c6356]">Loading seller activity...</p>
+              ) : recentActivity.length === 0 ? (
+                <p className="mt-3 text-sm font-semibold text-[#3c6356]">No recent seller activity yet.</p>
+              ) : (
+                <div className="mt-3 space-y-2">
+                  {recentActivity.map((item) => (
+                    <div key={item.id} className="rounded-xl border border-[#cde5da] bg-[#eef8f3] px-3 py-2">
+                      <p className="font-black text-[#17342a]">{item.action}</p>
+                      <p className="text-sm font-semibold text-[#3f695b]">{item.title}</p>
+                      <p className="text-xs font-semibold text-[#557b6e]">{item.date}</p>
+                    </div>
+                  ))}
                 </div>
-                <div className="rounded-full bg-[#1da76f] px-3 py-1 text-xs font-black text-white">
-                  JWT Verified
-                </div>
-              </div>
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                <div className="rounded-2xl border border-[#cde5da] bg-[#eef8f3] p-4 text-center">
-                  <Wheat className="mx-auto text-[#1c9464]" size={34} />
-                  <p className="mt-2 text-xl font-black text-[#17342a]">Farmer</p>
-                </div>
-                <div className="rounded-2xl border border-[#cde5da] bg-[#eef8f3] p-4 text-center">
-                  <Leaf className="mx-auto text-[#1c9464]" size={34} />
-                  <p className="mt-2 text-xl font-black text-[#17342a]">Buyer</p>
-                </div>
-              </div>
+              )}
             </Card>
 
             <Card className="border-[#a9d4c2] bg-[#f8fbfa] p-4">
-              <p className="text-3xl font-black text-[#12281f]">Recent Activity & Listings</p>
-              <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                {recentListings.map((listing) => (
-                  <article
-                    key={listing.title}
-                    className="overflow-hidden rounded-xl border border-[#c8e0d6] bg-white"
-                  >
-                    <img src={listing.imageUrl} alt={listing.title} className="h-20 w-full object-cover" />
-                    <div className="space-y-1 p-2">
-                      <p className="text-sm font-black text-[#17342a]">{listing.title}</p>
-                      <p className="text-xs font-semibold text-[#567d70]">{listing.subtitle}</p>
-                      <p className="text-xs font-black text-[#183e31]">{listing.price}</p>
-                      <p className="text-xs font-bold text-[#1da76f]">{listing.cta}</p>
-                    </div>
-                  </article>
-                ))}
+              <p className="text-3xl font-black text-[#12281f]">Recent Listings</p>
+              <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {recentListings.length === 0 ? (
+                  <p className="text-sm font-semibold text-[#3c6356]">No listings yet.</p>
+                ) : (
+                  recentListings.slice(0, 4).map((listing) => (
+                    <article
+                      key={listing._id}
+                      className="overflow-hidden rounded-xl border border-[#c8e0d6] bg-white"
+                    >
+                      <img src={listing.imageUrl} alt={listing.title} className="h-24 w-full object-cover" />
+                      <div className="space-y-1 p-2">
+                        <p className="text-sm font-black text-[#17342a]">{listing.title}</p>
+                        <p className="text-xs font-semibold text-[#567d70] capitalize">{listing.status}</p>
+                        <p className="text-xs font-black text-[#183e31]">{formatCurrency(listing.price)}</p>
+                        <p className="text-xs font-semibold text-[#4f776a]">{formatShortDate(listing.updatedAt)}</p>
+                      </div>
+                    </article>
+                  ))
+                )}
               </div>
             </Card>
           </div>
+
+          <Card className="border-[#a9d4c2] bg-[#f8fbfa] p-4">
+            <h3 className="text-3xl leading-none font-black text-[#12281f]">Terms & Privacy</h3>
+            <div className="mt-3 space-y-2 text-sm font-semibold text-[#3f6659]">
+              <p>
+                AgriFlow connects local buyers and sellers of crops and livestock. By using the platform,
+                you confirm listing information is accurate and that pricing, quantity, and delivery terms
+                are communicated clearly with counterparties.
+              </p>
+              <p>
+                Your profile data (name, contact, and location) is used to match nearby market opportunities
+                and improve trust signals. Contact details are only shared to support transaction coordination.
+              </p>
+              <p>
+                Sellers are responsible for listing quality and fulfillment. Buyers should verify produce
+                condition before payment and report disputes through support channels.
+              </p>
+            </div>
+          </Card>
         </div>
 
         <div className="space-y-4">
@@ -227,16 +384,17 @@ export const ProfilePage = () => {
           <div className="grid grid-cols-1 gap-3">
             <Card className="border-[#9bcfb8] bg-[#dff4e9] p-4">
               <p className="text-sm font-bold text-[#23483a]">Active Listings</p>
-              <p className="text-5xl leading-none font-black text-[#112d22]">12</p>
+              <p className="text-5xl leading-none font-black text-[#112d22]">{activeListings.length}</p>
             </Card>
             <Card className="border-[#e6dab6] bg-[#fff9e7] p-4">
               <p className="text-sm font-bold text-[#5a4d2a]">Total Sales</p>
-              <p className="text-5xl leading-none font-black text-[#2d2817]">2,800kg</p>
+              <p className="text-4xl leading-none font-black text-[#2d2817]">{Math.round(totalSoldQuantity)}kg</p>
+              <p className="text-sm font-semibold text-[#6d633f]">Revenue: {formatCurrency(totalRevenue)}</p>
             </Card>
             <Card className="border-[#c7e0d5] bg-[#f7fbf9] p-4">
               <p className="text-sm font-bold text-[#204637]">Performance</p>
-              <p className="text-4xl leading-none font-black text-[#0f3327]">98%</p>
-              <p className="text-sm font-semibold text-[#45695c]">Transactions complete</p>
+              <p className="text-4xl leading-none font-black text-[#0f3327]">{performancePercent}%</p>
+              <p className="text-sm font-semibold text-[#45695c]">Closed listings sold successfully</p>
             </Card>
           </div>
 
@@ -244,33 +402,58 @@ export const ProfilePage = () => {
             <h3 className="text-4xl leading-none font-black text-[#12281f]">Verification Status</h3>
             <div className="mt-3 space-y-2">
               <div className="flex items-center gap-2 rounded-lg bg-[#ebf7f2] px-3 py-2 font-bold text-[#18573f]">
-                <Check size={16} /> Identity Verified
+                {user.phoneVerified ? <Check size={16} /> : <Phone size={16} />}
+                Contact {user.phoneVerified ? 'Verified' : 'Not Verified'}
               </div>
               <div className="flex items-center gap-2 rounded-lg bg-[#ebf7f2] px-3 py-2 font-bold text-[#18573f]">
-                <Check size={16} /> Contact Verified
-              </div>
-              <div className="flex items-center gap-2 rounded-lg bg-[#ebf7f2] px-3 py-2 font-bold text-[#18573f]">
-                <Check size={16} /> Location Verified
+                {user.locationVerified ? <Check size={16} /> : <MapPin size={16} />}
+                Location {user.locationVerified ? 'Verified' : 'Not Verified'}
               </div>
             </div>
-            <p className="mt-3 rounded-lg bg-[#d7f0e4] px-3 py-2 text-sm font-black text-[#166448]">
-              JWT Status: Verified
-            </p>
           </Card>
 
           <Card className="border-[#a9d4c2] bg-[#f8fbfa] p-4">
             <h3 className="text-4xl leading-none font-black text-[#12281f]">Map Search</h3>
-            <div className="relative mt-3 h-50 overflow-hidden rounded-xl border border-[#c8e0d6] bg-[#eaf2ee]">
-              <div className="absolute inset-0 bg-[linear-gradient(to_right,#bfd4ca_1px,transparent_1px),linear-gradient(to_bottom,#bfd4ca_1px,transparent_1px)] bg-size-[24px_24px] opacity-60" />
-              <div className="absolute top-9 left-8 h-16 w-16 rounded-full border-2 border-dashed border-[#6fa98f]" />
-              <div className="absolute top-16 left-24 h-14 w-14 rounded-full border-2 border-dashed border-[#6fa98f]" />
-              <div className="absolute top-21 left-38 h-18 w-18 rounded-full border-2 border-dashed border-[#6fa98f]" />
-              <div className="absolute top-20 left-30 rounded-full bg-[#1f9f6a] p-2 text-white shadow-lg">
-                <MapPin size={18} fill="currentColor" />
+            <div className="mt-3 rounded-xl border border-[#c8e0d6] bg-white p-2">
+              <div className="mb-2 flex items-center rounded-lg border border-[#d5e6de] bg-[#f7fbf9] px-3">
+                <Search size={16} className="text-[#5d7f72]" />
+                <input
+                  value={mapQuery}
+                  onChange={(event) => setMapQuery(event.target.value)}
+                  placeholder="Search by crop or location"
+                  className="h-10 w-full bg-transparent px-2 text-sm font-semibold outline-none"
+                />
               </div>
-              <div className="absolute right-3 bottom-3 rounded-full bg-white/95 p-2 text-[#197a55] shadow">
-                <Search size={18} />
+
+              <div className="h-56 overflow-hidden rounded-lg border border-[#d2e4db]">
+                <MapContainer
+                  key={`map-${mapCenter[0]}-${mapCenter[1]}-${mapListings.length}`}
+                  center={mapCenter}
+                  zoom={10}
+                  className="h-full w-full"
+                >
+                  <TileLayer attribution={ENGLISH_MAP_ATTRIBUTION} url={ENGLISH_MAP_TILE_URL} />
+                  {mapListings.map((listing) => (
+                    <Marker
+                      key={listing._id}
+                      icon={markerIcon}
+                      position={[listing.location.latitude, listing.location.longitude]}
+                    >
+                      <Popup>
+                        <div className="text-sm">
+                          <p className="font-bold">{listing.title}</p>
+                          <p>{listing.location?.locationName || 'Unnamed location'}</p>
+                          <p className="capitalize">{listing.status}</p>
+                        </div>
+                      </Popup>
+                    </Marker>
+                  ))}
+                </MapContainer>
               </div>
+
+              <p className="mt-2 text-xs font-semibold text-[#45695c]">
+                {mapListings.length} listing{mapListings.length !== 1 ? 's' : ''} matched
+              </p>
             </div>
           </Card>
 
@@ -298,29 +481,16 @@ export const ProfilePage = () => {
             <p className="mt-3 text-sm font-bold text-[#3b6557]">Switch to {nextRole} mode</p>
           </Card>
 
-          <Card className="border-[#a9d4c2] bg-[#f8fbfa] p-0">
-            <div className="border-b border-[#d4e7de] px-4 py-3">
-              <p className="font-black text-[#173428]">Messaging</p>
-            </div>
-            <div className="space-y-3 px-4 py-3">
-              {[1, 2, 3, 4].map((item) => (
-                <div key={item} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <img
-                      src={profileImageUrl}
-                      alt="Contact avatar"
-                      className="h-9 w-9 rounded-full object-cover"
-                    />
-                    <div>
-                      <p className="text-sm font-bold text-[#143225]">Trusted contact {item}</p>
-                      <p className="text-xs font-semibold text-[#4e7568]">Online now</p>
-                    </div>
-                  </div>
-                  <div className="rounded-full bg-[#d9f0e7] p-2 text-[#14895d]">
-                    <MessageCircle size={16} />
-                  </div>
-                </div>
-              ))}
+          <Card className="border-[#a9d4c2] bg-[#f8fbfa] p-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-2xl border border-[#cde5da] bg-[#eef8f3] p-4 text-center">
+                <Wheat className="mx-auto text-[#1c9464]" size={34} />
+                <p className="mt-2 text-xl font-black text-[#17342a]">Farmer</p>
+              </div>
+              <div className="rounded-2xl border border-[#cde5da] bg-[#eef8f3] p-4 text-center">
+                <Leaf className="mx-auto text-[#1c9464]" size={34} />
+                <p className="mt-2 text-xl font-black text-[#17342a]">Buyer</p>
+              </div>
             </div>
           </Card>
         </div>
