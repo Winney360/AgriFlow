@@ -308,12 +308,17 @@ export const CreateListingPage = () => {
                       className="h-10"
                       required
                     />
-                    <Input
-                      placeholder="Unit Weight/Size"
-                      value={unitLabel === 'Bags' ? 'Bag Weight 50kg' : 'Kgs'}
-                      onChange={(event) => setUnitLabel(event.target.value || 'Kgs')}
-                      className="h-10"
-                    />
+                    <select
+                      className="h-10 rounded-xl border border-[#c9ddd4] bg-[#f8fcfa] px-3 text-sm font-semibold text-[#193f30]"
+                      value={unitLabel}
+                      onChange={(event) => setUnitLabel(event.target.value)}
+                    >
+                      <option value="Kgs">Kgs</option>
+                      <option value="Pieces">Pieces</option>
+                      <option value="Bags">Bags</option>
+                      <option value="Tons">Tons</option>
+                      <option value="Bunches">Bunches</option>
+                    </select>
 
                   </div>
                 </div>
@@ -338,6 +343,7 @@ export const CreateListingPage = () => {
                           onChange={(event) => setUnitLabel(event.target.value)}
                         >
                           <option value="Kgs">Kgs</option>
+                          <option value="Pieces">Pieces</option>
                           <option value="Bags">Bags</option>
                           <option value="Tons">Tons</option>
                           <option value="Bunches">Bunches</option>

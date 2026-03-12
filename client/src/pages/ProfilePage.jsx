@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
 import L from 'leaflet';
 import {
@@ -20,7 +20,7 @@ import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import { ENGLISH_MAP_ATTRIBUTION, ENGLISH_MAP_TILE_URL } from '../lib/mapTiles';
 import { formatCurrency } from '../lib/utils';
-import { productApi } from '../lib/api';
+import { productApi, emergencyRequestApi } from '../lib/api';
 
 const markerIcon = L.icon({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
@@ -55,6 +55,7 @@ export const ProfilePage = () => {
   const [error, setError] = useState('');
   const [activeListings, setActiveListings] = useState([]);
   const [historyListings, setHistoryListings] = useState([]);
+  const [myRequests, setMyRequests] = useState([]);
   const [mapQuery, setMapQuery] = useState('');
   const [profileForm, setProfileForm] = useState({
     name: '',
@@ -96,6 +97,16 @@ export const ProfilePage = () => {
     };
 
     loadSellerActivity();
+  }, [user]);
+
+  useEffect(() => {
+    if (!user || user.role !== 'buyer') {
+      setMyRequests([]);
+      return;
+    }
+    emergencyRequestApi.myRequests().then((res) => {
+      setMyRequests(res?.data?.data || []);
+    }).catch(() => setMyRequests([]));
   }, [user]);
 
   const nextRole = user?.role === 'buyer' ? 'seller' : 'buyer';
@@ -214,9 +225,15 @@ export const ProfilePage = () => {
                     <p className="text-3xl leading-none font-black text-[#0e2a1f]">{user.name}</p>
                   </div>
                   <p className="text-sm font-bold text-[#325749] capitalize">{user.role}</p>
-                  <p className="text-sm font-semibold text-[#325749]">
-                    Active listings: {activeListings.length} | Closed listings: {historyListings.length}
-                  </p>
+                  {user.role === 'seller' ? (
+                    <p className="text-sm font-semibold text-[#325749]">
+                      Active listings: {activeListings.length} | Closed listings: {historyListings.length}
+                    </p>
+                  ) : (
+                    <p className="text-sm font-semibold text-[#325749]">
+                      Buyer account · {user.locationName || 'Location not set'}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -314,18 +331,36 @@ export const ProfilePage = () => {
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1.2fr]">
             <Card className="border-[#a9d4c2] bg-[#f8fbfa] p-4">
-              <p className="text-3xl font-black text-[#12281f]">Recent Activity</p>
-              {activityBusy ? (
-                <p className="mt-3 text-sm font-semibold text-[#3c6356]">Loading seller activity...</p>
-              ) : recentActivity.length === 0 ? (
-                <p className="mt-3 text-sm font-semibold text-[#3c6356]">No recent seller activity yet.</p>
+              <p className="text-3xl font-black text-[#12281f]">{user.role === 'seller' ? 'Recent Activity' : 'My Emergency Requests'}</p>
+              {user.role === 'seller' ? (
+                activityBusy ? (
+                  <p className="mt-3 text-sm font-semibold text-[#3c6356]">Loading seller activity...</p>
+                ) : recentActivity.length === 0 ? (
+                  <p className="mt-3 text-sm font-semibold text-[#3c6356]">No recent seller activity yet.</p>
+                ) : (
+                  <div className="mt-3 space-y-2">
+                    {recentActivity.map((item) => (
+                      <div key={item.id} className="rounded-xl border border-[#cde5da] bg-[#eef8f3] px-3 py-2">
+                        <p className="font-black text-[#17342a]">{item.action}</p>
+                        <p className="text-sm font-semibold text-[#3f695b]">{item.title}</p>
+                        <p className="text-xs font-semibold text-[#557b6e]">{item.date}</p>
+                      </div>
+                    ))}
+                  </div>
+                )
+              ) : myRequests.length === 0 ? (
+                <div className="mt-3 space-y-2">
+                  <p className="text-sm font-semibold text-[#3c6356]">No emergency requests yet.</p>
+                  <Link to="/emergency-request">
+                    <Button className="mt-2 h-9 rounded-lg bg-[#1fa56f] text-sm font-bold text-white">Post a Request</Button>
+                  </Link>
+                </div>
               ) : (
                 <div className="mt-3 space-y-2">
-                  {recentActivity.map((item) => (
-                    <div key={item.id} className="rounded-xl border border-[#cde5da] bg-[#eef8f3] px-3 py-2">
-                      <p className="font-black text-[#17342a]">{item.action}</p>
-                      <p className="text-sm font-semibold text-[#3f695b]">{item.title}</p>
-                      <p className="text-xs font-semibold text-[#557b6e]">{item.date}</p>
+                  {myRequests.slice(0, 4).map((req) => (
+                    <div key={req._id} className="rounded-xl border border-[#cde5da] bg-[#eef8f3] px-3 py-2">
+                      <p className="font-black text-[#17342a]">{req.title}</p>
+                      <p className="text-xs font-semibold text-[#557b6e] capitalize">{req.status} · {req.productType}</p>
                     </div>
                   ))}
                 </div>
@@ -333,27 +368,41 @@ export const ProfilePage = () => {
             </Card>
 
             <Card className="border-[#a9d4c2] bg-[#f8fbfa] p-4">
-              <p className="text-3xl font-black text-[#12281f]">Recent Listings</p>
-              <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {recentListings.length === 0 ? (
-                  <p className="text-sm font-semibold text-[#3c6356]">No listings yet.</p>
-                ) : (
-                  recentListings.slice(0, 4).map((listing) => (
-                    <article
-                      key={listing._id}
-                      className="overflow-hidden rounded-xl border border-[#c8e0d6] bg-white"
-                    >
-                      <img src={listing.imageUrl} alt={listing.title} className="h-24 w-full object-cover" />
-                      <div className="space-y-1 p-2">
-                        <p className="text-sm font-black text-[#17342a]">{listing.title}</p>
-                        <p className="text-xs font-semibold text-[#567d70] capitalize">{listing.status}</p>
-                        <p className="text-xs font-black text-[#183e31]">{formatCurrency(listing.price)}</p>
-                        <p className="text-xs font-semibold text-[#4f776a]">{formatShortDate(listing.updatedAt)}</p>
-                      </div>
-                    </article>
-                  ))
-                )}
-              </div>
+              <p className="text-3xl font-black text-[#12281f]">{user.role === 'seller' ? 'Recent Listings' : 'Quick Actions'}</p>
+              {user.role === 'seller' ? (
+                <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {recentListings.length === 0 ? (
+                    <p className="text-sm font-semibold text-[#3c6356]">No listings yet.</p>
+                  ) : (
+                    recentListings.slice(0, 4).map((listing) => (
+                      <article
+                        key={listing._id}
+                        className="overflow-hidden rounded-xl border border-[#c8e0d6] bg-white"
+                      >
+                        <img src={listing.imageUrl} alt={listing.title} className="h-24 w-full object-cover" />
+                        <div className="space-y-1 p-2">
+                          <p className="text-sm font-black text-[#17342a]">{listing.title}</p>
+                          <p className="text-xs font-semibold text-[#567d70] capitalize">{listing.status}</p>
+                          <p className="text-xs font-black text-[#183e31]">{formatCurrency(listing.price)}</p>
+                          <p className="text-xs font-semibold text-[#4f776a]">{formatShortDate(listing.updatedAt)}</p>
+                        </div>
+                      </article>
+                    ))
+                  )}
+                </div>
+              ) : (
+                <div className="mt-3 space-y-2">
+                  <Link to="/marketplace">
+                    <Button className="h-10 w-full rounded-lg bg-[#1fa56f] font-bold text-white">Browse Marketplace</Button>
+                  </Link>
+                  <Link to="/emergency-request">
+                    <Button variant="outline" className="h-10 w-full rounded-lg border-[#1fa56f] text-[#0f5c40]">Post Emergency Request</Button>
+                  </Link>
+                  <Link to="/emergency-board">
+                    <Button variant="outline" className="h-10 w-full rounded-lg border-[#1fa56f] text-[#0f5c40]">View Request Board</Button>
+                  </Link>
+                </div>
+              )}
             </Card>
           </div>
 
@@ -378,23 +427,45 @@ export const ProfilePage = () => {
         </div>
 
         <div className="space-y-4">
-          <h2 className="text-4xl font-black tracking-tight text-[#091f17]">KPI Cards</h2>
+          <h2 className="text-4xl font-black tracking-tight text-[#091f17]">{user.role === 'seller' ? 'KPI Cards' : 'My Activity'}</h2>
 
           <div className="grid grid-cols-1 gap-3">
-            <Card className="border-[#9bcfb8] bg-[#dff4e9] p-4">
-              <p className="text-sm font-bold text-[#23483a]">Active Listings</p>
-              <p className="text-5xl leading-none font-black text-[#112d22]">{activeListings.length}</p>
-            </Card>
-            <Card className="border-[#e6dab6] bg-[#fff9e7] p-4">
-              <p className="text-sm font-bold text-[#5a4d2a]">Total Sales</p>
-              <p className="text-4xl leading-none font-black text-[#2d2817]">{Math.round(totalSoldQuantity)}kg</p>
-              <p className="text-sm font-semibold text-[#6d633f]">Revenue: {formatCurrency(totalRevenue)}</p>
-            </Card>
-            <Card className="border-[#c7e0d5] bg-[#f7fbf9] p-4">
-              <p className="text-sm font-bold text-[#204637]">Performance</p>
-              <p className="text-4xl leading-none font-black text-[#0f3327]">{performancePercent}%</p>
-              <p className="text-sm font-semibold text-[#45695c]">Closed listings sold successfully</p>
-            </Card>
+            {user.role === 'seller' ? (
+              <>
+                <Card className="border-[#9bcfb8] bg-[#dff4e9] p-4">
+                  <p className="text-sm font-bold text-[#23483a]">Active Listings</p>
+                  <p className="text-5xl leading-none font-black text-[#112d22]">{activeListings.length}</p>
+                </Card>
+                <Card className="border-[#e6dab6] bg-[#fff9e7] p-4">
+                  <p className="text-sm font-bold text-[#5a4d2a]">Total Sales</p>
+                  <p className="text-4xl leading-none font-black text-[#2d2817]">{Math.round(totalSoldQuantity)}kg</p>
+                  <p className="text-sm font-semibold text-[#6d633f]">Revenue: {formatCurrency(totalRevenue)}</p>
+                </Card>
+                <Card className="border-[#c7e0d5] bg-[#f7fbf9] p-4">
+                  <p className="text-sm font-bold text-[#204637]">Performance</p>
+                  <p className="text-4xl leading-none font-black text-[#0f3327]">{performancePercent}%</p>
+                  <p className="text-sm font-semibold text-[#45695c]">Closed listings sold successfully</p>
+                </Card>
+              </>
+            ) : (
+              <>
+                <Card className="border-[#9bcfb8] bg-[#dff4e9] p-4">
+                  <p className="text-sm font-bold text-[#23483a]">My Requests</p>
+                  <p className="text-5xl leading-none font-black text-[#112d22]">{myRequests.length}</p>
+                </Card>
+                <Card className="border-[#c8dff5] bg-[#eef6ff] p-4">
+                  <p className="text-sm font-bold text-[#1a3a5c]">Location</p>
+                  <p className="text-2xl leading-tight font-black text-[#0d2035]">{user.locationName || 'Not set'}</p>
+                  <p className="text-sm font-semibold text-[#2e5e87]">Your browsing area</p>
+                </Card>
+                <Card className="border-[#c7e0d5] bg-[#f7fbf9] p-4">
+                  <p className="text-sm font-bold text-[#204637]">Member Since</p>
+                  <p className="text-2xl leading-tight font-black text-[#0f3327]">
+                    {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-KE', { month: 'short', year: 'numeric' }) : '—'}
+                  </p>
+                </Card>
+              </>
+            )}
           </div>
 
           <Card className="border-[#a9d4c2] bg-[#f8fbfa] p-4">
@@ -410,6 +481,7 @@ export const ProfilePage = () => {
             </div>
           </Card>
 
+          {user.role === 'seller' && (
           <Card className="border-[#a9d4c2] bg-[#f8fbfa] p-4">
             <h3 className="text-4xl leading-none font-black text-[#12281f]">Map Search</h3>
             <div className="mt-3 rounded-xl border border-[#c8e0d6] bg-white p-2">
@@ -454,6 +526,7 @@ export const ProfilePage = () => {
               </p>
             </div>
           </Card>
+          )}
 
           <Card className="border-[#a9d4c2] bg-[#f8fbfa] p-4">
             <div className="flex items-start justify-between">

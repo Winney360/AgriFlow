@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { MapContainer, Marker, TileLayer } from 'react-leaflet';
+import { Link } from 'react-router-dom';
+import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
 import L from 'leaflet';
 import {
   ArrowRight,
@@ -12,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { productApi } from '../lib/api';
+import { useAuth } from '../context/AuthContext';
 import { ENGLISH_MAP_ATTRIBUTION, ENGLISH_MAP_TILE_URL } from '../lib/mapTiles';
 import { normalizePhoneForWhatsApp } from '../lib/utils';
 
@@ -23,11 +25,13 @@ const markerIcon = L.icon({
 });
 
 export const MarketplacePage = () => {
+  const { user } = useAuth();
   const [products, setProducts] = useState([]);
   const [geoBusy, setGeoBusy] = useState(false);
   const [geoError, setGeoError] = useState('');
   const [mapView, setMapView] = useState(true);
   const [selectedTags, setSelectedTags] = useState(['maize']);
+  const [customCropInput, setCustomCropInput] = useState('');
   const [filters, setFilters] = useState({
     search: '',
     productType: '',
@@ -113,6 +117,14 @@ export const MarketplacePage = () => {
     loadProducts(params).catch(() => setProducts([]));
   };
 
+  const onAddCustomCrop = () => {
+    const trimmed = customCropInput.trim().toLowerCase();
+    if (trimmed && !selectedTags.includes(trimmed)) {
+      setSelectedTags((prev) => [...prev, trimmed]);
+    }
+    setCustomCropInput('');
+  };
+
   const categoryTags = [
     { label: '[Crops]', value: 'maize' },
     { label: '[Livestock]', value: 'livestock' },
@@ -134,7 +146,7 @@ export const MarketplacePage = () => {
               <p className="text-lg font-black text-[#16382c]">Map Search</p>
               <span className="text-[#6b8d80]">x</span>
             </div>
-            <div className="h-42 overflow-hidden rounded-xl border border-[#d2e4db]">
+            <div className="relative isolate h-42 overflow-hidden rounded-xl border border-[#d2e4db]">
               <MapContainer center={center} zoom={10} className="h-full w-full">
                 <TileLayer
                   attribution={ENGLISH_MAP_ATTRIBUTION}
@@ -276,8 +288,37 @@ export const MarketplacePage = () => {
                 </button>
               ))}
             </div>
+              <div className="mt-1 flex gap-1">
+                <input
+                  type="text"
+                  value={customCropInput}
+                  onChange={(e) => setCustomCropInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); onAddCustomCrop(); } }}
+                  placeholder="Other crop..."
+                  className="h-8 flex-1 rounded-lg border border-[#c8ddd4] bg-[#f9fdfb] px-2 text-xs font-semibold outline-none"
+                />
+                <button type="button" onClick={onAddCustomCrop} className="h-8 rounded-lg bg-[#1f9f6a] px-2 text-xs font-black text-white">+</button>
+              </div>
           </div>
 
+          {mapView ? (
+            <div className="relative isolate overflow-hidden rounded-xl border border-[#cddfd7]" style={{ height: '480px' }}>
+              <MapContainer center={center} zoom={9} className="h-full w-full">
+                <TileLayer attribution={ENGLISH_MAP_ATTRIBUTION} url={ENGLISH_MAP_TILE_URL} />
+                {mapProducts.map((product) => (
+                  <Marker key={product._id} icon={markerIcon} position={[product.location.latitude, product.location.longitude]}>
+                    <Popup>
+                      <div className="text-sm">
+                        <p className="font-bold">{product.title}</p>
+                        <p>Ksh {Number(product.price || 0).toLocaleString()}</p>
+                        <p className="text-xs text-[#666]">{product.location?.locationName}</p>
+                      </div>
+                    </Popup>
+                  </Marker>
+                ))}
+              </MapContainer>
+            </div>
+          ) : (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {displayProducts.length === 0 ? (
               <div className="col-span-full rounded-xl border border-[#cddfd7] bg-white p-6 text-center text-sm font-semibold text-[#33574a]">
@@ -331,6 +372,7 @@ export const MarketplacePage = () => {
               );
             })}
           </div>
+          )}
         </section>
 
         <aside className="space-y-3">
@@ -342,13 +384,19 @@ export const MarketplacePage = () => {
           </div>
 
           <div className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-3">
-            <p className="text-4xl leading-none font-black text-[#1f9f6a]\">Request & Post Callout</p>
-            <Button type="button" className="mt-3 h-10 w-full rounded-lg bg-[#1f9f6a]">
-              Post Listing
-            </Button>
-            <Button type="button" variant="outline" className="mt-2 h-10 w-full rounded-lg border-[#8fc7af] text-[#1f704f]">
-              Create Request
-            </Button>
+            <p className="text-4xl leading-none font-black text-[#1f9f6a]">Actions</p>
+            {user?.role !== 'buyer' && (
+              <Link to="/create-listing">
+                <Button type="button" className="mt-3 h-10 w-full rounded-lg bg-[#1f9f6a]">
+                  Post Listing
+                </Button>
+              </Link>
+            )}
+            <Link to="/emergency-request">
+              <Button type="button" variant="outline" className="mt-2 h-10 w-full rounded-lg border-[#8fc7af] text-[#1f704f]">
+                Create Request
+              </Button>
+            </Link>
           </div>
         </aside>
       </div>
