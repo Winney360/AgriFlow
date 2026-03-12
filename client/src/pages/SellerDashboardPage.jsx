@@ -3,9 +3,12 @@ import { Link } from 'react-router-dom';
 import { MoreHorizontal, Plus, Edit, Pause, Trash2, Eye, TrendingUp, MessageSquare, Package } from 'lucide-react';
 import { productApi } from '../lib/api';
 import { formatCurrency } from '../lib/utils';
+import { useAuth } from '../context/AuthContext';
 
 export const SellerDashboardPage = () => {
+  const { user } = useAuth();
   const [products, setProducts] = useState([]);
+  const [history, setHistory] = useState([]);
   const [stats, setStats] = useState({
     activeListings: 0,
     pendingMessages: 0,
@@ -13,20 +16,40 @@ export const SellerDashboardPage = () => {
   });
 
   const loadMine = async () => {
-    const response = await productApi.myActive();
-    const productsData = response.data.data || [];
-    setProducts(productsData);
-    
-    // Calculate stats
-    setStats({
-      activeListings: productsData.length,
-      pendingMessages: 4,
-      totalSales: productsData.reduce((sum, p) => sum + (p.quantity || 0), 0),
-    });
+    try {
+      const [activeResponse, historyResponse] = await Promise.all([
+        productApi.myActive(),
+        productApi.myHistory(),
+      ]);
+
+      const productsData = activeResponse.data.data || [];
+      const historyData = historyResponse.data.data || [];
+
+      setProducts(productsData);
+      setHistory(historyData);
+
+      const totalSoldQuantity = historyData
+        .filter((item) => item.status === 'sold')
+        .reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+
+      setStats({
+        activeListings: productsData.length,
+        pendingMessages: 0,
+        totalSales: totalSoldQuantity,
+      });
+    } catch (_error) {
+      setProducts([]);
+      setHistory([]);
+      setStats({
+        activeListings: 0,
+        pendingMessages: 0,
+        totalSales: 0,
+      });
+    }
   };
 
   useEffect(() => {
-    loadMine().catch(() => setProducts([]));
+    loadMine();
   }, []);
 
   const markSold = async (id) => {
@@ -39,30 +62,8 @@ export const SellerDashboardPage = () => {
     await loadMine();
   };
 
-  // Fallback products for demo
-  const displayProducts = products.length > 0 ? products : [
-    {
-      _id: '1',
-      title: 'Fresh Red Tomatoes, Juja',
-      price: 4300,
-      quantity: 50,
-      imageUrl: 'https://images.unsplash.com/photo-1546470427-e5ac89cd0b32?auto=format&fit=crop&w=80&q=80',
-    },
-    {
-      _id: '2',
-      title: 'White Maize',
-      price: 4900,
-      quantity: 10,
-      imageUrl: 'https://images.unsplash.com/photo-1601593768799-76ea57f57b61?auto=format&fit=crop&w=80&q=80',
-    },
-    {
-      _id: '3',
-      title: 'Cassava',
-      price: 4300,
-      quantity: 120,
-      imageUrl: 'https://images.unsplash.com/photo-1615484477878-7f980bdc5d80?auto=format&fit=crop&w=80&q=80',
-    },
-  ];
+  const completedOrders = history.filter((item) => item.status === 'sold').length;
+  const inactiveListings = history.filter((item) => item.status === 'inactive').length;
 
   return (
     <div className="min-h-screen bg-[#f7f8f7]">
@@ -90,7 +91,7 @@ export const SellerDashboardPage = () => {
               <div className="flex items-center gap-3">
                 <div className="h-16 w-16 rounded-full bg-[#d7e5da]" />
                 <div>
-                  <h3 className="text-xl font-black text-[#1f1f1f]">JujaFreshFarm</h3>
+                  <h3 className="text-xl font-black text-[#1f1f1f]">{user?.name || 'Seller'}</h3>
                   <p className="text-sm text-[#666]">Verified Seller</p>
                 </div>
               </div>
@@ -148,7 +149,7 @@ export const SellerDashboardPage = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#e0e5e1]">
-                {displayProducts.map((product) => (
+                {products.map((product) => (
                   <tr key={product._id} className="hover:bg-[#f9fbfa] transition">
                     <td className="px-6 py-4 text-left">
                       <input type="checkbox" className="h-4 w-4" />
@@ -158,7 +159,7 @@ export const SellerDashboardPage = () => {
                         <img src={product.imageUrl} alt={product.title} className="h-10 w-10 rounded object-cover" />
                         <div>
                           <p className="font-semibold text-[#1f1f1f]">{product.title}</p>
-                          <p className="text-xs text-[#999]">{product.title}</p>
+                          <p className="text-xs text-[#999]">{product.productType} • {product.location?.locationName || 'No location'}</p>
                         </div>
                       </div>
                     </td>
@@ -190,6 +191,13 @@ export const SellerDashboardPage = () => {
                     </td>
                   </tr>
                 ))}
+                {products.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-8 text-center text-sm text-[#666]">
+                      No active listings yet. Add your first crop to see data here.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -205,14 +213,15 @@ export const SellerDashboardPage = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Trust Badges */}
+            {/* Performance Quick Stats */}
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#e8f5e9] text-[#20a46b]">
                   ✓
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-[#1f1f1f]">JWT Verified Seller</p>
+                  <p className="text-sm font-semibold text-[#1f1f1f]">Completed Orders</p>
+                  <p className="text-2xl font-black text-[#20a46b]">{completedOrders}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -220,8 +229,8 @@ export const SellerDashboardPage = () => {
                   ✓
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-[#1f1f1f]">Trust Score</p>
-                  <p className="text-2xl font-black text-[#20a46b]">4.7</p>
+                  <p className="text-sm font-semibold text-[#1f1f1f]">Archived Listings</p>
+                  <p className="text-2xl font-black text-[#20a46b]">{inactiveListings}</p>
                 </div>
               </div>
             </div>
@@ -229,8 +238,8 @@ export const SellerDashboardPage = () => {
             {/* Chart Area */}
             <div className="lg:col-span-2 h-48 rounded-lg border border-[#e0e5e1] bg-[#f9fbfa] flex items-center justify-center">
               <div className="text-center">
-                <p className="text-sm text-[#999]">Sales chart visualization</p>
-                <p className="text-xs text-[#ccc]">Line chart showing sales trend for last 30 days</p>
+                <p className="text-sm text-[#999]">{history.length} historical listings recorded</p>
+                <p className="text-xs text-[#ccc]">Total sold quantity: {stats.totalSales}kg</p>
               </div>
             </div>
           </div>
