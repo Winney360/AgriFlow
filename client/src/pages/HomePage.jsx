@@ -10,9 +10,7 @@ import {
   User,
   ChevronDown,
   ArrowRight,
-  ShieldCheck,
   MessageCircle,
-  BadgeCheck,
 } from 'lucide-react';
 import { productApi } from '../lib/api';
 import { formatCurrency } from '../lib/utils';
@@ -350,48 +348,13 @@ export const HomePage = () => {
                   </div>
                   <h3 className="text-xl font-black">{story.title}</h3>
                   <p className="mt-2 text-sm text-[#535b57]">{story.text}</p>
-                  <div className="mt-2 flex items-center gap-1 text-[#6f7855]">
+                  <div className="mt-2 flex items-center gap-1 text-[#1f9f6a]">
                     <Star size={13} fill="currentColor" />
                     <span className="text-sm">4.0</span>
                     <span className="text-sm">5</span>
                   </div>
                 </article>
               ))}
-            </div>
-          </section>
-
-          <section className="mt-8 rounded-md border border-[#d8ddda] bg-[#eef3f0] p-5 md:p-6">
-            <h2 className="text-4xl font-black text-[#161616]">Trust & Verification Panel</h2>
-            <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3">
-              <article className="rounded-md border border-[#d8ddda] bg-[#f6fbf8] p-4">
-                <div className="mb-2 flex items-center gap-2 text-[#2ca06e]">
-                  <ShieldCheck size={18} />
-                  <h3 className="text-2xl font-black text-[#111]">JWT authentication</h3>
-                </div>
-                <p className="text-sm text-[#4f5854]">
-                  JWT authentication helps secure sign-in and supports trusted buyer and seller communication.
-                </p>
-              </article>
-
-              <article className="rounded-md border border-[#d8ddda] bg-[#f6fbf8] p-4">
-                <div className="mb-2 flex items-center gap-2 text-[#2ca06e]">
-                  <MapPin size={18} />
-                  <h3 className="text-2xl font-black text-[#111]">GPS verification</h3>
-                </div>
-                <p className="text-sm text-[#4f5854]">
-                  GPS verification helps buyers confirm pickup areas and supports stronger local trust.
-                </p>
-              </article>
-
-              <article className="rounded-md border border-[#d8ddda] bg-[#f6fbf8] p-4">
-                <div className="mb-2 flex items-center gap-2 text-[#2ca06e]">
-                  <MessageCircle size={18} />
-                  <h3 className="text-2xl font-black text-[#111]">WhatsApp integration</h3>
-                </div>
-                <p className="text-sm text-[#4f5854]">
-                  WhatsApp integration makes it easy to negotiate, confirm orders, and coordinate pickup.
-                </p>
-              </article>
             </div>
           </section>
 
