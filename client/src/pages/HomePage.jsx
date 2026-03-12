@@ -18,6 +18,7 @@ import {
 import { productApi } from '../lib/api';
 import { formatCurrency } from '../lib/utils';
 import { ListingsMap } from '../components/map/ListingsMap';
+import { useAuth } from '../context/AuthContext';
 
 const successStories = [
   {
@@ -38,6 +39,7 @@ const successStories = [
 ];
 
 export const HomePage = () => {
+  const { isAuthenticated } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -76,17 +78,34 @@ export const HomePage = () => {
                 <span className="ml-2 text-sm">Search produce...</span>
               </div>
             </div>
-            <div className="ml-auto flex items-center gap-3 text-[#5f6865]">
-              <SquareTerminal size={16} />
-              <Bell size={16} />
-              <CircleHelp size={16} />
-              <div className="flex items-center gap-2 rounded-full bg-white px-2 py-1">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#d4e4d9]">
-                  <User size={14} />
+            {isAuthenticated ? (
+              <div className="ml-auto flex items-center gap-3 text-[#5f6865]">
+                <SquareTerminal size={16} />
+                <Bell size={16} />
+                <CircleHelp size={16} />
+                <div className="flex items-center gap-2 rounded-full bg-white px-2 py-1">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#d4e4d9]">
+                    <User size={14} />
+                  </div>
+                  <ChevronDown size={14} />
                 </div>
-                <ChevronDown size={14} />
               </div>
-            </div>
+            ) : (
+              <div className="ml-auto flex items-center gap-2">
+                <Link
+                  to="/login"
+                  className="rounded-md border border-[#d8ddda] bg-white px-3 py-2 text-sm font-semibold text-[#335c4f]"
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/signup"
+                  className="rounded-md bg-[#2ca06e] px-3 py-2 text-sm font-semibold text-white"
+                >
+                  Sign up
+                </Link>
+              </div>
+            )}
           </header>
 
           <div className="grid grid-cols-1 overflow-hidden rounded-md border border-[#d8ddda] lg:grid-cols-2">
@@ -203,30 +222,6 @@ export const HomePage = () => {
 
       <section className="min-h-screen bg-[#f3f6f4]">
         <div className="mx-auto w-full max-w-315 px-4 md:px-6">
-          <header className="flex flex-wrap items-center gap-3 border-b border-[#e1e5e2] py-3">
-            <div className="text-2xl font-black">
-              <span className="text-[#1f9f6a]">Agri</span>
-              <span className="text-[#1f1f1f]">Flow</span>
-            </div>
-            <div className="min-w-55 flex-1 md:max-w-md md:pl-8">
-              <div className="flex h-10 items-center rounded-md border border-[#d8ddda] bg-white px-3 text-[#79817e]">
-                <Search size={15} />
-                <span className="ml-2 text-sm">Search produce...</span>
-              </div>
-            </div>
-            <div className="ml-auto flex items-center gap-3 text-[#5f6865]">
-              <ListChecks size={16} />
-              <Bell size={16} />
-              <CircleHelp size={16} />
-              <div className="flex items-center gap-2 rounded-full bg-white px-2 py-1">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#d4e4d9]">
-                  <User size={14} />
-                </div>
-                <ChevronDown size={14} />
-              </div>
-            </div>
-          </header>
-
           <section className="py-10 md:py-14">
             <h2 className="text-center text-5xl font-black text-[#161616]">How It Works</h2>
             <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
