@@ -1,19 +1,17 @@
 import { useState, useMemo } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Store, Tractor, History, UserRound, Plus } from 'lucide-react';
+import { Store, Tractor, History, UserRound, Plus } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../ui/button';
 import { cn } from '../../lib/utils';
 
 const buyerNavItems = [
-  { to: '/', label: 'Home', icon: Home },
   { to: '/marketplace', label: 'Market', icon: Store },
   { to: '/profile', label: 'Profile', icon: UserRound },
 ];
 
 const sellerNavItems = [
-  { to: '/', label: 'Home', icon: Home },
   { to: '/dashboard', label: 'Dashboard', icon: Tractor },
   { to: '/create-listing', label: 'Create', icon: Plus },
   { to: '/history', label: 'History', icon: History },
@@ -31,6 +29,7 @@ export const MainLayout = () => {
     if (!isAuthenticated || !user) return buyerNavItems;
     return user.role === 'seller' ? sellerNavItems : buyerNavItems;
   }, [user, isAuthenticated]);
+  const logoTarget = !isAuthenticated || !user ? '/' : user.role === 'seller' ? '/dashboard' : '/marketplace';
 
   const nextRole = user?.role === 'buyer' ? 'seller' : 'buyer';
   const roleSwitchChecked = user?.role === 'seller';
@@ -66,7 +65,7 @@ export const MainLayout = () => {
       {(!isHomePage || isAuthenticated) && (
         <header className="sticky top-0 z-20 border-b border-outline bg-[var(--surface)/0.9] backdrop-blur">
           <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
-            <Link to="/" className="text-2xl font-black tracking-tight">
+            <Link to={logoTarget} className="text-2xl font-black tracking-tight">
               <span className="text-[#1f9f6a]">Agri</span>
               <span className="text-[#1f1f1f]">Flow</span>
             </Link>
@@ -83,8 +82,10 @@ export const MainLayout = () => {
                         <NavLink
                           to={item.to}
                           className={cn(
-                            'rounded-lg px-3 py-2 text-sm font-semibold transition-colors',
-                            active ? 'bg-button text-white' : 'text-text-muted hover:text-text',
+                            'rounded-lg px-3 py-2 text-sm font-semibold transition-all duration-200',
+                            active
+                              ? 'bg-button text-white shadow-sm'
+                              : 'nav-item text-text-muted hover:bg-surface hover:shadow-sm',
                           )}
                         >
                           {item.label}
@@ -158,8 +159,8 @@ export const MainLayout = () => {
                 <NavLink
                   to={item.to}
                   className={cn(
-                    'flex min-w-15 flex-col items-center gap-1 rounded-xl px-2 py-1 text-xs font-semibold',
-                    active ? 'bg-button text-white' : 'text-text-muted',
+                    'flex min-w-15 flex-col items-center gap-1 rounded-xl px-2 py-1 text-xs font-semibold transition-all duration-200',
+                    active ? 'bg-button text-white shadow-sm' : 'nav-item text-text-muted hover:bg-surface',
                   )}
                 >
                   <Icon size={16} />

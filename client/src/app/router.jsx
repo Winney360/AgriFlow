@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { MainLayout } from '../components/layout/MainLayout';
 import { ProtectedRoute } from './ProtectedRoute';
+import { PublicOnlyHomeRoute } from './PublicOnlyHomeRoute';
 import { HomePage } from '../pages/HomePage';
 import { LoginPage } from '../pages/LoginPage';
 import { SignupPage } from '../pages/SignupPage';
@@ -19,7 +20,14 @@ export const router = createBrowserRouter([
     path: '/',
     element: <MainLayout />,
     children: [
-      { index: true, element: <HomePage /> },
+      {
+        index: true,
+        element: (
+          <PublicOnlyHomeRoute>
+            <HomePage />
+          </PublicOnlyHomeRoute>
+        ),
+      },
       { path: 'marketplace', element: <MarketplacePage /> },
       { path: 'products/:id', element: <ProductDetailsPage /> },
       { path: 'login', element: <LoginPage /> },
