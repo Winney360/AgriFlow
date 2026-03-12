@@ -55,6 +55,11 @@ const productSchema = new mongoose.Schema(
       enum: ['active', 'sold', 'inactive'],
       default: 'active',
     },
+    pathAccessibility: {
+      type: String,
+      enum: ['open', 'flooded', 'trucks_only'],
+      default: 'open',
+    },
   },
   {
     timestamps: { createdAt: true, updatedAt: true },

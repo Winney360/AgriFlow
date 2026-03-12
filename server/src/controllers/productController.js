@@ -47,6 +47,7 @@ export const createProduct = async (req, res, next) => {
       longitude,
       locationName,
       imageUrl,
+      pathAccessibility,
     } = req.body;
 
     const lat = Number(latitude);
@@ -92,6 +93,7 @@ export const createProduct = async (req, res, next) => {
         longitude: lng,
         locationName: locationName || '',
       },
+      pathAccessibility: pathAccessibility || 'open',
       status: 'active',
     });
 
@@ -172,6 +174,11 @@ export const updateProduct = async (req, res, next) => {
     }
     existingProduct.location.locationName =
       req.body.locationName ?? existingProduct.location.locationName;
+    if (req.body.pathAccessibility !== undefined) {
+      if (['open', 'flooded', 'trucks_only'].includes(req.body.pathAccessibility)) {
+        existingProduct.pathAccessibility = req.body.pathAccessibility;
+      }
+    }
 
     await existingProduct.save();
 

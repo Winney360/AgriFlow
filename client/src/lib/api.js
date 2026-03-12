@@ -52,3 +52,18 @@ export const notificationApi = {
   myNotifications: () => api.get('/notifications/mine'),
   markRead: (id) => api.patch(`/notifications/${id}/read`),
 };
+
+export const emergencyRequestApi = {
+  list: (params) => api.get('/emergency-requests', { params }),
+  create: (payload) =>
+    api.post('/emergency-requests', payload, {
+      headers: { 'Content-Type': 'application/json' },
+    }),
+  details: (id) => api.get(`/emergency-requests/${id}`),
+  myRequests: () => api.get('/emergency-requests/mine/requests'),
+  myClaims: () => api.get('/emergency-requests/mine/claims'),
+  claim: (id, payload) => api.post(`/emergency-requests/${id}/claim`, payload),
+  updateClaimStatus: (id, claimIndex, payload) =>
+    api.patch(`/emergency-requests/${id}/claim/${claimIndex}`, payload),
+  close: (id) => api.patch(`/emergency-requests/${id}/close`),
+};

@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Mail, MapPin, MessageCircle, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
 import { productApi } from '../lib/api';
+import { ENGLISH_MAP_ATTRIBUTION, ENGLISH_MAP_TILE_URL } from '../lib/mapTiles';
 import { formatCurrency, normalizePhoneForWhatsApp } from '../lib/utils';
 
 const fallbackRelated = [
@@ -173,8 +174,8 @@ export const ProductDetailsPage = () => {
                   className="h-full w-full"
                 >
                   <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution={ENGLISH_MAP_ATTRIBUTION}
+                    url={ENGLISH_MAP_TILE_URL}
                   />
                   <Marker position={[product.location.latitude, product.location.longitude]}>
                     <Popup>

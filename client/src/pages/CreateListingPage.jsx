@@ -14,6 +14,7 @@ import {
   Upload,
 } from 'lucide-react';
 import { productApi } from '../lib/api';
+import { ENGLISH_MAP_ATTRIBUTION, ENGLISH_MAP_TILE_URL } from '../lib/mapTiles';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 
@@ -52,6 +53,7 @@ export const CreateListingPage = () => {
     longitude: 36.817223,
     image: null,
     imageUrl: '',
+    pathAccessibility: 'open',
   });
 
   const [locationMode, setLocationMode] = useState('map');
@@ -87,6 +89,7 @@ export const CreateListingPage = () => {
         latitude: item.location.latitude,
         longitude: item.location.longitude,
         imageUrl: item.imageUrl,
+        pathAccessibility: item.pathAccessibility || 'open',
       }));
       setProductSearch(item.title || '');
       setUnitLabel(String(item.quantity || '').toLowerCase().includes('bag') ? 'Bags' : 'Kgs');
@@ -361,6 +364,22 @@ export const CreateListingPage = () => {
                       />
                     </div>
 
+                    <div>
+                      <p className="text-sm font-black text-[#2f6152]">Road Accessibility Status</p>
+                      <select
+                        value={form.pathAccessibility}
+                        onChange={(event) =>
+                          setForm({ ...form, pathAccessibility: event.target.value })
+                        }
+                        className="mt-1 h-10 w-full rounded-xl border border-[#c9ddd4] bg-white px-3 text-sm font-semibold text-[#193f30]"
+                      >
+                        <option value="open">🟢 Road is Open</option>
+                        <option value="flooded">🔴 Road is Flooded</option>
+                        <option value="trucks_only">🟡 Trucks Only</option>
+                      </select>
+                      <p className="mt-1 text-xs text-[#4a6e60]">Help buyers know if they can reach your farm during emergencies</p>
+                    </div>
+
                     <div className="rounded-xl border border-[#d8e7e1] bg-[#f8fcfb] p-3">
                       <p className="text-xl leading-tight font-black text-[#203f33]">
                         Price & Unit data will be linked for local trust and visible JWT validation.
@@ -482,8 +501,8 @@ export const CreateListingPage = () => {
                 <div className="h-60">
                   <MapContainer center={marker} zoom={8} className="h-full w-full">
                     <TileLayer
-                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      attribution={ENGLISH_MAP_ATTRIBUTION}
+                      url={ENGLISH_MAP_TILE_URL}
                     />
                     <LocationPicker
                       selected={marker}

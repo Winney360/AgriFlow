@@ -11,6 +11,8 @@ import { CreateListingPage } from '../pages/CreateListingPage';
 import { HistoryPage } from '../pages/HistoryPage';
 import { ProfilePage } from '../pages/ProfilePage';
 import { NotFoundPage } from '../pages/NotFoundPage';
+import { EmergencyRequestPage } from '../pages/EmergencyRequestPage';
+import { EmergencyRequestsBoard } from '../pages/EmergencyRequestsBoard';
 
 export const router = createBrowserRouter([
   {
@@ -51,6 +53,22 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <ProfilePage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'emergency-request',
+        element: (
+          <ProtectedRoute>
+            <EmergencyRequestPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'emergency-board',
+        element: (
+          <ProtectedRoute>
+            <EmergencyRequestsBoard />
           </ProtectedRoute>
         ),
       },

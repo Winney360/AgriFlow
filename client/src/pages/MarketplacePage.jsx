@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { productApi } from '../lib/api';
+import { ENGLISH_MAP_ATTRIBUTION, ENGLISH_MAP_TILE_URL } from '../lib/mapTiles';
 import { normalizePhoneForWhatsApp } from '../lib/utils';
 
 export const MarketplacePage = () => {
@@ -177,8 +178,8 @@ export const MarketplacePage = () => {
             <div className="h-42 overflow-hidden rounded-xl border border-[#d2e4db]">
               <MapContainer center={center} zoom={10} className="h-full w-full">
                 <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution={ENGLISH_MAP_ATTRIBUTION}
+                  url={ENGLISH_MAP_TILE_URL}
                 />
                 {mapView
                   ? mapProducts.slice(0, 4).map((product) => (
