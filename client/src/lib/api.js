@@ -35,7 +35,7 @@ export const productApi = {
   listActive: (params) => api.get('/products', { params }),
   details: (id) => api.get(`/products/${id}`),
   myActive: () => api.get('/products/mine/active'),
-  myHistory: () => api.get('/products/mine/history'),
+  myHistory: (params) => api.get('/products/mine/history', { params }),
   create: (formData) =>
     api.post('/products', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },

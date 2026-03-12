@@ -315,10 +315,94 @@ export const getProductDetails = async (req, res, next) => {
 
 export const getSellerHistory = async (req, res, next) => {
   try {
-    const history = await Product.find({
+    const { range = 'last30', startDate, endDate } = req.query;
+    const now = new Date();
+    const query = {
       sellerId: req.user._id,
       status: { $in: ['sold', 'inactive'] },
-    }).sort({ updatedAt: -1 });
+    };
+
+    let fromDate;
+    let toDate;
+
+    switch (range) {
+      case 'today': {
+        fromDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        toDate = now;
+        break;
+      }
+      case 'last7': {
+        fromDate = new Date(now);
+        fromDate.setDate(fromDate.getDate() - 7);
+        toDate = now;
+        break;
+      }
+      case 'last14': {
+        fromDate = new Date(now);
+        fromDate.setDate(fromDate.getDate() - 14);
+        toDate = now;
+        break;
+      }
+      case 'last30': {
+        fromDate = new Date(now);
+        fromDate.setDate(fromDate.getDate() - 30);
+        toDate = now;
+        break;
+      }
+      case 'last90': {
+        fromDate = new Date(now);
+        fromDate.setDate(fromDate.getDate() - 90);
+        toDate = now;
+        break;
+      }
+      case 'thisMonth': {
+        fromDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        toDate = now;
+        break;
+      }
+      case 'previousMonth': {
+        fromDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        toDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+        break;
+      }
+      case 'ytd': {
+        fromDate = new Date(now.getFullYear(), 0, 1);
+        toDate = now;
+        break;
+      }
+      case 'last12Months': {
+        fromDate = new Date(now);
+        fromDate.setMonth(fromDate.getMonth() - 12);
+        toDate = now;
+        break;
+      }
+      case 'custom': {
+        if (startDate || endDate) {
+          fromDate = startDate ? new Date(startDate) : undefined;
+          toDate = endDate ? new Date(endDate) : now;
+        }
+        break;
+      }
+      case 'all':
+      default:
+        break;
+    }
+
+    if (fromDate || toDate) {
+      query.updatedAt = {};
+      if (fromDate && !Number.isNaN(fromDate.getTime())) {
+        query.updatedAt.$gte = fromDate;
+      }
+      if (toDate && !Number.isNaN(toDate.getTime())) {
+        query.updatedAt.$lte = toDate;
+      }
+
+      if (Object.keys(query.updatedAt).length === 0) {
+        delete query.updatedAt;
+      }
+    }
+
+    const history = await Product.find(query).sort({ updatedAt: -1 });
 
     res.json({ success: true, data: history });
   } catch (error) {

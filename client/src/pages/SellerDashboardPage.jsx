@@ -5,21 +5,35 @@ import { productApi } from '../lib/api';
 import { formatCurrency } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 
+const historyRangeOptions = [
+  { value: 'today', label: 'Today' },
+  { value: 'last7', label: 'Last 7 days' },
+  { value: 'last14', label: 'Last 14 days' },
+  { value: 'last30', label: 'Last 30 days' },
+  { value: 'last90', label: 'Last 90 days' },
+  { value: 'thisMonth', label: 'This month' },
+  { value: 'previousMonth', label: 'Previous month' },
+  { value: 'ytd', label: 'Year to date' },
+  { value: 'last12Months', label: 'Last 12 months' },
+  { value: 'all', label: 'All time' },
+];
+
 export const SellerDashboardPage = () => {
   const { user } = useAuth();
   const [products, setProducts] = useState([]);
   const [history, setHistory] = useState([]);
+  const [selectedHistoryRange, setSelectedHistoryRange] = useState('last30');
   const [stats, setStats] = useState({
     activeListings: 0,
     pendingMessages: 0,
     totalSales: 0,
   });
 
-  const loadMine = async () => {
+  const loadMine = async (historyRange) => {
     try {
       const [activeResponse, historyResponse] = await Promise.all([
         productApi.myActive(),
-        productApi.myHistory(),
+        productApi.myHistory({ range: historyRange }),
       ]);
 
       const productsData = activeResponse.data.data || [];
@@ -49,17 +63,17 @@ export const SellerDashboardPage = () => {
   };
 
   useEffect(() => {
-    loadMine();
-  }, []);
+    loadMine(selectedHistoryRange);
+  }, [selectedHistoryRange]);
 
   const markSold = async (id) => {
     await productApi.markSold(id);
-    await loadMine();
+    await loadMine(selectedHistoryRange);
   };
 
   const remove = async (id) => {
     await productApi.remove(id);
-    await loadMine();
+    await loadMine(selectedHistoryRange);
   };
 
   const completedOrders = history.filter((item) => item.status === 'sold').length;
@@ -207,9 +221,18 @@ export const SellerDashboardPage = () => {
         <div className="rounded-lg border border-[#d8ddda] bg-white p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-black text-[#1f1f1f]">Recent Sales & Performance Chart</h2>
-            <button className="text-sm font-semibold text-[#20a46b] hover:underline">
-              Last 30 days ▼
-            </button>
+            <select
+              value={selectedHistoryRange}
+              onChange={(event) => setSelectedHistoryRange(event.target.value)}
+              className="rounded-lg border border-[#d8ddda] bg-white px-3 py-2 text-sm font-semibold text-[#20a46b] outline-none"
+              aria-label="Select history range"
+            >
+              {historyRangeOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
