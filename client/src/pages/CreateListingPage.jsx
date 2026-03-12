@@ -2,6 +2,17 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet';
+import {
+  AlertCircle,
+  Camera,
+  Check,
+  ChevronRight,
+  List,
+  MapPin,
+  Plus,
+  Search,
+  Upload,
+} from 'lucide-react';
 import { productApi } from '../lib/api';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
@@ -26,6 +37,9 @@ export const CreateListingPage = () => {
   const editId = searchParams.get('edit');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [productSearch, setProductSearch] = useState('');
+  const [unitLabel, setUnitLabel] = useState('Kgs');
+  const [certBadge, setCertBadge] = useState('');
 
   const [form, setForm] = useState({
     title: '',
@@ -42,6 +56,18 @@ export const CreateListingPage = () => {
 
   const [locationMode, setLocationMode] = useState('map');
   const marker = useMemo(() => [form.latitude, form.longitude], [form.latitude, form.longitude]);
+
+  const productSuggestions = [
+    'Hybrid Maize (White)',
+    'Local Yellow Maize',
+    'Popcorn Maize',
+    'Sweet Corn',
+  ];
+
+  const visualSlots = [
+    'https://images.unsplash.com/photo-1551754655-cd27e38d2076?auto=format&fit=crop&w=500&q=80',
+    'https://images.unsplash.com/photo-1596097635121-14b63b7a0c19?auto=format&fit=crop&w=500&q=80',
+  ];
 
   useEffect(() => {
     const loadEditProduct = async () => {
@@ -62,10 +88,18 @@ export const CreateListingPage = () => {
         longitude: item.location.longitude,
         imageUrl: item.imageUrl,
       }));
+      setProductSearch(item.title || '');
+      setUnitLabel(String(item.quantity || '').toLowerCase().includes('bag') ? 'Bags' : 'Kgs');
     };
 
     loadEditProduct().catch(() => null);
   }, [editId]);
+
+  useEffect(() => {
+    if (!form.title && productSearch) {
+      setForm((prev) => ({ ...prev, title: productSearch }));
+    }
+  }, [productSearch, form.title]);
 
   const useCurrentLocation = () => {
     setError('');
@@ -131,106 +165,372 @@ export const CreateListingPage = () => {
     }
   };
 
+  const totalValue = Number(form.quantity || 0) * Number(form.price || 0);
+  const headlineValue = form.title || productSearch || 'Untitled listing';
+  const quantityError = form.quantity && Number(form.quantity) <= 0 ? 'Quantity is too low.' : '';
+
+  const selectSuggestion = (value) => {
+    setProductSearch(value);
+    setForm((prev) => ({ ...prev, title: value }));
+  };
+
   return (
     <div className="space-y-4">
-      <h1 className="text-3xl font-black">{editId ? 'Edit Listing' : 'Create Listing'}</h1>
-      <form onSubmit={onSubmit} className="space-y-3 rounded-2xl border border-(--outline) bg-(--surface) p-4">
-        <Input
-          placeholder="Product name"
-          value={form.title}
-          onChange={(event) => setForm({ ...form, title: event.target.value })}
-          required
-        />
-        <textarea
-          placeholder="Description"
-          className="min-h-24 w-full rounded-xl border border-(--outline) bg-(--surface) p-3"
-          value={form.description}
-          onChange={(event) => setForm({ ...form, description: event.target.value })}
-        />
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <select
-            className="h-11 rounded-xl border border-(--outline) bg-(--surface) px-3"
-            value={form.productType}
-            onChange={(event) => setForm({ ...form, productType: event.target.value })}
-          >
-            <option value="crop">Crop</option>
-            <option value="livestock">Livestock</option>
-          </select>
-          <Input
-            placeholder="Quantity / Count"
-            value={form.quantity}
-            onChange={(event) => setForm({ ...form, quantity: event.target.value })}
-            required
-          />
-          <Input
-            type="number"
-            placeholder="Price"
-            value={form.price}
-            onChange={(event) => setForm({ ...form, price: event.target.value })}
-            required
-          />
-        </div>
+      <div className="flex items-center gap-2 text-sm font-semibold text-[#2f5f50]">
+        <span>Crop Feed</span>
+        <ChevronRight size={14} />
+        <span>Map Search</span>
+        <ChevronRight size={14} />
+        <span className="text-[#123327]">{editId ? 'Edit Listing' : 'Create Listing'}</span>
+      </div>
 
-        <Input
-          placeholder="Location description (optional)"
-          value={form.locationName}
-          onChange={(event) => setForm({ ...form, locationName: event.target.value })}
-        />
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.2fr_1fr]">
+        <form
+          id="create-listing-form"
+          onSubmit={onSubmit}
+          className="rounded-2xl border border-[#cfe3da] bg-[#f7fcfa] p-4 shadow-[0_8px_22px_-16px_rgba(2,38,27,0.8)]"
+        >
+          <h1 className="text-5xl leading-none font-black tracking-tight text-[#0f2a20]">
+            {editId ? 'Edit Listing.' : 'Create Listing.'}
+          </h1>
 
-        <div className="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            variant={locationMode === 'gps' ? 'cta' : 'outline'}
-            onClick={() => {
-              setLocationMode('gps');
-              useCurrentLocation();
-            }}
-          >
-            Use Current GPS
-          </Button>
-          <Button
-            type="button"
-            variant={locationMode === 'map' ? 'cta' : 'outline'}
-            onClick={() => setLocationMode('map')}
-          >
-            Choose On Map
-          </Button>
-        </div>
+          <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[11rem_1fr]">
+            <aside className="rounded-xl border border-[#d7e8e0] bg-white p-3">
+              <p className="text-lg font-black text-[#173d2f]">Steps</p>
+              <div className="mt-2 space-y-2 text-sm font-bold text-[#315f50]">
+                {['Details', 'Quantity & Price', 'Visuals & Description', 'Location', 'Review & Post'].map(
+                  (step, index) => (
+                    <div key={step} className="flex items-center gap-2">
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#e4f1ec] text-[#187a55]">
+                        {index + 1}
+                      </span>
+                      <span>{step}</span>
+                    </div>
+                  ),
+                )}
+              </div>
+            </aside>
 
-        <div className="h-72 overflow-hidden rounded-xl border border-(--outline)">
-          <MapContainer center={marker} zoom={8} className="h-full w-full">
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            <section className="space-y-4">
+              <div className="grid grid-cols-1 gap-3 lg:grid-cols-[1.05fr_1fr]">
+                <div className="rounded-xl border border-[#d5e6df] bg-white p-3">
+                  <p className="text-lg font-black text-[#163d2e]">Product Selection</p>
+                  <label className="mt-2 flex h-11 items-center gap-2 rounded-xl border border-[#c9ddd4] bg-[#f8fcfa] px-3">
+                    <Search size={16} className="text-[#638a7b]" />
+                    <input
+                      className="h-full w-full bg-transparent text-sm font-semibold outline-none"
+                      placeholder="Search crop"
+                      value={productSearch}
+                      onChange={(event) => setProductSearch(event.target.value)}
+                    />
+                  </label>
+
+                  <div className="mt-2 rounded-xl border border-[#dbe8e2] bg-[#fbfefd] p-2">
+                    {productSuggestions
+                      .filter((item) =>
+                        item.toLowerCase().includes(productSearch.toLowerCase().trim() || 'maize'),
+                      )
+                      .slice(0, 3)
+                      .map((item) => (
+                        <button
+                          key={item}
+                          type="button"
+                          onClick={() => selectSuggestion(item)}
+                          className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm font-semibold text-[#255040] hover:bg-[#eef7f3]"
+                        >
+                          <span className="h-3 w-3 rounded-sm bg-[#f2c84e]" />
+                          {item}
+                        </button>
+                      ))}
+                  </div>
+
+                  <Button
+                    type="button"
+                    className="mt-3 h-10 w-full rounded-lg bg-[#1f9f6a] text-sm font-black"
+                    onClick={() => selectSuggestion(productSearch || 'Custom Crop')}
+                  >
+                    <Plus size={15} /> Add Custom Crop
+                  </Button>
+
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <img
+                      src={visualSlots[0]}
+                      alt="Primary crop"
+                      className="h-24 w-full rounded-xl object-cover"
+                    />
+                    <label className="flex h-24 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-[#c8ddd4] bg-[#f6fbf9] text-[#52786a]">
+                      <Upload size={16} />
+                      <span className="text-xs font-bold">Add preview</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(event) =>
+                          setForm({ ...form, image: event.target.files?.[0] || null })
+                        }
+                      />
+                    </label>
+                  </div>
+
+                  <div className="mt-3 space-y-2">
+                    <Input
+                      placeholder="Headline"
+                      value={headlineValue}
+                      onChange={(event) =>
+                        setForm((prev) => ({ ...prev, title: event.target.value }))
+                      }
+                      required
+                      className="h-10"
+                    />
+                    <Input
+                      placeholder="Total Quantity"
+                      value={form.quantity}
+                      onChange={(event) => setForm({ ...form, quantity: event.target.value })}
+                      className="h-10"
+                      required
+                    />
+                    <Input
+                      placeholder="Unit Weight/Size"
+                      value={unitLabel === 'Bags' ? 'Bag Weight 50kg' : 'Kgs'}
+                      onChange={(event) => setUnitLabel(event.target.value || 'Kgs')}
+                      className="h-10"
+                    />
+                    <Input
+                      placeholder="Certification badges"
+                      value={certBadge}
+                      onChange={(event) => setCertBadge(event.target.value)}
+                      className="h-10"
+                    />
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-[#d5e6df] bg-white p-3">
+                  <p className="text-4xl leading-none font-black text-[#112d22]">Define Your Harvest & Price.</p>
+
+                  <div className="mt-4 space-y-4">
+                    <div>
+                      <p className="text-2xl font-black text-[#143629]">Quantity</p>
+                      <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        <Input
+                          placeholder="Total Quantity"
+                          value={form.quantity}
+                          onChange={(event) => setForm({ ...form, quantity: event.target.value })}
+                          className="h-10"
+                          required
+                        />
+                        <select
+                          className="h-10 rounded-xl border border-[#c9ddd4] bg-[#f8fcfa] px-3 text-sm font-semibold text-[#193f30]"
+                          value={unitLabel}
+                          onChange={(event) => setUnitLabel(event.target.value)}
+                        >
+                          <option value="Kgs">Kgs</option>
+                          <option value="Bags">Bags</option>
+                          <option value="Tons">Tons</option>
+                          <option value="Bunches">Bunches</option>
+                        </select>
+                      </div>
+                      {quantityError ? (
+                        <p className="mt-1 flex items-center gap-1 text-xs font-bold text-[#ba2a2a]">
+                          <AlertCircle size={13} /> {quantityError}
+                        </p>
+                      ) : null}
+                    </div>
+
+                    <div>
+                      <p className="text-2xl font-black text-[#143629]">Price</p>
+                      <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        <Input
+                          type="number"
+                          placeholder="Price per Unit"
+                          value={form.price}
+                          onChange={(event) => setForm({ ...form, price: event.target.value })}
+                          className="h-10"
+                          required
+                        />
+                        <Input value={totalValue ? `Ksh ${totalValue.toLocaleString()}` : 'Ksh 0'} readOnly className="h-10" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="text-sm font-black text-[#2f6152]">Certification badges</p>
+                      <Input
+                        placeholder="Organic Cert No."
+                        value={certBadge}
+                        onChange={(event) => setCertBadge(event.target.value)}
+                        className="mt-1 h-10"
+                      />
+                    </div>
+
+                    <div className="rounded-xl border border-[#d8e7e1] bg-[#f8fcfb] p-3">
+                      <p className="text-xl leading-tight font-black text-[#203f33]">
+                        Price & Unit data will be linked for local trust and visible JWT validation.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          {error ? (
+            <p className="mt-3 rounded-lg border border-[#efc7c7] bg-[#fff2f2] px-3 py-2 text-sm font-semibold text-[#b11e1e]">
+              {error}
+            </p>
+          ) : null}
+
+          <div className="mt-4 flex flex-wrap gap-2 border-t border-[#dbe9e3] pt-4">
+            <Button type="button" variant="outline" className="h-10 rounded-lg border-[#bed8cd] text-[#2f5c4d]">
+              Previous
+            </Button>
+            <Button type="button" variant="outline" className="h-10 rounded-lg border-[#bed8cd] text-[#2f5c4d]">
+              Save Draft
+            </Button>
+            <Button type="button" variant="outline" className="h-10 rounded-lg border-[#8cc8ae] text-[#1e6f4f]">
+              Next Step: Visuals & Description
+            </Button>
+            <Button
+              type="submit"
+              className="h-10 rounded-lg bg-[#1f9f6a] px-5 font-black"
+              disabled={submitting}
+            >
+              {submitting ? 'Saving...' : editId ? 'Confirm and Update Listing' : 'Confirm and POST Listing'}
+            </Button>
+          </div>
+        </form>
+
+        <section className="space-y-4">
+          <div className="rounded-2xl border border-[#d3e5dc] bg-[#f7fcfa] p-4">
+            <p className="text-4xl leading-none font-black text-[#122f24]">Visuals</p>
+            <div className="mt-3 grid grid-cols-4 gap-2">
+              {visualSlots.map((src) => (
+                <img key={src} src={src} alt="Crop visual" className="h-28 w-full rounded-xl object-cover" />
+              ))}
+              {[1, 2].map((slot) => (
+                <label
+                  key={slot}
+                  className="flex h-28 cursor-pointer items-center justify-center rounded-xl border border-dashed border-[#c8ddd4] bg-[#f9fdfb] text-[#5a7f72]"
+                >
+                  <Camera size={19} />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(event) => setForm({ ...form, image: event.target.files?.[0] || null })}
+                  />
+                </label>
+              ))}
+            </div>
+            <p className="mt-2 text-sm font-bold text-[#315d4f]">
+              Reminder: Photos of the actual crop required for verification.
+            </p>
+
+            <p className="mt-4 text-4xl leading-none font-black text-[#122f24]">Description</p>
+            <textarea
+              placeholder="Describe your produce, trust signals, and pickup plan."
+              className="mt-3 min-h-26 w-full rounded-xl border border-[#c9ddd4] bg-white p-3 text-sm font-semibold text-[#1d4536] outline-none"
+              value={form.description}
+              onChange={(event) => setForm({ ...form, description: event.target.value })}
             />
-            <LocationPicker
-              selected={marker}
-              setSelected={(next) =>
-                setForm((prev) => ({ ...prev, latitude: next[0], longitude: next[1] }))
-              }
-            />
-          </MapContainer>
-        </div>
+          </div>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <Input
-            type="file"
-            accept="image/*"
-            onChange={(event) => setForm({ ...form, image: event.target.files?.[0] || null })}
-          />
-          <Input
-            placeholder="Or existing image URL"
-            value={form.imageUrl}
-            onChange={(event) => setForm({ ...form, imageUrl: event.target.value })}
-          />
-        </div>
+          <div className="rounded-2xl border border-[#d3e5dc] bg-[#f7fcfa] p-4">
+            <p className="text-4xl leading-none font-black text-[#122f24]">Location</p>
+            <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-[0.9fr_1.2fr]">
+              <div className="rounded-xl border border-[#d6e8df] bg-[#ecf6f1] p-3">
+                <p className="text-4xl leading-none font-black text-[#123225]">Set Pickup Location.</p>
+                <p className="mt-2 text-lg leading-tight font-bold text-[#2d5a4b]">
+                  GPS location acquired. Manual address and map pin supported.
+                </p>
+                <Input
+                  className="mt-3 h-10 bg-white"
+                  placeholder="Location name"
+                  value={form.locationName}
+                  onChange={(event) => setForm({ ...form, locationName: event.target.value })}
+                />
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={locationMode === 'gps' ? 'primary' : 'outline'}
+                    className="rounded-lg"
+                    onClick={() => {
+                      setLocationMode('gps');
+                      useCurrentLocation();
+                    }}
+                  >
+                    <MapPin size={14} /> Use GPS
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={locationMode === 'map' ? 'primary' : 'outline'}
+                    className="rounded-lg"
+                    onClick={() => setLocationMode('map')}
+                  >
+                    <List size={14} /> Pick on Map
+                  </Button>
+                </div>
+              </div>
 
-        {error ? <p className="text-sm text-red-600">{error}</p> : null}
+              <div className="overflow-hidden rounded-xl border border-[#c7ddd3]">
+                <div className="flex items-center justify-between border-b border-[#d8e8e2] bg-white px-3 py-2">
+                  <p className="font-black text-[#214538]">Set Pickup Location</p>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#ddf3e8] px-2 py-1 text-xs font-black text-[#15714d]">
+                    <Check size={13} /> GPS Location acquired
+                  </span>
+                </div>
+                <div className="h-60">
+                  <MapContainer center={marker} zoom={8} className="h-full w-full">
+                    <TileLayer
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                    <LocationPicker
+                      selected={marker}
+                      setSelected={(next) =>
+                        setForm((prev) => ({ ...prev, latitude: next[0], longitude: next[1] }))
+                      }
+                    />
+                  </MapContainer>
+                </div>
+              </div>
+            </div>
+          </div>
 
-        <Button className="w-full" disabled={submitting}>
-          {submitting ? 'Saving...' : editId ? 'Update Listing' : 'Publish Listing'}
-        </Button>
-      </form>
+          <div className="rounded-2xl border border-[#d3e5dc] bg-[#f7fcfa] p-4">
+            <p className="text-4xl leading-none font-black text-[#1b3a2d]">
+              Create listings directly from verified crop lists for enhanced Local Trust.
+            </p>
+            <p className="mt-2 text-lg font-bold text-[#2f5f50]">Verify on WhatsApp before post.</p>
+            <div className="mt-3 flex items-center justify-between rounded-xl bg-[#e7f4ee] p-3">
+              <span className="text-sm font-black text-[#1a7d57]">WhatsApp CTA</span>
+              <Button type="button" size="sm" className="h-8 rounded-lg bg-[#1f9f6a] px-3">
+                Open
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2 border-t border-[#d8e8e2] pt-4">
+            <Button type="button" variant="outline" className="h-10 rounded-lg border-[#bed8cd] text-[#2f5c4d]">
+              Previous (disabled)
+            </Button>
+            <Button type="button" variant="outline" className="h-10 rounded-lg border-[#bed8cd] text-[#2f5c4d]">
+              Save Draft
+            </Button>
+            <Button type="button" variant="outline" className="h-10 rounded-lg border-[#8cc8ae] text-[#1e6f4f]">
+              Next Step: Visuals & Description
+            </Button>
+            <Button
+              type="submit"
+              form="create-listing-form"
+              className="h-10 rounded-lg bg-[#1f9f6a] px-5 font-black"
+              disabled={submitting}
+            >
+              {submitting ? 'Saving...' : editId ? 'Confirm and Update Listing' : 'Confirm and POST Listing'}
+            </Button>
+          </div>
+        </section>
+      </div>
     </div>
   );
 };
