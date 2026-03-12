@@ -241,7 +241,7 @@ export const CreateListingPage = () => {
                           onClick={() => selectSuggestion(item)}
                           className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm font-semibold text-[#255040] hover:bg-[#eef7f3]"
                         >
-                          <span className="h-3 w-3 rounded-sm bg-[#f2c84e]" />
+                          <span className="h-3 w-3 rounded-sm bg-[#3bb77e]" />
                           {item}
                         </button>
                       ))}

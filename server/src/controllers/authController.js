@@ -19,7 +19,7 @@ const sanitizeUser = (user) => ({
 
 export const signup = async (req, res, next) => {
   try {
-    const { name, phoneNumber, password, email } = req.body;
+    const { name, phoneNumber, password, email, role } = req.body;
     const normalizedPhone = normalizePhoneNumber(phoneNumber);
     const normalizedEmail = String(email || '').trim().toLowerCase();
 
@@ -41,6 +41,12 @@ export const signup = async (req, res, next) => {
       throw error;
     }
 
+    if (role && !['buyer', 'seller'].includes(role)) {
+      const error = new Error('Role must be buyer or seller');
+      error.statusCode = 400;
+      throw error;
+    }
+
     const existingUser = await User.findOne({ phoneNumber: normalizedPhone });
 
     if (existingUser) {
@@ -56,6 +62,7 @@ export const signup = async (req, res, next) => {
       phoneNumber: normalizedPhone,
       password: hashedPassword,
       email: normalizedEmail || null,
+      role: role || 'buyer',
     });
 
     const token = generateToken(user._id.toString());

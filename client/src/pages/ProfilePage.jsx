@@ -113,7 +113,7 @@ export const ProfilePage = () => {
                     </span>
                   </div>
                   <p className="text-sm font-bold text-[#325749] capitalize">{user.role}</p>
-                  <div className="flex items-center gap-1 text-[#d5a018]">
+                  <div className="flex items-center gap-1 text-[#2aa76f]">
                     <Star size={14} fill="currentColor" />
                     <Star size={14} fill="currentColor" />
                     <Star size={14} fill="currentColor" />

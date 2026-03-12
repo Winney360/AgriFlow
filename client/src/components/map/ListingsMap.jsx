@@ -23,7 +23,7 @@ export const ListingsMap = ({ products }) => {
     : fallbackCenter;
 
   return (
-    <div className="h-80 overflow-hidden rounded-2xl border border-(--outline) md:h-115">
+    <div className="h-80 overflow-hidden rounded-2xl border border-outline md:h-115">
       <MapContainer center={center} zoom={7} className="h-full w-full" attributionControl={false}>
         <TileLayer url={ENGLISH_MAP_TILE_URL} />
         {mappableProducts.map((product) => (
@@ -36,7 +36,7 @@ export const ListingsMap = ({ products }) => {
               <div className="space-y-1">
                 <p className="font-bold">{product.title}</p>
                 <p>{product.location.locationName || 'Unnamed location'}</p>
-                <Link to={`/products/${product._id}`} className="text-(--primary) underline">
+                <Link to={`/products/${product._id}`} className="text-primary underline">
                   View product
                 </Link>
               </div>

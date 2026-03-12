@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Home, Store, Tractor, History, UserRound } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 import { useAuth } from '../../context/AuthContext';
@@ -15,6 +15,7 @@ const navItems = [
 ];
 
 export const MainLayout = () => {
+  const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated, user, logout, switchRole } = useAuth();
   const isHomePage = location.pathname === '/';
@@ -35,8 +36,13 @@ export const MainLayout = () => {
     }
   };
 
+  const onLogout = () => {
+    logout();
+    navigate('/');
+  };
+
   return (
-    <div className="relative min-h-screen bg-(--bg) text-(--text)">
+    <div className="relative min-h-screen bg-bg text-text">
       {!isHomePage && (
         <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
           <div className="blob blob-one" />
@@ -46,9 +52,9 @@ export const MainLayout = () => {
       )}
 
       {!isHomePage && (
-        <header className="sticky top-0 z-20 border-b border-(--outline) bg-[var(--surface)/0.9] backdrop-blur">
+        <header className="sticky top-0 z-20 border-b border-outline bg-[var(--surface)/0.9] backdrop-blur">
           <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-            <Link to="/" className="text-xl font-black tracking-tight text-(--primary)">
+            <Link to="/" className="text-xl font-black tracking-tight text-primary">
               AgriFlow
             </Link>
             <div className="flex items-center gap-2">
@@ -57,7 +63,7 @@ export const MainLayout = () => {
                   type="button"
                   onClick={onSwitchRole}
                   disabled={roleBusy}
-                  className="flex items-center gap-2 rounded-full border border-(--outline) bg-(--surface) px-3 py-1.5 text-xs font-bold text-(--text)"
+                  className="flex items-center gap-2 rounded-full border border-outline bg-surface px-3 py-1.5 text-xs font-bold text-text"
                   aria-label={`Switch role to ${nextRole}`}
                 >
                   <span className="capitalize">{user.role}</span>
@@ -78,7 +84,7 @@ export const MainLayout = () => {
               ) : null}
               <ThemeToggle />
               {isAuthenticated ? (
-                <Button variant="outline" size="sm" onClick={logout}>
+                <Button variant="outline" size="sm" onClick={onLogout}>
                   Logout
                 </Button>
               ) : (

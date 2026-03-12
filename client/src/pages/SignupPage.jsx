@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Eye, EyeOff, Mail, Phone, User } from 'lucide-react';
+import { Eye, EyeOff, Mail, Phone, User, ShoppingBag, Sprout } from 'lucide-react';
 
 export const SignupPage = () => {
   const navigate = useNavigate();
@@ -14,6 +14,7 @@ export const SignupPage = () => {
     phoneNumber: '',
     password: '',
     email: '',
+    role: 'buyer',
   });
 
   const onSubmit = async (event) => {
@@ -40,6 +41,7 @@ export const SignupPage = () => {
         phoneNumber: form.phoneNumber,
         password: form.password,
         email: form.email,
+        role: form.role,
       });
       navigate('/marketplace');
     } catch (err) {
@@ -54,6 +56,40 @@ export const SignupPage = () => {
           <div>
             <h1 className="text-3xl font-black text-[#1f1f1f]">Create your AgriFlow account.</h1>
             <p className="mt-2 text-sm text-[#666]">Sign up with your details to start buying or selling locally.</p>
+          </div>
+
+          <div>
+            <label className="mb-3 block text-xs font-semibold text-[#555]">I want to</label>
+            <div className="flex gap-3">
+              <label className="flex flex-1 cursor-pointer items-center gap-2 rounded-lg border-2 p-3 transition-colors" style={{borderColor: form.role === 'buyer' ? '#20a46b' : '#d0d6d2', backgroundColor: form.role === 'buyer' ? '#f0fdf6' : '#fff'}}>
+                <input
+                  type="radio"
+                  name="role"
+                  value="buyer"
+                  checked={form.role === 'buyer'}
+                  onChange={(e) => setForm({ ...form, role: e.target.value })}
+                  className="accent-[#20a46b]"
+                />
+                <div className="flex items-center gap-2">
+                  <ShoppingBag size={16} className="text-[#20a46b]" />
+                  <span className="text-sm font-semibold text-[#333]">Buy</span>
+                </div>
+              </label>
+              <label className="flex flex-1 cursor-pointer items-center gap-2 rounded-lg border-2 p-3 transition-colors" style={{borderColor: form.role === 'seller' ? '#20a46b' : '#d0d6d2', backgroundColor: form.role === 'seller' ? '#f0fdf6' : '#fff'}}>
+                <input
+                  type="radio"
+                  name="role"
+                  value="seller"
+                  checked={form.role === 'seller'}
+                  onChange={(e) => setForm({ ...form, role: e.target.value })}
+                  className="accent-[#20a46b]"
+                />
+                <div className="flex items-center gap-2">
+                  <Sprout size={16} className="text-[#20a46b]" />
+                  <span className="text-sm font-semibold text-[#333]">Sell</span>
+                </div>
+              </label>
+            </div>
           </div>
 
           <div>

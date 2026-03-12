@@ -318,7 +318,7 @@ export const MarketplacePage = () => {
                       <MapPin size={13} /> {product.location?.locationName || 'Juja, 12km'}
                     </p>
                     <p className="flex items-center gap-1 text-sm font-semibold text-[#476f62]">
-                      <Star size={13} fill="currentColor" className="text-[#d3a018]" /> 5.0 Stars, 28
+                      <Star size={13} fill="currentColor" className="text-[#2aa76f]" /> 5.0 Stars, 28
                       Reviews
                     </p>
 

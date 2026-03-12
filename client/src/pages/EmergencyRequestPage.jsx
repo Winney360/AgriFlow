@@ -114,11 +114,11 @@ export const EmergencyRequestPage = () => {
             Post Emergency Request.
           </h1>
 
-          <div className="rounded-lg border border-[#f4a261] bg-[#fff8f0] p-3 mt-4 flex gap-2">
-            <AlertCircle size={20} className="text-[#f4a261] shrink-0 mt-0.5" />
+          <div className="rounded-lg border border-[#8ed7b5] bg-[#ecfaf3] p-3 mt-4 flex gap-2">
+            <AlertCircle size={20} className="text-[#1f9f6a] shrink-0 mt-0.5" />
             <div>
               <p className="font-bold text-[#d83c31]">Critical Need Alert</p>
-              <p className="text-sm text-[#6f5c5c] mt-1">
+              <p className="text-sm text-[#3f5f52] mt-1">
                 This notifies all nearby farmers with high priority. Use only for genuine emergencies.
               </p>
             </div>
