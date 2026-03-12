@@ -39,7 +39,7 @@ export const CreateListingPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [productSearch, setProductSearch] = useState('');
   const [unitLabel, setUnitLabel] = useState('Kgs');
-  const [certBadge, setCertBadge] = useState('');
+
 
   const [form, setForm] = useState({
     title: '',
@@ -63,12 +63,25 @@ export const CreateListingPage = () => {
     'Local Yellow Maize',
     'Popcorn Maize',
     'Sweet Corn',
+    'Irish Potatoes',
+    'Sweet Potatoes',
+    'Tomatoes',
+    'Kale (Sukuma Wiki)',
+    'Cabbage',
+    'Onions',
+    'Capsicum',
+    'Spinach',
+    'Beans',
+    'Green Grams',
+    'Sorghum',
+    'Cassava',
+    'Milk Cow',
+    'Chicken (Broilers)',
   ];
 
-  const visualSlots = [
-    'https://images.unsplash.com/photo-1551754655-cd27e38d2076?auto=format&fit=crop&w=500&q=80',
-    'https://images.unsplash.com/photo-1596097635121-14b63b7a0c19?auto=format&fit=crop&w=500&q=80',
-  ];
+  const imagePreview = form.image
+    ? URL.createObjectURL(form.image)
+    : form.imageUrl || null;
 
   useEffect(() => {
     const loadEditProduct = async () => {
@@ -152,6 +165,10 @@ export const CreateListingPage = () => {
       if (form.image) {
         payload.append('image', form.image);
       }
+      if (unitLabel) {
+        payload.append('unitLabel', unitLabel);
+      }
+
 
       if (editId) {
         await productApi.update(editId, payload);
@@ -222,7 +239,9 @@ export const CreateListingPage = () => {
                   <div className="mt-2 rounded-xl border border-[#dbe8e2] bg-[#fbfefd] p-2">
                     {productSuggestions
                       .filter((item) =>
-                        item.toLowerCase().includes(productSearch.toLowerCase().trim() || 'maize'),
+                        productSearch.trim()
+                          ? item.toLowerCase().includes(productSearch.toLowerCase().trim())
+                          : true,
                       )
                       .slice(0, 3)
                       .map((item) => (
@@ -247,11 +266,17 @@ export const CreateListingPage = () => {
                   </Button>
 
                   <div className="mt-3 grid grid-cols-2 gap-2">
-                    <img
-                      src={visualSlots[0]}
-                      alt="Primary crop"
-                      className="h-24 w-full rounded-xl object-cover"
-                    />
+                    {imagePreview ? (
+                      <img
+                        src={imagePreview}
+                        alt="Crop preview"
+                        className="h-24 w-full rounded-xl object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-24 items-center justify-center rounded-xl border border-dashed border-[#c8ddd4] bg-[#f6fbf9] text-xs font-semibold text-[#52786a]">
+                        No image yet
+                      </div>
+                    )}
                     <label className="flex h-24 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-[#c8ddd4] bg-[#f6fbf9] text-[#52786a]">
                       <Upload size={16} />
                       <span className="text-xs font-bold">Add preview</span>
@@ -289,12 +314,7 @@ export const CreateListingPage = () => {
                       onChange={(event) => setUnitLabel(event.target.value || 'Kgs')}
                       className="h-10"
                     />
-                    <Input
-                      placeholder="Certification badges"
-                      value={certBadge}
-                      onChange={(event) => setCertBadge(event.target.value)}
-                      className="h-10"
-                    />
+
                   </div>
                 </div>
 
@@ -343,16 +363,6 @@ export const CreateListingPage = () => {
                         />
                         <Input value={totalValue ? `Ksh ${totalValue.toLocaleString()}` : 'Ksh 0'} readOnly className="h-10" />
                       </div>
-                    </div>
-
-                    <div>
-                      <p className="text-sm font-black text-[#2f6152]">Certification badges</p>
-                      <Input
-                        placeholder="Organic Cert No."
-                        value={certBadge}
-                        onChange={(event) => setCertBadge(event.target.value)}
-                        className="mt-1 h-10"
-                      />
                     </div>
 
                     <div>
@@ -412,9 +422,13 @@ export const CreateListingPage = () => {
           <div className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-4">
             <p className="text-4xl leading-none font-black text-[#1f9f6a]">Visuals</p>
             <div className="mt-3 grid grid-cols-4 gap-2">
-              {visualSlots.map((src) => (
-                <img key={src} src={src} alt="Crop visual" className="h-28 w-full rounded-xl object-cover" />
-              ))}
+              {imagePreview ? (
+                <img src={imagePreview} alt="Crop visual" className="h-28 w-full rounded-xl object-cover col-span-2" />
+              ) : (
+                <div className="col-span-2 flex h-28 items-center justify-center rounded-xl border border-dashed border-[#c8ddd4] bg-[#f9fdfb] text-xs font-semibold text-[#5a7f72]">
+                  No image uploaded
+                </div>
+              )}
               {[1, 2].map((slot) => (
                 <label
                   key={slot}
