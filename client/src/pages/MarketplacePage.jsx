@@ -284,17 +284,19 @@ export const MarketplacePage = () => {
             Find Your Ideal Harvest.
           </h1>
 
-          <div className="flex flex-col sm:flex-row items-center overflow-hidden rounded-xl border border-[#c2d9ce] bg-white">
-            <Search size={18} className="ml-3 text-[#5d7f72]" />
-            <input
-              className="h-10 sm:h-12 w-full px-3 text-base sm:text-lg font-semibold outline-none"
-              value={filters.search}
-              onChange={(event) => setFilters({ ...filters, search: event.target.value })}
-              placeholder="Maize"
-            />
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center overflow-hidden rounded-xl border border-[#c2d9ce] bg-white p-2 sm:p-0">
+            <div className="flex items-center w-full sm:w-auto">
+              <Search size={18} className="ml-2 sm:ml-3 text-[#5d7f72]" />
+              <input
+                className="h-10 sm:h-12 w-full px-3 text-base sm:text-lg font-semibold outline-none bg-transparent"
+                value={filters.search}
+                onChange={(event) => setFilters({ ...filters, search: event.target.value })}
+                placeholder="Maize"
+              />
+            </div>
             <Button
               type="button"
-              className="mt-2 sm:mt-0 mr-1 h-10 rounded-lg bg-[#1e9f6a] px-3"
+              className="h-10 sm:h-12 w-full sm:w-auto rounded-lg bg-[#1e9f6a] px-3 flex items-center justify-center"
               onClick={onApplyFilters}
             >
               <ArrowRight size={16} />
