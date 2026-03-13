@@ -954,9 +954,6 @@ export const CreateListingPage = () => {
           </div>
 
           <div className="flex flex-wrap gap-2 border-t border-[#d8e8e2] pt-4">
-            <Button type="button" variant="outline" className="h-10 rounded-lg border-[#bed8cd] text-[#2f5c4d]">
-              Previous (disabled)
-            </Button>
             <Button
               type="button"
               variant="outline"
@@ -965,9 +962,6 @@ export const CreateListingPage = () => {
               disabled={submitting}
             >
               Save Draft
-            </Button>
-            <Button type="button" variant="outline" className="h-10 rounded-lg border-[#8cc8ae] text-[#1e6f4f]">
-              Next Step: Visuals & Description
             </Button>
             <Button
               type="submit"
