@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, Fragment } from 'react';
+import { Listbox, Transition } from '@headlessui/react';
 import { useSearchParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet';
@@ -582,21 +583,32 @@ export const CreateListingPage = () => {
                 <div className="rounded-xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-3">
                   <p className="text-4xl leading-none font-black text-[#1f9f6a]">Define Your Harvest & Price.</p>
 
-                  {/* Category Dropdown */}
+                  {/* Category Dropdown with Headless UI Listbox */}
                   <div className="mt-4">
                     <label className="block text-sm font-bold text-[#2f6152] mb-1">Category</label>
-                    <select
-                      className="h-10 w-full rounded-xl border border-[#c9ddd4] bg-[#f8fcfa] px-3 text-sm font-semibold text-[#193f30] mb-4"
-                      value={form.productType}
-                      onChange={e => setForm({ ...form, productType: e.target.value })}
-                      required
-                    >
-                      <option value="crop">Crop</option>
-                      <option value="livestock">Livestock</option>
-                      <option value="grain">Grain</option>
-                      <option value="vegetable">Vegetable</option>
-                      <option value="fruit">Fruit</option>
-                    </select>
+                    <Listbox value={form.productType} onChange={val => setForm({ ...form, productType: val })}>
+                      <div className="relative">
+                        <Listbox.Button className="h-10 w-full rounded-xl border border-[#c9ddd4] bg-[#f8fcfa] px-3 text-sm font-semibold text-[#193f30] mb-4 text-left flex items-center justify-between">
+                          {CATEGORY_OPTIONS.find(opt => opt.value === form.productType)?.label || 'Select Category'}
+                          <span className="ml-2">▼</span>
+                        </Listbox.Button>
+                        <Transition as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
+                          <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                            {CATEGORY_OPTIONS.map(option => (
+                              <Listbox.Option
+                                key={option.value}
+                                className={({ active }) =>
+                                  `cursor-pointer select-none px-4 py-2 text-sm font-semibold rounded ${active ? 'bg-[#20a46b] text-white' : 'text-[#193f30]'}`
+                                }
+                                value={option.value}
+                              >
+                                {option.label}
+                              </Listbox.Option>
+                            ))}
+                          </Listbox.Options>
+                        </Transition>
+                      </div>
+                    </Listbox>
                   </div>
 
                   <div className="space-y-4">
