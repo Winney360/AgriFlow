@@ -15,9 +15,9 @@ const Footer = () => (
         <div>
           <h4 className="font-bold text-white mb-2">Quick Links</h4>
           <ul className="space-y-1">
-            <li><a href="/" className="hover:underline">Home</a></li>
-            <li><a href="/marketplace" className="hover:underline">Marketplace</a></li>
-            <li><a href="/post-listing" className="hover:underline">Post Listing</a></li>
+            <li><a href="/" className="hover:underline hover:text-[#1f9f6a] transition-colors">Home</a></li>
+            <li><a href="/profile" className="hover:underline hover:text-[#1f9f6a] transition-colors">Profile</a></li>
+            <li><a href="/emergency-board" className="hover:underline hover:text-[#1f9f6a] transition-colors">Emergency Board</a></li>
           </ul>
         </div>
         <div>
@@ -26,20 +26,20 @@ const Footer = () => (
             <li>
               <button
                 onClick={() => window.open('mailto:agriflow@gmail.com')}
-                className="hover:underline text-left w-full bg-transparent border-0 p-0 m-0 cursor-pointer text-inherit"
+                className="hover:underline hover:text-[#1f9f6a] text-left w-full bg-transparent border-0 p-0 m-0 cursor-pointer text-inherit transition-colors"
                 type="button"
               >
                 Contact Us
               </button>
             </li>
-            <li><a href="/faq" className="hover:underline">FAQs</a></li>
+            <li><a href="/faq" className="hover:underline hover:text-[#1f9f6a] transition-colors">FAQs</a></li>
           </ul>
         </div>
         <div>
           <h4 className="font-bold text-white mb-2">Legal</h4>
           <ul className="space-y-1">
-            <li><a href="/privacy" className="hover:underline">Privacy Policy</a></li>
-            <li><a href="/terms" className="hover:underline">Terms of Service</a></li>
+            <li><a href="/privacy" className="hover:underline hover:text-[#1f9f6a] transition-colors">Privacy Policy</a></li>
+            <li><a href="/terms" className="hover:underline hover:text-[#1f9f6a] transition-colors">Terms of Service</a></li>
           </ul>
         </div>
       </div>
