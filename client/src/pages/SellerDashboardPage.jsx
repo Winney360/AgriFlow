@@ -184,6 +184,8 @@ export const SellerDashboardPage = () => {
     () => [...dateFilteredHistory].sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)).slice(0, 3),
     [dateFilteredHistory],
   );
+  const profileImageUrl = user?.avatarUrl || '';
+  const profileInitial = (user?.name || 'Seller').trim().charAt(0).toUpperCase() || 'S';
 
   return (
     <div className="min-h-screen bg-[#f7f8f7]">
@@ -207,12 +209,43 @@ export const SellerDashboardPage = () => {
         {/* Seller Profile Card */}
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           <div className="rounded-lg border border-[#d8ddda] bg-white p-4 lg:col-span-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="h-16 w-16 rounded-full bg-[#d7e5da]" />
-                <div>
-                  <h3 className="text-xl font-black text-[#1f1f1f]">{user?.name || 'Seller'}</h3>
-                  <p className="text-sm text-[#666]">Verified Seller</p>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-3">
+                {profileImageUrl ? (
+                  <img
+                    src={profileImageUrl}
+                    alt={user?.name || 'Seller'}
+                    className="h-16 w-16 rounded-full border-2 border-[#9bc7b4] object-cover"
+                  />
+                ) : (
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-[#9bc7b4] bg-[#1f9f6a] text-2xl font-black text-white">
+                    {profileInitial}
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <div>
+                    <h3 className="text-xl font-black text-[#1f1f1f]">{user?.name || 'Seller'}</h3>
+                    <p className="text-sm text-[#666]">Verified Seller</p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2 text-xs font-semibold">
+                    <span className="rounded-full bg-[#e8f5e9] px-2.5 py-1 text-[#1a8657]">Seller Mode</span>
+                    <span className="rounded-full bg-[#f0f9f5] px-2.5 py-1 text-[#2a5a45]">
+                      Joined {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-KE', { month: 'short', year: 'numeric' }) : 'Recently'}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-2 text-sm text-[#3f4a45] sm:grid-cols-2">
+                    <p className="rounded-lg bg-[#f7faf8] px-2 py-1">
+                      <span className="font-bold text-[#1f1f1f]">Phone:</span> {user?.phoneNumber || 'Not set'}
+                    </p>
+                    <p className="rounded-lg bg-[#f7faf8] px-2 py-1">
+                      <span className="font-bold text-[#1f1f1f]">Email:</span> {user?.email || 'Not set'}
+                    </p>
+                    <p className="rounded-lg bg-[#f7faf8] px-2 py-1 sm:col-span-2">
+                      <span className="font-bold text-[#1f1f1f]">Location:</span> {user?.locationName || 'Not set'}
+                    </p>
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-2">
