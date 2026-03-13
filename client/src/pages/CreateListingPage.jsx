@@ -496,24 +496,38 @@ export const CreateListingPage = () => {
   };
 
   const useCurrentLocation = () => {
-    toast('Allow GPS access for this listing?', {
-      description: 'Tap Allow now to continue and approve location permission in your browser.',
-      style: {
-        border: '1px solid #20a46b',
+    toast.custom(
+      (toastItem) => (
+        <div className="w-full max-w-sm rounded-lg border border-[#20a46b] bg-white p-4 shadow-sm">
+          <p className="text-sm font-black text-[#1f1f1f]">Allow GPS access for this listing?</p>
+          <p className="mt-1 text-xs text-[#5a6b64]">
+            Tap Allow now to continue and approve location permission in your browser.
+          </p>
+          <div className="mt-3 flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={() => toast.dismiss(toastItem)}
+              className="h-10 rounded-md border border-[#d0d6d2] bg-white px-3 text-sm font-semibold text-[#334a41]"
+            >
+              Not now
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                toast.dismiss(toastItem);
+                requestCurrentLocation();
+              }}
+              className="h-10 rounded-md bg-[#20a46b] px-3 text-sm font-semibold text-white"
+            >
+              Allow now
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        duration: Infinity,
       },
-      action: {
-        label: 'Allow now',
-        onClick: () => requestCurrentLocation(),
-      },
-      actionButtonStyle: {
-        backgroundColor: '#20a46b',
-        color: '#ffffff',
-      },
-      cancel: {
-        label: 'Not now',
-      },
-      duration: 7000,
-    });
+    );
   };
 
   const onSubmit = async (event) => {
