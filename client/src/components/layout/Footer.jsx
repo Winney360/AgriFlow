@@ -3,8 +3,11 @@ const Footer = () => (
   <footer className="mt-8 w-full bg-[#27333c] px-4 py-8 text-[#d3dde3]">
     <div className="max-w-5xl mx-auto flex flex-col gap-6">
       <div className="flex flex-col items-center gap-1">
-        <div className="text-2xl font-black">
-          <span className="text-[#1f9f6a]">Agri</span><span className="text-white">Flow</span>
+        <div className="flex items-center gap-2 text-2xl font-black">
+          <img src="/favicon.png" alt="AgriFlow Logo" className="h-12 w-12" />
+          <span>
+            <span className="text-[#1f9f6a]">Agri</span><span className="text-white">Flow</span>
+          </span>
         </div>
         <p className="text-sm text-[#b6c6d1]">Connecting farmers and buyers.</p>
       </div>
