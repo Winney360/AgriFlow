@@ -32,8 +32,37 @@ const LocationPicker = ({ selected, setSelected }) => {
   return <Marker position={selected} />;
 };
 
+const DRAFT_STORAGE_KEY = 'cropconnect_create_listing_draft';
+
+const DEFAULT_FORM_STATE = {
+  title: '',
+  description: '',
+  productType: 'crop',
+  quantity: '',
+  price: '',
+  locationName: '',
+  latitude: -1.286389,
+  longitude: 36.817223,
+  image: null,
+  imageUrl: '',
+  pathAccessibility: 'open',
+};
+
+const hasDraftContent = (form, productSearch) => {
+  const textFields = [
+    form?.title,
+    form?.description,
+    form?.quantity,
+    form?.price,
+    form?.locationName,
+    form?.imageUrl,
+    productSearch,
+  ];
+
+  return textFields.some((value) => String(value || '').trim().length > 0);
+};
+
 export const CreateListingPage = () => {
-  const DRAFT_STORAGE_KEY = 'cropconnect_create_listing_draft';
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const editId = searchParams.get('edit');
@@ -43,19 +72,7 @@ export const CreateListingPage = () => {
   const [unitLabel, setUnitLabel] = useState('Kgs');
 
 
-  const [form, setForm] = useState({
-    title: '',
-    description: '',
-    productType: 'crop',
-    quantity: '',
-    price: '',
-    locationName: '',
-    latitude: -1.286389,
-    longitude: 36.817223,
-    image: null,
-    imageUrl: '',
-    pathAccessibility: 'open',
-  });
+  const [form, setForm] = useState(DEFAULT_FORM_STATE);
 
   const [locationMode, setLocationMode] = useState('map');
   const marker = useMemo(() => [form.latitude, form.longitude], [form.latitude, form.longitude]);
@@ -134,6 +151,10 @@ export const CreateListingPage = () => {
         return;
       }
 
+      if (!hasDraftContent(parsedDraft.form, parsedDraft.productSearch)) {
+        return;
+      }
+
       setForm((prev) => ({
         ...prev,
         ...parsedDraft.form,
@@ -145,9 +166,36 @@ export const CreateListingPage = () => {
     } catch {
       localStorage.removeItem(DRAFT_STORAGE_KEY);
     }
-  }, [editId, DRAFT_STORAGE_KEY]);
+  }, [editId]);
+
+  useEffect(() => {
+    if (editId) {
+      return;
+    }
+
+    if (!hasDraftContent(form, productSearch)) {
+      return;
+    }
+
+    const draftPayload = {
+      form: {
+        ...form,
+        image: null,
+      },
+      productSearch,
+      unitLabel,
+      savedAt: new Date().toISOString(),
+    };
+
+    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draftPayload));
+  }, [editId, form, productSearch, unitLabel]);
 
   const onSaveDraft = () => {
+    if (!hasDraftContent(form, productSearch)) {
+      toast.info('Add listing details before saving a draft.');
+      return;
+    }
+
     try {
       const draftPayload = {
         form: {
