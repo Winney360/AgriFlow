@@ -136,6 +136,16 @@ export const SellerDashboardPage = () => {
     await loadMine(selectedHistoryRange);
   };
 
+  const removeHistoryRecord = async (id) => {
+    const confirmed = window.confirm('Delete this crop record from sales history? This cannot be undone.');
+    if (!confirmed) {
+      return;
+    }
+
+    await productApi.removeHistory(id);
+    await loadMine(selectedHistoryRange);
+  };
+
   const { from: rangeFrom, to: rangeTo } = useMemo(
     () => getDateRangeBounds(selectedHistoryRange),
     [selectedHistoryRange],
@@ -169,6 +179,10 @@ export const SellerDashboardPage = () => {
   const totalSoldRevenue = soldInRange.reduce(
     (sum, item) => sum + getListingEstimatedTotal(item.price, item.quantity),
     0,
+  );
+  const recentHistory = useMemo(
+    () => [...dateFilteredHistory].sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)).slice(0, 3),
+    [dateFilteredHistory],
   );
 
   return (
@@ -358,14 +372,43 @@ export const SellerDashboardPage = () => {
             </div>
 
             {/* Chart Area */}
-            <div className="lg:col-span-2 h-48 rounded-lg border border-[#e0e5e1] bg-[#f9fbfa] flex items-center justify-center">
-              <div className="text-center">
+            <div className="lg:col-span-2 min-h-48 rounded-lg border border-[#e0e5e1] bg-[#f9fbfa] flex items-center justify-center">
+              <div className="w-full p-4">
+                <div className="text-center">
                 <p className="text-sm text-[#999]">{dateFilteredHistory.length} historical listings in selected range</p>
                 <p className="text-xs text-[#ccc]">
                   Date range: {formatRangeDate(rangeFrom)} - {formatRangeDate(rangeTo)}
                 </p>
                 <p className="text-xs text-[#ccc]">Total sold quantity: {Math.round(totalSoldQuantity)}kg</p>
                 <p className="text-xs text-[#ccc]">Estimated revenue: {formatCurrency(totalSoldRevenue)}</p>
+                </div>
+
+                <div className="mt-3 space-y-2">
+                  {recentHistory.length === 0 ? (
+                    <p className="text-center text-xs text-[#9aa6a0]">No history records in this date range.</p>
+                  ) : (
+                    recentHistory.map((item) => (
+                      <div key={item._id} className="flex items-center justify-between rounded-lg border border-[#dbe5e0] bg-white px-3 py-2">
+                        <div>
+                          <p className="text-sm font-semibold text-[#1f1f1f]">{item.title}</p>
+                          <p className="text-xs text-[#7a8a84]">{new Date(item.updatedAt).toLocaleDateString('en-KE')}</p>
+                        </div>
+                        <div className="flex items-center gap-3 text-xs font-semibold">
+                          <Link to={`/products/${item._id}`} className="text-[#20a46b] hover:underline">
+                            View Details
+                          </Link>
+                          <button
+                            type="button"
+                            className="text-red-600 hover:underline"
+                            onClick={() => removeHistoryRecord(item._id)}
+                          >
+                            Delete History
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             </div>
           </div>

@@ -238,6 +238,36 @@ export const deleteProduct = async (req, res, next) => {
   }
 };
 
+export const deleteHistoryProduct = async (req, res, next) => {
+  try {
+    const product = await Product.findById(req.params.id);
+
+    if (!product) {
+      const error = new Error('History record not found');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    if (product.sellerId.toString() !== req.user._id.toString()) {
+      const error = new Error('You can only delete your own history records');
+      error.statusCode = 403;
+      throw error;
+    }
+
+    if (!['sold', 'inactive'].includes(product.status)) {
+      const error = new Error('Only sold or archived records can be deleted from history');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    await Product.findByIdAndDelete(product._id);
+
+    res.json({ success: true, message: 'History record deleted successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getActiveProducts = async (req, res, next) => {
   try {
     const { search, productType, minPrice, maxPrice, locationName, lat, lng, radiusKm } = req.query;

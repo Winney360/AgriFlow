@@ -46,6 +46,7 @@ export const productApi = {
       headers: { 'Content-Type': 'multipart/form-data' },
     }),
   markSold: (id) => api.patch(`/products/${id}/sold`),
+  removeHistory: (id) => api.delete(`/products/${id}/history`),
   remove: (id) => api.delete(`/products/${id}`),
 };
 
