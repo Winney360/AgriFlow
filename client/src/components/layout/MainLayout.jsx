@@ -68,9 +68,11 @@ export const MainLayout = () => {
       {(!isHomePage || isAuthenticated) && (
         <header className="sticky top-0 z-20 border-b border-outline bg-[var(--surface)/0.9] backdrop-blur">
           <div className="mx-auto flex items-center justify-between max-w-7xl px-2 sm:px-4 py-2 sm:py-3">
-            <Link to={logoTarget} className="text-2xl font-black tracking-tight">
-              <span className="text-[#1f9f6a]">Agri</span>
-              <span className="text-[#1f1f1f]">Flow</span>
+            <Link to={logoTarget} className="flex items-center gap-2 text-2xl font-black tracking-tight">
+              <img src="/favicon.png" alt="AgriFlow Logo" className="h-16 w-16 object-contain" style={{ background: 'transparent' }} />
+              <span>
+                <span className="text-[#1f9f6a]">Agri</span><span className="text-[#1f1f1f]">Flow</span>
+              </span>
             </Link>
             {isAuthenticated && user && (
               <button
