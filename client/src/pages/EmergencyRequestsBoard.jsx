@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertCircle, Check, ChevronRight, Clock, MapPin, Phone } from 'lucide-react';
 import { emergencyRequestApi } from '../lib/api';
@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
+import { toast } from 'sonner';
 
 const getStatusBadge = (status) => {
   switch (status) {
@@ -120,6 +121,7 @@ export const EmergencyRequestsBoard = () => {
   const [error, setError] = useState('');
   const [claimingId, setClaimingId] = useState(null);
   const [claimQuantity, setClaimQuantity] = useState('');
+  const toastShownRef = useRef(false); // Add ref to track if toast has been shown
 
   const [filters, setFilters] = useState({
     status: 'open',
@@ -127,32 +129,97 @@ export const EmergencyRequestsBoard = () => {
     radius: 50,
   });
 
+  // Function to load requests
+  const loadRequests = async (params = filters) => {
+    try {
+      setLoading(true);
+      const response = await emergencyRequestApi.list(params);
+      setRequests(response.data.data || []);
+      setLoading(false);
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Failed to load emergency requests');
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadRequests = async () => {
+    const initializeWithLocation = async () => {
       try {
         setLoading(true);
-        const params = {
-          ...filters,
-        };
+        const params = { ...filters };
 
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition((position) => {
-            params.latitude = position.coords.latitude;
-            params.longitude = position.coords.longitude;
-          });
+        // Only show toast if it hasn't been shown before
+        if (!toastShownRef.current) {
+          toastShownRef.current = true; // Mark as shown immediately
+          
+          toast.custom((toastItem) => (
+            <div className="w-full max-w-sm rounded-lg border border-[#20a46b] bg-white p-4 shadow-sm">
+              <p className="text-sm font-black text-[#1f1f1f]">Allow GPS access to filter requests by your location?</p>
+              <p className="mt-1 text-xs text-[#5a6b64]">
+                Tap Allow now to continue and approve location permission in your browser.
+              </p>
+              <div className="mt-3 flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    toast.dismiss(toastItem);
+                    // Load requests without location
+                    loadRequests(params);
+                  }}
+                  className="h-10 rounded-md border border-[#d0d6d2] bg-white px-3 text-sm font-semibold text-[#334a41]"
+                >
+                  Not now
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    toast.dismiss(toastItem);
+                    if (navigator.geolocation) {
+                      navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                          // Add location to params and load
+                          params.latitude = position.coords.latitude;
+                          params.longitude = position.coords.longitude;
+                          loadRequests(params);
+                        },
+                        (error) => {
+                          console.error('Geolocation error:', error);
+                          // Load without location if permission denied
+                          loadRequests(params);
+                        }
+                      );
+                    } else {
+                      // Geolocation not supported
+                      loadRequests(params);
+                    }
+                  }}
+                  className="h-10 rounded-md bg-[#20a46b] px-3 text-sm font-semibold text-white"
+                >
+                  Allow now
+                </button>
+              </div>
+            </div>
+          ), { duration: Infinity });
+        } else {
+          // Toast already shown, just load requests
+          loadRequests(params);
         }
-
-        const response = await emergencyRequestApi.list(params);
-        setRequests(response.data.data || []);
       } catch (err) {
         setError(err?.response?.data?.message || 'Failed to load emergency requests');
-      } finally {
         setLoading(false);
       }
     };
 
-    loadRequests();
-  }, [filters]);
+    initializeWithLocation();
+  }, []); // Empty dependency array - runs only once on mount
+
+  // Separate effect for filter changes
+  useEffect(() => {
+    // Don't run on initial mount (when requests is empty)
+    if (requests.length > 0 || !loading) {
+      loadRequests(filters);
+    }
+  }, [filters.status, filters.productType, filters.radius]); // Only reload when filters change
 
   const handleClaim = async (requestId) => {
     if (!claimQuantity.trim()) {
@@ -189,11 +256,6 @@ export const EmergencyRequestsBoard = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-sm font-semibold text-[#1f9f6a]">
-        <span>Community</span>
-        <ChevronRight size={14} />
-        <span className="text-[#123327]">Emergency Board</span>
-      </div>
 
       <div className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-4 flex gap-2">
         <AlertCircle size={20} className="text-[#1f9f6a] shrink-0 mt-0.5" />
