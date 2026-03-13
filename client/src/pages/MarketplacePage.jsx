@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
-import L from 'leaflet';
 import {
   ArrowRight,
   LocateFixed,
@@ -15,14 +14,8 @@ import { Button } from '../components/ui/button';
 import { productApi } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 import { ENGLISH_MAP_ATTRIBUTION, ENGLISH_MAP_TILE_URL } from '../lib/mapTiles';
+import { greenMarkerIcon } from '../lib/mapMarkerIcon';
 import { normalizePhoneForWhatsApp } from '../lib/utils';
-
-const markerIcon = L.icon({
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-});
 
 export const MarketplacePage = () => {
   const { user } = useAuth();
@@ -155,7 +148,7 @@ export const MarketplacePage = () => {
                   ? mapProducts.slice(0, 4).map((product) => (
                       <Marker
                         key={product._id}
-                        icon={markerIcon}
+                        icon={greenMarkerIcon}
                         position={[product.location.latitude, product.location.longitude]}
                       />
                     ))
@@ -305,7 +298,7 @@ export const MarketplacePage = () => {
               <MapContainer center={center} zoom={9} className="h-full w-full" attributionControl={false}>
                 <TileLayer url={ENGLISH_MAP_TILE_URL} />
                 {mapProducts.map((product) => (
-                  <Marker key={product._id} icon={markerIcon} position={[product.location.latitude, product.location.longitude]}>
+                  <Marker key={product._id} icon={greenMarkerIcon} position={[product.location.latitude, product.location.longitude]}>
                     <Popup>
                       <div className="text-sm">
                         <p className="font-bold">{product.title}</p>

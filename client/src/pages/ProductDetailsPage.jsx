@@ -4,6 +4,7 @@ import { Mail, MapPin, MessageCircle, ChevronLeft, ChevronRight, Star } from 'lu
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
 import { productApi } from '../lib/api';
 import { ENGLISH_MAP_ATTRIBUTION, ENGLISH_MAP_TILE_URL } from '../lib/mapTiles';
+import { greenMarkerIcon } from '../lib/mapMarkerIcon';
 import { formatCurrency, normalizePhoneForWhatsApp } from '../lib/utils';
 
 const fallbackRelated = [
@@ -177,7 +178,7 @@ export const ProductDetailsPage = () => {
                   <TileLayer
                     url={ENGLISH_MAP_TILE_URL}
                   />
-                  <Marker position={[product.location.latitude, product.location.longitude]}>
+                  <Marker position={[product.location.latitude, product.location.longitude]} icon={greenMarkerIcon}>
                     <Popup>
                       <div className="text-sm">
                         <p className="font-bold">{product.title}</p>

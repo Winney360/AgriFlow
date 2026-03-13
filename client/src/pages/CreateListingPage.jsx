@@ -15,6 +15,7 @@ import {
 import { toast } from 'sonner';
 import { productApi } from '../lib/api';
 import { ENGLISH_MAP_ATTRIBUTION, ENGLISH_MAP_TILE_URL } from '../lib/mapTiles';
+import { greenMarkerIcon } from '../lib/mapMarkerIcon';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 
@@ -29,7 +30,7 @@ const LocationPicker = ({ selected, setSelected }) => {
     return null;
   }
 
-  return <Marker position={selected} />;
+  return <Marker position={selected} icon={greenMarkerIcon} />;
 };
 
 const DRAFT_STORAGE_KEY = 'cropconnect_create_listing_draft';

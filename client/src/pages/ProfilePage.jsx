@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
-import L from 'leaflet';
 import {
   Bell,
   Check,
@@ -19,15 +18,9 @@ import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import { ENGLISH_MAP_ATTRIBUTION, ENGLISH_MAP_TILE_URL } from '../lib/mapTiles';
+import { greenMarkerIcon } from '../lib/mapMarkerIcon';
 import { formatCurrency, getListingEstimatedTotal, parseNumericValue } from '../lib/utils';
 import { productApi, emergencyRequestApi } from '../lib/api';
-
-const markerIcon = L.icon({
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-});
 
 const formatShortDate = (value) => {
   if (!value) return '—';
@@ -510,7 +503,7 @@ export const ProfilePage = () => {
                   {mapListings.map((listing) => (
                     <Marker
                       key={listing._id}
-                      icon={markerIcon}
+                      icon={greenMarkerIcon}
                       position={[listing.location.latitude, listing.location.longitude]}
                     >
                       <Popup>
