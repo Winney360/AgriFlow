@@ -1,6 +1,7 @@
 import Product from '../models/Product.js';
 import User from '../models/User.js';
 import Notification from '../models/Notification.js';
+import upload, { uploadToCloudinary } from '../middleware/cloudinaryUpload.js';
 
 const toNumber = (value, fallback = 0) => {
   const parsed = Number(value);
@@ -59,18 +60,25 @@ const parseIncomingImageUrls = (rawValue) => {
   return [];
 };
 
-const buildUploadedImageUrls = (req, files = []) =>
-  files.map((file) => `${req.protocol}://${req.get('host')}/uploads/${file.filename}`);
 
-const resolveProductImageUrls = (req) => {
-  const uploaded = buildUploadedImageUrls(req, req.files || []);
+// Helper to upload all images to Cloudinary and return their URLs
+const buildUploadedImageUrls = async (files = []) => {
+  const urls = [];
+  for (const file of files) {
+    const url = await uploadToCloudinary(file.buffer, 'products');
+    urls.push(url);
+  }
+  return urls;
+};
+
+
+const resolveProductImageUrls = async (req) => {
+  const uploaded = req.files && req.files.length > 0 ? await buildUploadedImageUrls(req.files) : [];
   const existing = parseIncomingImageUrls(req.body.imageUrls || req.body.imageUrl);
-
   const merged = [...existing, ...uploaded]
     .map((value) => String(value || '').trim())
     .filter(Boolean)
     .slice(0, 4);
-
   return {
     imageUrls: merged,
     primaryImageUrl: merged[0] || '',
@@ -113,7 +121,7 @@ export const createProduct = async (req, res, next) => {
       throw error;
     }
 
-    const { imageUrls, primaryImageUrl } = resolveProductImageUrls(req);
+    const { imageUrls, primaryImageUrl } = await resolveProductImageUrls(req);
 
     if (!primaryImageUrl) {
       const error = new Error('A product photo is mandatory');
@@ -178,7 +186,7 @@ export const updateProduct = async (req, res, next) => {
       throw error;
     }
 
-    const { imageUrls, primaryImageUrl } = resolveProductImageUrls(req);
+    const { imageUrls, primaryImageUrl } = await resolveProductImageUrls(req);
 
     existingProduct.title = req.body.title || existingProduct.title;
     existingProduct.description = req.body.description ?? existingProduct.description;

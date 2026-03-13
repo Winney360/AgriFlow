@@ -11,7 +11,7 @@ import {
   deleteHistoryProduct,
 } from '../controllers/productController.js';
 import { protect } from '../middleware/authMiddleware.js';
-import { upload } from '../middleware/uploadMiddleware.js';
+import upload from '../middleware/cloudinaryUpload.js';
 
 const router = express.Router();
 
