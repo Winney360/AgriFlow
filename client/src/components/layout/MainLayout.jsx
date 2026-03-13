@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Menu } from 'lucide-react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Store, Tractor, History, UserRound, Plus } from 'lucide-react';
-import { ThemeToggle } from './ThemeToggle';
+// import { ThemeToggle } from './ThemeToggle';
 import Footer from './Footer';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../ui/button';
@@ -158,9 +158,7 @@ export const MainLayout = () => {
                     );
                   })}
                 </ul>
-                <div className="ml-4 flex items-center">
-                  <ThemeToggle />
-                </div>
+
               </nav>
             )}
           </div>
@@ -185,10 +183,7 @@ export const MainLayout = () => {
                   </li>
                 ))}
                 <li className="border-t border-outline my-1" />
-                <li>
-                  <ThemeToggle />
-                  <span className="ml-2 text-sm">Theme</span>
-                </li>
+
                 {isAuthenticated && (
                   <li>
                     <button

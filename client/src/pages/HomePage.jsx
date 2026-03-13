@@ -10,7 +10,7 @@ import {
 import { productApi } from '../lib/api';
 import { formatCurrency } from '../lib/utils';
 import { ListingsMap } from '../components/map/ListingsMap';
-import { ThemeToggle } from '../components/layout/ThemeToggle';
+// import { ThemeToggle } from '../components/layout/ThemeToggle';
 import { useAuth } from '../context/AuthContext';
 import step1Image from '../assets/homepage/step1.png';
 import step2Image from '../assets/homepage/step2.png';
@@ -115,7 +115,7 @@ export const HomePage = () => {
               </div>
             </div>
             <div className="ml-auto flex items-center gap-2">
-              <ThemeToggle />
+
               {!isAuthenticated && (
                 <>
                   <Link
