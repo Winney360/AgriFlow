@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Dialog } from '@headlessui/react';
 import { Link } from 'react-router-dom';
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
 import {
@@ -20,6 +21,8 @@ import { normalizePhoneForWhatsApp } from '../lib/utils';
 export const MarketplacePage = () => {
   const { user } = useAuth();
   const [products, setProducts] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showModal, setShowModal] = useState(false);
   const [geoBusy, setGeoBusy] = useState(false);
   const [geoError, setGeoError] = useState('');
   const [mapView, setMapView] = useState(true);
@@ -327,8 +330,8 @@ export const MarketplacePage = () => {
 
               return (
                 <article key={product._id} className="overflow-hidden rounded-xl border border-[#cddfd7] bg-white">
-                  <div className="flex h-40 w-full items-center justify-center bg-[#f3f8f5] p-2">
-                    <img src={product.imageUrl} alt={product.title} className="h-full w-full rounded-lg object-contain" />
+                  <div className="flex h-40 w-full items-center justify-center bg-[#f3f8f5] p-0">
+                    <img src={product.imageUrl} alt={product.title} className="h-full w-full object-cover" />
                   </div>
                   <div className="space-y-1 p-2.5">
                     <p className="text-3xl leading-none font-black text-[#102f24]">{product.title}</p>
@@ -338,32 +341,78 @@ export const MarketplacePage = () => {
                     <p className="flex items-center gap-1 text-sm font-semibold text-[#476f62]">
                       <MapPin size={13} /> {product.location?.locationName || 'Juja, 12km'}
                     </p>
-                    <p className="flex items-center gap-1 text-sm font-semibold text-[#476f62]">
-                      <Star size={13} fill="currentColor" className="text-[#2aa76f]" /> 5.0 Stars, 28
-                      Reviews
-                    </p>
-
-                    {whatsappNumber ? (
-                      <a href={whatsappHref} target="_blank" rel="noreferrer" className="block">
+                    <div className="flex gap-2 mt-2">
+                      <Button
+                        type="button"
+                        className="flex-1 h-10 rounded-lg bg-[#1f9f6a] text-white font-bold"
+                        onClick={() => { setSelectedProduct(product); setShowModal(true); }}
+                      >
+                        View Crop
+                      </Button>
+                      {whatsappNumber ? (
+                        <a href={whatsappHref} target="_blank" rel="noreferrer" className="flex-1">
+                          <button
+                            type="button"
+                            className="h-10 w-full rounded-lg bg-[#1f9f6a] px-3 text-sm font-black text-white"
+                          >
+                            WhatsApp <MessageCircle size={15} />
+                          </button>
+                        </a>
+                      ) : (
                         <button
                           type="button"
-                          className="mt-2 flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-[#1f9f6a] px-3 text-sm font-black text-white"
+                          className="h-10 w-full rounded-lg bg-[#d4e3dd] px-3 text-sm font-black text-[#4b6f62]"
+                          disabled
                         >
-                          Contact via WhatsApp <MessageCircle size={15} />
+                          Request Quote
                         </button>
-                      </a>
-                    ) : (
-                      <button
-                        type="button"
-                        className="mt-2 h-10 w-full rounded-lg bg-[#d4e3dd] px-3 text-sm font-black text-[#4b6f62]"
-                        disabled
-                      >
-                        Request Quote
-                      </button>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </article>
               );
+                  {/* Crop Modal */}
+                  <Dialog open={showModal} onClose={() => setShowModal(false)} className="relative z-50">
+                    <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
+                    <div className="fixed inset-0 flex items-center justify-center p-4">
+                      <Dialog.Panel className="w-full max-w-2xl rounded-xl bg-white p-6 shadow-xl">
+                        <Dialog.Title className="text-2xl font-black mb-2">{selectedProduct?.title}</Dialog.Title>
+                        <div className="flex flex-col md:flex-row gap-4">
+                          <div className="flex-1">
+                            {selectedProduct?.imageUrls && selectedProduct.imageUrls.length > 0 ? (
+                              <div className="grid grid-cols-2 gap-2">
+                                {selectedProduct.imageUrls.map((img, idx) => (
+                                  <img
+                                    key={img}
+                                    src={img}
+                                    alt={`Crop image ${idx + 1}`}
+                                    className="w-full h-32 object-cover rounded-lg"
+                                  />
+                                ))}
+                              </div>
+                            ) : (
+                              <img src={selectedProduct?.imageUrl} alt={selectedProduct?.title} className="w-full h-40 object-cover rounded-lg" />
+                            )}
+                          </div>
+                          <div className="flex-1 space-y-2">
+                            <p className="text-lg font-bold">Price: <span className="text-[#1f9f6a]">Ksh {Number(selectedProduct?.price || 0).toLocaleString()}</span></p>
+                            <p className="text-md font-semibold">Quantity: {selectedProduct?.quantity}</p>
+                            <p className="text-md font-semibold">Type: {selectedProduct?.productType}</p>
+                            <p className="text-md font-semibold">Location: {selectedProduct?.location?.locationName}</p>
+                            <p className="text-md">{selectedProduct?.description}</p>
+                            <div className="flex gap-2 mt-4">
+                              <Button onClick={() => setShowModal(false)} className="bg-gray-200 text-gray-800">Close</Button>
+                              {selectedProduct?.sellerId?.phoneNumber && (
+                                <a href={`https://wa.me/${normalizePhoneForWhatsApp(selectedProduct.sellerId.phoneNumber)}`} target="_blank" rel="noreferrer">
+                                  <Button className="bg-[#1f9f6a] text-white">Contact Seller</Button>
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </Dialog.Panel>
+                    </div>
+                  </Dialog>
             })}
           </div>
           )}
