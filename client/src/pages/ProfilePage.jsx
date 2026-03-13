@@ -325,7 +325,7 @@ export const ProfilePage = () => {
               id={user.role === 'buyer' ? 'my-emergency-requests' : undefined}
               className="border-[#a9d4c2] bg-[#f8fbfa] p-4"
             >
-              <p className="text-3xl font-black text-[#12281f]">{user.role === 'seller' ? 'Recent Activity' : 'My Emergency Requests'}</p>
+              <p className="text-3xl font-black text-[#12281f]">{user.role === 'seller' ? 'Recent Activity' : 'My Requests'}</p>
               {user.role === 'seller' ? (
                 activityBusy ? (
                   <p className="mt-3 text-sm font-semibold text-[#3c6356]">Loading seller activity...</p>
@@ -344,7 +344,7 @@ export const ProfilePage = () => {
                 )
               ) : myRequests.length === 0 ? (
                 <div className="mt-3 space-y-2">
-                  <p className="text-sm font-semibold text-[#3c6356]">No emergency requests yet.</p>
+                  <p className="text-sm font-semibold text-[#3c6356]">No requests yet.</p>
                   <Link to="/emergency-request">
                     <Button className="mt-2 h-9 rounded-lg bg-[#1fa56f] text-sm font-bold text-white">Post a Request</Button>
                   </Link>
