@@ -23,9 +23,16 @@ const Footer = () => (
         <div>
           <h4 className="font-bold text-white mb-2">Support</h4>
           <ul className="space-y-1">
-            <li><a href="/contact" className="hover:underline">Contact Us</a></li>
-            <li><a href="/help" className="hover:underline">Help Center</a></li>
-            <li><a href="/faq" className="hover:underline">FAQ</a></li>
+            <li>
+              <button
+                onClick={() => window.open('mailto:agriflow@gmail.com')}
+                className="hover:underline text-left w-full bg-transparent border-0 p-0 m-0 cursor-pointer text-inherit"
+                type="button"
+              >
+                Contact Us
+              </button>
+            </li>
+            <li><a href="/faq" className="hover:underline">FAQs</a></li>
           </ul>
         </div>
         <div>

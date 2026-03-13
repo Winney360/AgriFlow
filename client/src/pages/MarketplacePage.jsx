@@ -367,7 +367,7 @@ export const MarketplacePage = () => {
                 return (
                   <Card key={product._id} className="overflow-hidden border-2 border-[#d83c31] bg-[#fff7f7] p-0">
                     <div className="absolute top-2 right-2 bg-[#d83c31] text-white text-xs font-bold px-2 py-1 rounded">EMERGENCY</div>
-                    <div className="bg-gradient-to-r from-[#1f9f6a] to-[#27b883] p-4 text-white">
+                    <div className="bg-linear-to-r from-[#1f9f6a] to-[#27b883] p-4 text-white">
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <h2 className="text-xl font-black">{product.title}</h2>
