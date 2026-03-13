@@ -553,6 +553,9 @@ export const ProfilePage = () => {
                 <Phone size={16} /> {user.phoneNumber || 'Phone number not added'}
               </div>
               <div className="flex items-center gap-2 rounded-lg bg-[#ebf7f2] px-3 py-2 font-bold text-[#18573f]">
+                <Mail size={16} /> {user.email || 'Email not added'}
+              </div>
+              <div className="flex items-center gap-2 rounded-lg bg-[#ebf7f2] px-3 py-2 font-bold text-[#18573f]">
                 {user.locationVerified ? <Check size={16} /> : <MapPin size={16} />}
                 Location {user.locationVerified ? 'Verified' : 'Not Verified'}
               </div>

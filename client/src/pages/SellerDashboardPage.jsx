@@ -200,9 +200,6 @@ export const SellerDashboardPage = () => {
                 Add New Crop
               </button>
             </Link>
-            <button className="flex items-center gap-2 rounded-lg border border-[#d8ddda] bg-white px-4 py-2.5 font-semibold text-[#333] hover:bg-[#f9f9f9]">
-              Create Request
-            </button>
           </div>
         </div>
 
@@ -225,11 +222,10 @@ export const SellerDashboardPage = () => {
                 <div className="space-y-2">
                   <div>
                     <h3 className="text-xl font-black text-[#1f1f1f]">{user?.name || 'Seller'}</h3>
-                    <p className="text-sm text-[#666]">Verified Seller</p>
+                    <p className="text-sm text-[#666]">Trusted produce partner</p>
                   </div>
 
                   <div className="flex flex-wrap gap-2 text-xs font-semibold">
-                    <span className="rounded-full bg-[#e8f5e9] px-2.5 py-1 text-[#1a8657]">Seller Mode</span>
                     <span className="rounded-full bg-[#f0f9f5] px-2.5 py-1 text-[#2a5a45]">
                       Joined {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-KE', { month: 'short', year: 'numeric' }) : 'Recently'}
                     </span>
@@ -248,11 +244,19 @@ export const SellerDashboardPage = () => {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-[#666]">Switch to Buyer Mode</span>
-                <button className="relative inline-flex h-6 w-10 items-center rounded-full bg-[#ddd] transition-colors hover:bg-[#ccc]">
-                  <span className="inline-block h-5 w-5 rounded-full bg-white transition-transform translate-x-0.5" />
-                </button>
+              <div className="grid min-w-48 grid-cols-1 gap-2 text-sm">
+                <div className="rounded-lg border border-[#d0e0d6] bg-[#f0f9f5] px-3 py-2">
+                  <p className="text-xs font-semibold text-[#55796a]">Account Status</p>
+                  <p className="font-black text-[#1a8657]">Identity & contact confirmed</p>
+                </div>
+                <div className="rounded-lg border border-[#dbe3df] bg-[#fafcfb] px-3 py-2">
+                  <p className="text-xs font-semibold text-[#66736d]">Notifications</p>
+                  <p className="font-black text-[#2f4c40]">{user?.notificationEnabled ? 'Enabled' : 'Disabled'}</p>
+                </div>
+                <div className="rounded-lg border border-[#dbe3df] bg-[#fafcfb] px-3 py-2">
+                  <p className="text-xs font-semibold text-[#66736d]">Current Role</p>
+                  <p className="font-black text-[#2f4c40]">Seller</p>
+                </div>
               </div>
             </div>
           </div>
