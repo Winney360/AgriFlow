@@ -123,11 +123,11 @@ export const MarketplacePage = () => {
   };
 
   const categoryTags = [
-    { label: '[Crops]', value: 'maize' },
-    { label: '[Livestock]', value: 'livestock' },
-    { label: '[Grains]', value: 'grains' },
-    { label: '[Vegetables]', value: 'vegetables' },
-    { label: '[Fruits]', value: 'fruits' },
+    { label: 'Crop', value: 'crop', color: 'bg-green-100 text-green-800 border-green-300' },
+    { label: 'Livestock', value: 'livestock', color: 'bg-yellow-100 text-yellow-800 border-yellow-300' },
+    { label: 'Grain', value: 'grain', color: 'bg-orange-100 text-orange-800 border-orange-300' },
+    { label: 'Vegetable', value: 'vegetable', color: 'bg-lime-100 text-lime-800 border-lime-300' },
+    { label: 'Fruit', value: 'fruit', color: 'bg-pink-100 text-pink-800 border-pink-300' },
   ];
 
   return (
@@ -276,8 +276,8 @@ export const MarketplacePage = () => {
                   onClick={() => onCategoryTag(tag.value)}
                   className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-black transition ${
                     selectedTags.includes(tag.value)
-                      ? 'border-[#8ac7ae] bg-[#e8f6ef] text-[#145e43]'
-                      : 'border-[#d6e7df] bg-white text-[#2d5b4d]'
+                      ? tag.color + ' ring-2 ring-offset-1 ring-' + tag.color.split(' ')[1].replace('bg-', '')
+                      : 'border-gray-200 bg-white text-gray-700'
                   }`}
                 >
                   <Sprout size={14} /> {tag.label}

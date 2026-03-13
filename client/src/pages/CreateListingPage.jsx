@@ -36,6 +36,14 @@ const LocationPicker = ({ selected, setSelected }) => {
 const DRAFT_STORAGE_KEY = 'cropconnect_create_listing_draft';
 const MAX_LISTING_IMAGES = 4;
 
+const CATEGORY_OPTIONS = [
+  { label: 'Crop', value: 'crop' },
+  { label: 'Livestock', value: 'livestock' },
+  { label: 'Grain', value: 'grain' },
+  { label: 'Vegetable', value: 'vegetable' },
+  { label: 'Fruit', value: 'fruit' },
+];
+
 const DEFAULT_FORM_STATE = {
   title: '',
   description: '',
@@ -328,6 +336,7 @@ export const CreateListingPage = () => {
             draftImages: [],
           }),
         );
+        toast.info('Draft saved, but some images were too large to keep offline.');
       } catch {
         // Ignore storage failures in background autosave.
       }
