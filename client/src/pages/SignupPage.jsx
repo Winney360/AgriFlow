@@ -3,6 +3,23 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Eye, EyeOff, Mail, MapPin, Phone, User, ShoppingBag, Sprout } from 'lucide-react';
 
+const COUNTRY_CODE_OPTIONS = [
+  { value: '+254', label: 'KE +254', placeholder: '714648730' },
+  { value: '+256', label: 'UG +256', placeholder: '772123456' },
+  { value: '+255', label: 'TZ +255', placeholder: '712345678' },
+  { value: '+250', label: 'RW +250', placeholder: '788123456' },
+  { value: '+251', label: 'ET +251', placeholder: '911234567' },
+];
+
+const getNumberPlaceholder = (countryCode) =>
+  COUNTRY_CODE_OPTIONS.find((option) => option.value === countryCode)?.placeholder || '714648730';
+
+const buildFullPhoneNumber = (countryCode, localPhoneNumber) => {
+  const cleaned = String(localPhoneNumber || '').replace(/\D/g, '');
+  const normalizedLocal = cleaned.startsWith('0') ? cleaned.slice(1) : cleaned;
+  return `${countryCode}${normalizedLocal}`;
+};
+
 export const SignupPage = () => {
   const navigate = useNavigate();
   const { signup } = useAuth();
@@ -12,7 +29,8 @@ export const SignupPage = () => {
 
   const [form, setForm] = useState({
     name: '',
-    phoneNumber: '',
+    countryCode: '+254',
+    localPhoneNumber: '',
     password: '',
     email: '',
     locationName: '',
@@ -27,8 +45,14 @@ export const SignupPage = () => {
       setError('Name is required');
       return;
     }
-    if (!form.phoneNumber.trim()) {
+    if (!form.localPhoneNumber.trim()) {
       setError('Phone number is required');
+      return;
+    }
+
+    const composedPhoneNumber = buildFullPhoneNumber(form.countryCode, form.localPhoneNumber);
+    if (!composedPhoneNumber || composedPhoneNumber.length < 8) {
+      setError('Enter a valid phone number');
       return;
     }
 
@@ -41,7 +65,7 @@ export const SignupPage = () => {
       setSignupPending(true);
       const user = await signup({
         name: form.name,
-        phoneNumber: form.phoneNumber,
+        phoneNumber: composedPhoneNumber,
         password: form.password,
         email: form.email,
         locationName: form.locationName,
@@ -118,11 +142,23 @@ export const SignupPage = () => {
             <label className="mb-1 block text-xs font-semibold text-[#555]">Phone Number</label>
             <div className="flex h-11 items-center rounded-lg border border-[#d0d6d2] bg-white px-3">
               <Phone size={16} className="text-[#999]" />
+              <select
+                value={form.countryCode}
+                onChange={(e) => setForm({ ...form, countryCode: e.target.value })}
+                className="ml-2 h-8 rounded border border-[#d0d6d2] bg-[#f8fbf9] px-2 text-xs font-semibold text-[#2b4f42] outline-none"
+                aria-label="Select country code"
+              >
+                {COUNTRY_CODE_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
               <input
                 type="text"
-                placeholder="e.g. +2547..."
-                value={form.phoneNumber}
-                onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })}
+                placeholder={getNumberPlaceholder(form.countryCode)}
+                value={form.localPhoneNumber}
+                onChange={(e) => setForm({ ...form, localPhoneNumber: e.target.value })}
                 className="ml-2 flex-1 bg-transparent text-sm outline-none"
                 required
               />

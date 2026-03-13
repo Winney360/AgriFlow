@@ -1,18 +1,45 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Eye, EyeOff, Phone } from 'lucide-react';
+
+const REMEMBER_LOGIN_KEY = 'agriflow_remember_login';
+const REMEMBER_LOGIN_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
 export const LoginPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
 
   const [form, setForm] = useState({
     phoneNumber: '',
     password: '',
   });
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(REMEMBER_LOGIN_KEY);
+      if (!raw) {
+        return;
+      }
+
+      const parsed = JSON.parse(raw);
+      if (!parsed?.expiresAt || Date.now() > parsed.expiresAt) {
+        localStorage.removeItem(REMEMBER_LOGIN_KEY);
+        return;
+      }
+
+      setForm({
+        phoneNumber: parsed.phoneNumber || '',
+        password: parsed.password || '',
+      });
+      setRememberMe(true);
+    } catch {
+      localStorage.removeItem(REMEMBER_LOGIN_KEY);
+    }
+  }, []);
 
   const onSubmit = async (event) => {
     event.preventDefault();
@@ -20,6 +47,20 @@ export const LoginPage = () => {
 
     try {
       const user = await login(form);
+
+      if (rememberMe) {
+        localStorage.setItem(
+          REMEMBER_LOGIN_KEY,
+          JSON.stringify({
+            phoneNumber: form.phoneNumber,
+            password: form.password,
+            expiresAt: Date.now() + REMEMBER_LOGIN_TTL_MS,
+          }),
+        );
+      } else {
+        localStorage.removeItem(REMEMBER_LOGIN_KEY);
+      }
+
       const redirectUrl = user.role === 'seller' ? '/dashboard' : '/marketplace';
       navigate(redirectUrl);
     } catch (err) {
@@ -46,6 +87,7 @@ export const LoginPage = () => {
                 value={form.phoneNumber}
                 onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })}
                 className="ml-2 flex-1 bg-transparent text-sm outline-none"
+                autoComplete="username"
                 required
               />
             </div>
@@ -60,6 +102,7 @@ export const LoginPage = () => {
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 className="flex-1 bg-transparent text-sm outline-none"
+                autoComplete="current-password"
                 required
               />
               <button
@@ -71,6 +114,16 @@ export const LoginPage = () => {
               </button>
             </div>
           </div>
+
+          <label className="flex items-center gap-2 text-sm text-[#4e5f58]">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(event) => setRememberMe(event.target.checked)}
+              className="h-4 w-4 accent-[#20a46b]"
+            />
+            Remember me for the next 30 days
+          </label>
 
           {error && <p className="text-sm text-red-600">{error}</p>}
 
