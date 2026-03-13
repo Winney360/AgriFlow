@@ -105,21 +105,21 @@ export const MarketplacePage = () => {
   };
 
   // Merge products and emergency requests for display
+  // Emergency requests always first and top
   const displayProducts = [
-    ...products,
     ...emergencyRequests.map((req) => ({
       ...req,
       isEmergency: true,
-      // For map compatibility, ensure location field exists
       location: req.location || {},
-      imageUrl: req.imageUrl || '/emergency-default.png', // fallback image
+      imageUrl: req.imageUrl || '/emergency-default.png',
       title: req.title || 'Emergency Request',
       price: req.price || '',
       quantity: req.quantity || '',
       productType: req.productType || '',
       description: req.description || '',
-      sellerId: req.buyerId || {}, // emergency requests are posted by buyers
+      sellerId: req.buyerId || {},
     })),
+    ...products,
   ];
 
   const mapProducts = useMemo(
