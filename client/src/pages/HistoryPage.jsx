@@ -301,6 +301,16 @@ export const HistoryPage = () => {
     setCurrentPage(1);
   };
 
+  const removeHistoryRecord = async (id) => {
+    const confirmed = window.confirm('Delete this crop record from sales history? This cannot be undone.');
+    if (!confirmed) {
+      return;
+    }
+
+    await productApi.removeHistory(id);
+    await loadHistory();
+  };
+
   return (
     <div className="min-h-screen bg-[#f7f8f7]">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 px-6 py-6">
@@ -558,6 +568,13 @@ export const HistoryPage = () => {
                               >
                                 View Details
                               </Link>
+                              <button
+                                type="button"
+                                className="font-semibold text-red-600 hover:underline"
+                                onClick={() => removeHistoryRecord(item._id)}
+                              >
+                                Delete History
+                              </button>
                             </div>
                           </td>
                         </tr>
