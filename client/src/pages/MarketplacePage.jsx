@@ -10,10 +10,13 @@ import {
   Search,
   Sprout,
   Star,
+  Phone,
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
+import { Card } from '../components/ui/card';
 import { toast } from 'sonner';
-import { productApi } from '../lib/api';
+import { productApi, emergencyRequestApi } from '../lib/api';
+import { AlertCircle, Check, Clock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { ENGLISH_MAP_ATTRIBUTION, ENGLISH_MAP_TILE_URL } from '../lib/mapTiles';
 import { greenMarkerIcon } from '../lib/mapMarkerIcon';
@@ -22,6 +25,7 @@ import { normalizePhoneForWhatsApp } from '../lib/utils';
 export const MarketplacePage = () => {
   const { user } = useAuth();
   const [products, setProducts] = useState([]);
+  const [emergencyRequests, setEmergencyRequests] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [geoBusy, setGeoBusy] = useState(false);
@@ -58,6 +62,10 @@ export const MarketplacePage = () => {
 
   useEffect(() => {
     loadProducts().catch(() => setProducts([]));
+    // Load emergency requests for the marketplace
+    emergencyRequestApi.list({ status: 'open' })
+      .then((res) => setEmergencyRequests(res.data.data || []))
+      .catch(() => setEmergencyRequests([]));
   }, []);
 
   const useMyLocation = () => {
@@ -96,7 +104,23 @@ export const MarketplacePage = () => {
     );
   };
 
-  const displayProducts = products;
+  // Merge products and emergency requests for display
+  const displayProducts = [
+    ...products,
+    ...emergencyRequests.map((req) => ({
+      ...req,
+      isEmergency: true,
+      // For map compatibility, ensure location field exists
+      location: req.location || {},
+      imageUrl: req.imageUrl || '/emergency-default.png', // fallback image
+      title: req.title || 'Emergency Request',
+      price: req.price || '',
+      quantity: req.quantity || '',
+      productType: req.productType || '',
+      description: req.description || '',
+      sellerId: req.buyerId || {}, // emergency requests are posted by buyers
+    })),
+  ];
 
   const mapProducts = useMemo(
     () =>
@@ -334,6 +358,53 @@ export const MarketplacePage = () => {
             ) : null}
 
             {displayProducts.map((product) => {
+              if (product.isEmergency) {
+                // Emergency request card (profile style, no image)
+                const createdAt = new Date(product.createdAt);
+                const hoursAgo = Math.floor((Date.now() - createdAt) / (1000 * 60 * 60));
+                return (
+                  <Card key={product._id} className="overflow-hidden border-2 border-[#d83c31] bg-[#fff7f7] p-0">
+                    <div className="absolute top-2 right-2 bg-[#d83c31] text-white text-xs font-bold px-2 py-1 rounded">EMERGENCY</div>
+                    <div className="bg-gradient-to-r from-[#1f9f6a] to-[#27b883] p-4 text-white">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <h2 className="text-xl font-black">{product.title}</h2>
+                          <p className="text-sm opacity-90 mt-1">{product.productType}</p>
+                        </div>
+                        <span className="rounded px-3 py-1 text-xs font-bold whitespace-nowrap bg-red-100 text-red-700">🔴 Open</span>
+                      </div>
+                    </div>
+                    <div className="p-4 space-y-3">
+                      <div className="flex items-center gap-2 text-sm">
+                        <AlertCircle size={16} className="text-[#d83c31]" />
+                        <span className="font-bold text-[#1f1f1f]">Need: {product.quantity}</span>
+                      </div>
+                      {product.description && (
+                        <p className="text-sm text-[#666]">{product.description}</p>
+                      )}
+                      <div className="flex items-center gap-2 text-xs text-[#999]">
+                        <Clock size={14} />
+                        <span>{hoursAgo === 0 ? 'Just now' : `${hoursAgo} hour${hoursAgo !== 1 ? 's' : ''} ago`}</span>
+                      </div>
+                      <div className="rounded-lg border border-[#e0e0e0] p-2 bg-[#f8f8f8]">
+                        <p className="text-xs font-bold text-[#2f6152]">Posted by</p>
+                        <p className="text-sm font-bold text-[#1f1f1f] mt-1">{product.sellerId?.name}</p>
+                        {product.sellerId?.phoneNumber && (
+                          <p className="text-xs text-[#666] mt-1">📞 {product.sellerId.phoneNumber}</p>
+                        )}
+                      </div>
+                      <Button
+                        type="button"
+                        className="w-full bg-[#1f9f6a] font-bold"
+                        onClick={() => { setSelectedProduct(product); setShowModal(true); }}
+                      >
+                        View Emergency
+                      </Button>
+                    </div>
+                  </Card>
+                );
+              }
+              // ...existing code for normal product card...
               const whatsappNumber = normalizePhoneForWhatsApp(product?.sellerId?.phoneNumber);
               const whatsappHref = whatsappNumber ? `https://wa.me/${whatsappNumber}` : '#';
               const unit = String(product.quantity || 'bag').toLowerCase().includes('kg')
