@@ -347,9 +347,9 @@ export const HistoryPage = () => {
 
   return (
     <div className="min-h-screen bg-[#f7f8f7]">
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 px-6 py-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 px-2 sm:px-4 md:px-6 py-4 sm:py-6">
         {/* Left Sidebar */}
-        <aside className="lg:col-span-1 space-y-4 h-fit sticky top-6">
+        <aside className="lg:col-span-1 space-y-4 h-fit lg:sticky lg:top-6">
           {/* Search Bar */}
           <div className="rounded-lg border border-[#d8ddda] bg-white p-4 space-y-3">
             <h3 className="text-lg font-black text-[#1f1f1f]">Search Bar</h3>
