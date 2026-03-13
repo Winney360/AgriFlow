@@ -369,30 +369,7 @@ export const MarketplacePage = () => {
           )}
         </section>
 
-        <aside className="space-y-3">
-          <div className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-3">
-            <p className="text-4xl leading-none font-black text-[#1f9f6a]">Local Market Tips</p>
-            <p className="mt-2 text-lg leading-tight font-bold text-[#1f9f6a]">
-              Compare prices, confirm location details, and contact sellers directly before payment.
-            </p>
-          </div>
-
-          <div className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-3">
-            <p className="text-4xl leading-none font-black text-[#1f9f6a]">Actions</p>
-            {user?.role !== 'buyer' && (
-              <Link to="/create-listing">
-                <Button type="button" className="mt-3 h-10 w-full rounded-lg bg-[#1f9f6a]">
-                  Post Listing
-                </Button>
-              </Link>
-            )}
-            <Link to="/emergency-request">
-              <Button type="button" variant="outline" className="mt-2 h-10 w-full rounded-lg border-[#8fc7af] text-[#1f704f]">
-                Create Request
-              </Button>
-            </Link>
-          </div>
-        </aside>
+        {/* Removed Local Market Tips and Actions cards for buyers */}
       </div>
     </div>
   );

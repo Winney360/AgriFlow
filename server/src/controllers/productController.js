@@ -87,6 +87,13 @@ const resolveProductImageUrls = async (req) => {
 
 export const createProduct = async (req, res, next) => {
   try {
+    // Only allow sellers to post products
+    if (!req.user || req.user.role !== 'seller') {
+      const error = new Error('Only sellers can post listings. Switch to seller role to create a listing.');
+      error.statusCode = 403;
+      throw error;
+    }
+
     const {
       title,
       description,
