@@ -574,12 +574,17 @@ export const CreateListingPage = () => {
                           </Listbox.Button>
                           <Transition as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
                             <Listbox.Options className="absolute z-10 bottom-full mb-1 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                              {['Kgs','Pieces','Bags','Tons','Bunches'].map(option => (
+                              {['Kgs','Pieces','Bags','Tons','Bunches'].map((option, idx, arr) => (
                                 <Listbox.Option
                                   key={option}
-                                  className={({ active }) =>
-                                    `cursor-pointer select-none px-4 py-2 text-sm font-semibold rounded ${active ? 'bg-[#20a46b] text-white' : 'text-[#193f30]'}`
-                                  }
+                                  className={({ active }) => {
+                                    let base = 'cursor-pointer select-none px-4 py-2 text-sm font-semibold';
+                                    let rounded = '';
+                                    if (idx === 0) rounded += ' rounded-t-xl';
+                                    if (idx === arr.length - 1) rounded += ' rounded-b-xl';
+                                    let color = active ? 'bg-[#20a46b] text-white' : 'text-[#193f30]';
+                                    return `${base}${rounded} ${color}`;
+                                  }}
                                   value={option}
                                 >
                                   {option}
