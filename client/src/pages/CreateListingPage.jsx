@@ -565,17 +565,31 @@ export const CreateListingPage = () => {
                       className="h-10"
                       required
                     />
-                    <select
-                      className="h-10--full rounded-xl border border-[#c9ddd4] bg-[#f8fcfa] px-3 text-sm font-semibold text-[#193f30]"
-                      value={unitLabel}
-                      onChange={(event) => setUnitLabel(event.target.value)}
-                    >
-                      <option value="Kgs">Kgs</option>
-                      <option value="Pieces">Pieces</option>
-                      <option value="Bags">Bags</option>
-                      <option value="Tons">Tons</option>
-                      <option value="Bunches">Bunches</option>
-                    </select>
+                    <div className="w-3/8 min-w-[120px] max-w-[220px]">
+                      <Listbox value={unitLabel} onChange={setUnitLabel}>
+                        <div className="relative">
+                          <Listbox.Button className="h-10 w-full rounded-xl border border-[#c9ddd4] bg-[#f8fcfa] px-3 text-sm font-semibold text-[#193f30] text-left flex items-center justify-between">
+                            {unitLabel}
+                            <span className="ml-2">▼</span>
+                          </Listbox.Button>
+                          <Transition as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
+                            <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                              {['Kgs','Pieces','Bags','Tons','Bunches'].map(option => (
+                                <Listbox.Option
+                                  key={option}
+                                  className={({ active }) =>
+                                    `cursor-pointer select-none px-4 py-2 text-sm font-semibold rounded ${active ? 'bg-[#20a46b] text-white' : 'text-[#193f30]'}`
+                                  }
+                                  value={option}
+                                >
+                                  {option}
+                                </Listbox.Option>
+                              ))}
+                            </Listbox.Options>
+                          </Transition>
+                        </div>
+                      </Listbox>
+                    </div>
 
                   </div>
                 </div>
