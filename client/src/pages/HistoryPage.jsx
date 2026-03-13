@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { Download, Phone, Eye, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 import { productApi } from '../lib/api';
 import { formatCurrency } from '../lib/utils';
@@ -551,12 +552,12 @@ export const HistoryPage = () => {
                           </td>
                           <td className="px-6 py-4 text-left text-sm">
                             <div className="flex gap-2">
-                              <button className="font-semibold text-[#20a46b] hover:underline">View Details</button>
-                              <button className="flex items-center gap-1 font-semibold text-[#20a46b] hover:underline">
-                                <Phone size={12} />
-                                Contact Buyer
-                              </button>
-                              <button className="font-semibold text-[#20a46b] hover:underline">Download Invoice</button>
+                              <Link
+                                to={`/products/${item._id}`}
+                                className="font-semibold text-[#20a46b] hover:underline"
+                              >
+                                View Details
+                              </Link>
                             </div>
                           </td>
                         </tr>
