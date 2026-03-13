@@ -5,6 +5,7 @@ CropConnect is a full-stack web application designed to connect farmers, sellers
 ## Features
 
 ### Client (Frontend)
+
 - Built with React and Vite
 - Modern UI with Tailwind CSS
 - Authentication (login, signup, protected routes)
@@ -16,6 +17,7 @@ CropConnect is a full-stack web application designed to connect farmers, sellers
 - Responsive design
 
 ### Server (Backend)
+
 - Node.js with Express
 - MongoDB for data storage
 - RESTful API endpoints for products, users, notifications, and emergency requests
@@ -53,6 +55,7 @@ server/           # Backend Node.js app
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js (v18+ recommended)
 - pnpm (or npm/yarn)
 - MongoDB instance (local or cloud)
@@ -61,12 +64,14 @@ server/           # Backend Node.js app
 ### Setup
 
 1. **Clone the repository:**
+
    ```sh
    git clone <repo-url>
    cd CropConnect
    ```
 
 2. **Install dependencies:**
+
    ```sh
    cd client && pnpm install
    cd ../server && pnpm install
@@ -92,23 +97,27 @@ server/           # Backend Node.js app
 ## Scripts
 
 ### Client
+
 - `pnpm run dev` — Start Vite dev server
 - `pnpm run build` — Build for production
 - `pnpm run preview` — Preview production build
 
 ### Server
+
 - `pnpm run dev` — Start server with nodemon
 - `pnpm start` — Start server
 
 ## Environment Variables
 
 ### Server
+
 - `MONGO_URI` — MongoDB connection string
 - `JWT_SECRET` — Secret for JWT authentication
 - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` — Cloudinary credentials
 - ...other variables as needed
 
 ### Client
+
 - `VITE_API_BASE_URL` — Base URL for backend API
 - ...other variables as needed
 
@@ -121,6 +130,7 @@ This project is licensed under the MIT License.
 Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
 
 ## Acknowledgements
+
 - React, Vite, Tailwind CSS
 - Node.js, Express, MongoDB, Mongoose
 - Cloudinary
