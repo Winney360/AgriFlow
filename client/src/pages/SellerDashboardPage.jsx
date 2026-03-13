@@ -264,9 +264,10 @@ export const SellerDashboardPage = () => {
                 <p className="text-xs font-semibold text-[#666] mb-1">Active Listings</p>
                 <p className="text-3xl font-black text-[#20a46b]">{stats.activeListings}</p>
               </div>
-              <div className="rounded-lg border border-[#e0d0f0] bg-[#f7f0ff] p-3">
-                <p className="text-xs font-semibold text-[#666] mb-1">Active Buyers</p>
-                <p className="text-3xl font-black text-[#7a40e0]">{stats.activeBuyers || 0}</p>
+              <div className="rounded-lg border border-[#c7e0d5] bg-[#f7fbf9] p-3">
+                <p className="text-xs font-semibold text-[#204637] mb-1">Performance</p>
+                <p className="text-3xl font-black text-[#0f3327]">{(completedOrders + inactiveListings) > 0 ? Math.round((completedOrders / (completedOrders + inactiveListings)) * 100) : 0}%</p>
+                <p className="text-xs font-semibold text-[#45695c]">Closed listings sold successfully</p>
               </div>
               <div className="rounded-lg border border-[#d8ddda] bg-white p-3">
                 <p className="text-xs font-semibold text-[#666] mb-1">Total Sales</p>

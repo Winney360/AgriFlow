@@ -482,24 +482,7 @@ export const ProfilePage = () => {
             </Card>
           </div>
 
-          <Card className="border-[#a9d4c2] bg-[#f8fbfa] p-4">
-            <h3 className="text-3xl leading-none font-black text-[#12281f]">Terms & Privacy</h3>
-            <div className="mt-3 space-y-2 text-sm font-semibold text-[#3f6659]">
-              <p>
-                AgriFlow connects local buyers and sellers of crops and livestock. By using the platform,
-                you confirm listing information is accurate and that pricing, quantity, and delivery terms
-                are communicated clearly with counterparties.
-              </p>
-              <p>
-                Your profile data (name, contact, and location) is used to match nearby market opportunities
-                and improve trust signals. Contact details are only shared to support transaction coordination.
-              </p>
-              <p>
-                Sellers are responsible for listing quality and fulfillment. Buyers should verify produce
-                condition before payment and report disputes through support channels.
-              </p>
-            </div>
-          </Card>
+          
         </div>
 
         <div className="space-y-4">
@@ -543,22 +526,6 @@ export const ProfilePage = () => {
               </>
             )}
           </div>
-
-          <Card className="border-[#a9d4c2] bg-[#f8fbfa] p-4">
-            <h3 className="text-4xl leading-none font-black text-[#12281f]">Contact & Location</h3>
-            <div className="mt-3 space-y-2">
-              <div className="flex items-center gap-2 rounded-lg bg-[#ebf7f2] px-3 py-2 font-bold text-[#18573f]">
-                <Phone size={16} /> {user.phoneNumber || 'Phone number not added'}
-              </div>
-              <div className="flex items-center gap-2 rounded-lg bg-[#ebf7f2] px-3 py-2 font-bold text-[#18573f]">
-                <Mail size={16} /> {user.email || 'Email not added'}
-              </div>
-              <div className="flex items-center gap-2 rounded-lg bg-[#ebf7f2] px-3 py-2 font-bold text-[#18573f]">
-                {user.locationVerified ? <Check size={16} /> : <MapPin size={16} />}
-                Location {user.locationVerified ? 'Verified' : 'Not Verified'}
-              </div>
-            </div>
-          </Card>
 
           {user.role === 'seller' && (
           <Card className="border-[#a9d4c2] bg-[#f8fbfa] p-4">
@@ -607,32 +574,6 @@ export const ProfilePage = () => {
             </div>
           </Card>
           )}
-
-          {user.role === 'seller' ? (
-            <Card className="border-[#a9d4c2] bg-[#f8fbfa] p-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-xl font-black text-[#142f24]">You are currently:</p>
-                  <p className="text-lg font-bold capitalize text-[#3b6557]">{user.role}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={onSwitchRole}
-                  disabled={busy}
-                  className={`relative inline-flex h-8 w-14 items-center rounded-full transition ${
-                    roleSwitchChecked ? 'bg-[#1ea26c]' : 'bg-[#8caea0]'
-                  } disabled:opacity-60`}
-                >
-                  <span
-                    className={`inline-block h-6 w-6 rounded-full bg-white shadow transition ${
-                      roleSwitchChecked ? 'translate-x-7' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
-              </div>
-              <p className="mt-3 text-sm font-bold text-[#3b6557]">Switch to {nextRole} mode</p>
-            </Card>
-          ) : null}
 
         </div>
       </div>
