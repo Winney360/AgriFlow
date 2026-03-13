@@ -486,27 +486,10 @@ export const ProfilePage = () => {
         </div>
 
         <div className="space-y-4">
-          <h2 className="text-4xl font-black tracking-tight text-[#091f17]">{user.role === 'seller' ? 'KPI Cards' : 'My Activity'}</h2>
+          <h2 className="text-4xl font-black tracking-tight text-[#091f17]">{user.role === 'seller' ? '' : 'My Activity'}</h2>
 
           <div className="grid grid-cols-1 gap-3">
-            {user.role === 'seller' ? (
-              <>
-                <Card className="border-[#9bcfb8] bg-[#dff4e9] p-4">
-                  <p className="text-sm font-bold text-[#23483a]">Active Listings</p>
-                  <p className="text-5xl leading-none font-black text-[#112d22]">{activeListings.length}</p>
-                </Card>
-                <Card className="border-[#e6dab6] bg-[#fff9e7] p-4">
-                  <p className="text-sm font-bold text-[#5a4d2a]">Total Sales</p>
-                  <p className="text-4xl leading-none font-black text-[#2d2817]">{Math.round(totalSoldQuantity)}kg</p>
-                  <p className="text-sm font-semibold text-[#6d633f]">Revenue: {formatCurrency(totalRevenue)}</p>
-                </Card>
-                <Card className="border-[#c7e0d5] bg-[#f7fbf9] p-4">
-                  <p className="text-sm font-bold text-[#204637]">Performance</p>
-                  <p className="text-4xl leading-none font-black text-[#0f3327]">{performancePercent}%</p>
-                  <p className="text-sm font-semibold text-[#45695c]">Closed listings sold successfully</p>
-                </Card>
-              </>
-            ) : (
+            {user.role === 'seller' ? null : (
               <>
                 <Card className="border-[#9bcfb8] bg-[#dff4e9] p-4">
                   <p className="text-sm font-bold text-[#23483a]">My Requests</p>
