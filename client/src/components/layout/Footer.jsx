@@ -43,7 +43,7 @@ const Footer = () => (
           </ul>
         </div>
       </div>
-      <div className="mt-6 text-center text-xs text-[#aab7bf]">© 2026 AgriFlow. All rights reserved.</div>
+      <div className="mt-6 text-center text-xs text-[#aab7bf]">© 2026 <span style={{ color: '#1f9f6a' }}>Agri</span>Flow. All rights reserved.</div>
     </div>
   </footer>
 );
