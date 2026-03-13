@@ -200,57 +200,59 @@ export const SellerDashboardPage = () => {
         {/* Seller Profile Card */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <div className="rounded-lg border border-[#d8ddda] bg-white p-4 md:col-span-2">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-start gap-3">
-                {profileImageUrl ? (
-                  <img
-                    src={profileImageUrl}
-                    alt={user?.name || 'Seller'}
-                    className="h-16 w-16 rounded-full border-2 border-[#9bc7b4] object-cover"
-                  />
-                ) : (
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-[#9bc7b4] bg-[#1f9f6a] text-2xl font-black text-white">
-                    {profileInitial}
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                {/* DP and Name/Role */}
+                <div className="flex flex-row items-center gap-4 min-w-0">
+                  {profileImageUrl ? (
+                    <img
+                      src={profileImageUrl}
+                      alt={user?.name || 'Seller'}
+                      className="h-20 w-20 rounded-full border-2 border-[#9bc7b4] object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-[#9bc7b4] bg-[#1f9f6a] text-3xl font-black text-white">
+                      {profileInitial}
+                    </div>
+                  )}
+                  <div className="flex flex-col gap-1 min-w-0">
+                    <h3 className="text-xl font-black text-[#1f1f1f] truncate">{user?.name || 'Seller'}</h3>
+                    <p className="text-sm text-[#666] truncate">Trusted produce partner</p>
                   </div>
-                )}
-                <div className="space-y-2">
-                  <div>
-                    <h3 className="text-xl font-black text-[#1f1f1f]">{user?.name || 'Seller'}</h3>
-                    <p className="text-sm text-[#666]">Trusted produce partner</p>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2 text-xs font-semibold">
-                    <span className="rounded-full bg-[#f0f9f5] px-2.5 py-1 text-[#2a5a45]">
-                      Joined {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-KE', { month: 'short', year: 'numeric' }) : 'Recently'}
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-2 text-sm text-[#3f4a45] sm:grid-cols-2">
-                    <p className="rounded-lg bg-[#f7faf8] px-2 py-1">
-                      <span className="font-bold text-[#1f1f1f]">Phone:</span> {user?.phoneNumber || 'Not set'}
-                    </p>
-                    <p className="rounded-lg bg-[#f7faf8] px-2 py-1">
-                      <span className="font-bold text-[#1f1f1f]">Email:</span> {user?.email || 'Not set'}
-                    </p>
-                    <p className="rounded-lg bg-[#f7faf8] px-2 py-1 sm:col-span-2">
-                      <span className="font-bold text-[#1f1f1f]">Location:</span> {user?.locationName || 'Not set'}
-                    </p>
-                  </div>
+                </div>
+                {/* Join Time & Phone */}
+                <div className="flex flex-row flex-wrap gap-2 text-xs font-semibold sm:ml-auto">
+                  <span className="rounded-full bg-[#f0f9f5] px-2.5 py-1 text-[#2a5a45]">
+                    Joined {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-KE', { month: 'short', year: 'numeric' }) : 'Recently'}
+                  </span>
+                  <span className="rounded-full bg-[#f7faf8] px-2.5 py-1 text-[#1f1f1f]">
+                    <span className="font-bold">Phone:</span> {user?.phoneNumber || 'Not set'}
+                  </span>
                 </div>
               </div>
-              <div className="grid min-w-48 grid-cols-1 gap-2 text-sm">
-                <div className="rounded-lg border border-[#d0e0d6] bg-[#f0f9f5] px-3 py-2">
-                  <p className="text-xs font-semibold text-[#55796a]">Account Status</p>
-                  <p className="font-black text-[#1a8657]">Identity & contact confirmed</p>
-                </div>
-                <div className="rounded-lg border border-[#dbe3df] bg-[#fafcfb] px-3 py-2">
+              {/* Email & Location */}
+              <div className="flex flex-row flex-wrap gap-2 text-xs font-semibold">
+                <span className="rounded-full bg-[#f7faf8] px-2.5 py-1 text-[#1f1f1f]">
+                  <span className="font-bold">Email:</span> {user?.email || 'Not set'}
+                </span>
+                <span className="rounded-full bg-[#f7faf8] px-2.5 py-1 text-[#1f1f1f]">
+                  <span className="font-bold">Location:</span> {user?.locationName || 'Not set'}
+                </span>
+              </div>
+              {/* Notifications and Current Role side by side, Account Status full width at bottom */}
+              <div className="flex flex-row gap-2 mt-2 w-full">
+                <div className="rounded-lg border border-[#dbe3df] bg-[#fafcfb] px-3 py-2 flex-1 min-w-[120px]">
                   <p className="text-xs font-semibold text-[#66736d]">Notifications</p>
                   <p className="font-black text-[#2f4c40]">{user?.notificationEnabled ? 'Enabled' : 'Disabled'}</p>
                 </div>
-                <div className="rounded-lg border border-[#dbe3df] bg-[#fafcfb] px-3 py-2">
+                <div className="rounded-lg border border-[#dbe3df] bg-[#fafcfb] px-3 py-2 flex-1 min-w-[120px]">
                   <p className="text-xs font-semibold text-[#66736d]">Current Role</p>
                   <p className="font-black text-[#2f4c40]">Seller</p>
                 </div>
+              </div>
+              <div className="rounded-lg border border-[#d0e0d6] bg-[#f0f9f5] px-3 py-2 w-full mt-2">
+                <p className="text-xs font-semibold text-[#55796a]">Account Status</p>
+                <p className="font-black text-[#1a8657]">Identity & contact confirmed</p>
               </div>
             </div>
           </div>
