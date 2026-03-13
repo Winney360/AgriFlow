@@ -85,7 +85,7 @@ export const SellerDashboardPage = () => {
   const [selectedHistoryRange, setSelectedHistoryRange] = useState('last30');
   const [stats, setStats] = useState({
     activeListings: 0,
-    pendingMessages: 0,
+    activeBuyers: 0,
     totalSales: 0,
   });
 
@@ -108,7 +108,7 @@ export const SellerDashboardPage = () => {
 
       setStats({
         activeListings: productsData.length,
-        pendingMessages: 0,
+        activeBuyers: 0,
         totalSales: totalSoldQuantity,
       });
     } catch (_error) {
@@ -116,7 +116,7 @@ export const SellerDashboardPage = () => {
       setHistory([]);
       setStats({
         activeListings: 0,
-        pendingMessages: 0,
+        activeBuyers: 0,
         totalSales: 0,
       });
     }
@@ -254,9 +254,9 @@ export const SellerDashboardPage = () => {
                 <p className="text-xs font-semibold text-[#666] mb-1">Active Listings</p>
                 <p className="text-3xl font-black text-[#20a46b]">{stats.activeListings}</p>
               </div>
-              <div className="rounded-lg border border-[#f0e8d0] bg-[#fffbf0] p-3">
-                <p className="text-xs font-semibold text-[#666] mb-1">Pending Messages</p>
-                <p className="text-3xl font-black text-[#f0a000]">{stats.pendingMessages}</p>
+              <div className="rounded-lg border border-[#e0d0f0] bg-[#f7f0ff] p-3">
+                <p className="text-xs font-semibold text-[#666] mb-1">Active Buyers</p>
+                <p className="text-3xl font-black text-[#7a40e0]">{stats.activeBuyers || 0}</p>
               </div>
               <div className="rounded-lg border border-[#d8ddda] bg-white p-3">
                 <p className="text-xs font-semibold text-[#666] mb-1">Total Sales</p>
@@ -282,9 +282,6 @@ export const SellerDashboardPage = () => {
             <table className="w-full">
               <thead className="border-b border-[#e0e5e1] bg-[#f9fbfa]">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-[#666] w-8">
-                    <input type="checkbox" className="h-4 w-4" />
-                  </th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-[#666]">Product Name</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-[#666]">Quantity</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-[#666]">Price</th>
@@ -294,9 +291,6 @@ export const SellerDashboardPage = () => {
               <tbody className="divide-y divide-[#e0e5e1]">
                 {products.map((product) => (
                   <tr key={product._id} className="hover:bg-[#f9fbfa] transition">
-                    <td className="px-6 py-4 text-left">
-                      <input type="checkbox" className="h-4 w-4" />
-                    </td>
                     <td className="px-6 py-4 text-left">
                       <div className="flex items-center gap-3">
                         <img src={product.imageUrl} alt={product.title} className="h-10 w-10 rounded object-cover" />
@@ -390,6 +384,7 @@ export const SellerDashboardPage = () => {
                 <div>
                   <p className="text-sm font-semibold text-[#1f1f1f]">Archived Listings</p>
                   <p className="text-2xl font-black text-[#20a46b]">{inactiveListings}</p>
+                  {/* Archived listings are your past/expired/removed products. They are not visible to buyers but you can review them here for your records. */}
                 </div>
               </div>
             </div>
