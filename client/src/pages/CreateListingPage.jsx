@@ -498,9 +498,16 @@ export const CreateListingPage = () => {
   const useCurrentLocation = () => {
     toast('Allow GPS access for this listing?', {
       description: 'Tap Allow now to continue and approve location permission in your browser.',
+      style: {
+        border: '1px solid #20a46b',
+      },
       action: {
         label: 'Allow now',
         onClick: () => requestCurrentLocation(),
+      },
+      actionButtonStyle: {
+        backgroundColor: '#20a46b',
+        color: '#ffffff',
       },
       cancel: {
         label: 'Not now',
