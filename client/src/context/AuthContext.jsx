@@ -3,6 +3,20 @@ import { authApi } from '../lib/api';
 
 const AuthContext = createContext(null);
 
+const mergeUserWithAvatarFallback = (incomingUser, currentUser) => {
+  if (!incomingUser) {
+    return incomingUser;
+  }
+
+  return {
+    ...incomingUser,
+    avatarUrl:
+      incomingUser.avatarUrl !== undefined
+        ? incomingUser.avatarUrl
+        : currentUser?.avatarUrl || '',
+  };
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('agriflow_token'));
@@ -38,21 +52,21 @@ export const AuthProvider = ({ children }) => {
 
   const switchRole = async (role) => {
     const response = await authApi.switchRole(role);
-    const updated = response.data.data;
+    const updated = mergeUserWithAvatarFallback(response.data.data, user);
     localStorage.setItem('agriflow_user', JSON.stringify(updated));
     setUser(updated);
   };
 
   const toggleNotifications = async (notificationEnabled) => {
     const response = await authApi.toggleNotifications(notificationEnabled);
-    const updated = response.data.data;
+    const updated = mergeUserWithAvatarFallback(response.data.data, user);
     localStorage.setItem('agriflow_user', JSON.stringify(updated));
     setUser(updated);
   };
 
   const updateProfile = async (payload) => {
     const response = await authApi.updateProfile(payload);
-    const updated = response.data.data;
+    const updated = mergeUserWithAvatarFallback(response.data.data, user);
     localStorage.setItem('agriflow_user', JSON.stringify(updated));
     setUser(updated);
     return updated;
@@ -72,7 +86,10 @@ export const AuthProvider = ({ children }) => {
 
       try {
         const response = await authApi.me();
-        const profile = response.data.data;
+        const profile = mergeUserWithAvatarFallback(
+          response.data.data,
+          cachedUser ? JSON.parse(cachedUser) : null,
+        );
         localStorage.setItem('agriflow_user', JSON.stringify(profile));
         setUser(profile);
       } catch (_error) {

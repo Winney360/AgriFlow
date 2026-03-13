@@ -36,6 +36,7 @@ export const ProfilePage = () => {
   const { user, switchRole, toggleNotifications, updateProfile } = useAuth();
   const [busy, setBusy] = useState(false);
   const [saveBusy, setSaveBusy] = useState(false);
+  const [avatarBusy, setAvatarBusy] = useState(false);
   const [activityBusy, setActivityBusy] = useState(false);
   const [saveMessage, setSaveMessage] = useState('');
   const [error, setError] = useState('');
@@ -67,11 +68,38 @@ export const ProfilePage = () => {
     }
 
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
       const nextAvatar = String(reader.result || '');
       setProfileForm((prev) => ({ ...prev, avatarUrl: nextAvatar }));
+
+      try {
+        setAvatarBusy(true);
+        setSaveMessage('');
+        setError('');
+        await updateProfile({ avatarUrl: nextAvatar });
+        setSaveMessage('Display picture updated.');
+      } catch (err) {
+        setError(err?.response?.data?.message || 'Failed to update display picture');
+      } finally {
+        setAvatarBusy(false);
+      }
     };
     reader.readAsDataURL(file);
+  };
+
+  const onRemoveAvatar = async () => {
+    setProfileForm((prev) => ({ ...prev, avatarUrl: '' }));
+    try {
+      setAvatarBusy(true);
+      setSaveMessage('');
+      setError('');
+      await updateProfile({ avatarUrl: '' });
+      setSaveMessage('Display picture removed.');
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Failed to remove display picture');
+    } finally {
+      setAvatarBusy(false);
+    }
   };
 
   useEffect(() => {
@@ -285,6 +313,7 @@ export const ProfilePage = () => {
                     type="file"
                     accept="image/*"
                     onChange={onAvatarFileChange}
+                    disabled={avatarBusy}
                     className="w-full rounded-lg border border-[#c6ddd2] bg-white px-2 py-2 text-sm font-semibold"
                   />
                 </div>
@@ -292,7 +321,8 @@ export const ProfilePage = () => {
                   <button
                     type="button"
                     className="mt-2 text-xs font-bold text-[#a81f1f] hover:underline"
-                    onClick={() => setProfileForm((prev) => ({ ...prev, avatarUrl: '' }))}
+                    onClick={onRemoveAvatar}
+                    disabled={avatarBusy}
                   >
                     Remove picture
                   </button>
