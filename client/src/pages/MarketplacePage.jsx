@@ -26,9 +26,11 @@ export const MarketplacePage = () => {
   const [showModal, setShowModal] = useState(false);
   const [geoBusy, setGeoBusy] = useState(false);
   const [geoError, setGeoError] = useState('');
+  // Map is off by default for buyers, on for sellers
   const [mapView, setMapView] = useState(true);
   const [selectedTags, setSelectedTags] = useState(['maize']);
   const [customCropInput, setCustomCropInput] = useState('');
+
   const [filters, setFilters] = useState({
     search: '',
     productType: '',
@@ -39,6 +41,15 @@ export const MarketplacePage = () => {
     lng: '',
     radiusKm: '',
   });
+
+  // If user role changes, update mapView accordingly
+  useEffect(() => {
+    if (user?.role === 'buyer') {
+      setMapView(false);
+    } else if (user?.role === 'seller') {
+      setMapView(true);
+    }
+  }, [user?.role]);
 
   const loadProducts = async (params = {}) => {
     const response = await productApi.listActive(params);
