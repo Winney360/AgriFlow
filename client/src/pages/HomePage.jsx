@@ -238,34 +238,7 @@ export const HomePage = () => {
             </div>
           </section>
 
-          <section className="rounded-md border border-[#d8ddda] bg-[#eef3f0] p-4 sm:p-5 md:p-6">
-            <div className="mb-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-              <h2 className="text-2xl sm:text-4xl font-black text-[#161616]">Featured Success Stories</h2>
-              <div className="hidden gap-2 md:flex">
-                <button type="button" className="rounded border border-[#ccd4cf] bg-white px-2 py-1">{'<'}</button>
-                <button type="button" className="rounded border border-[#ccd4cf] bg-white px-2 py-1">{'>'}</button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-              {successStories.map((story) => (
-                <article key={story.id} className="rounded-md border border-[#d8ddda] bg-white p-3">
-                  <div className="mb-3 flex gap-2">
-                    <div className="h-14 w-14 rounded-md bg-[#d7e5da]" />
-                    <div className="h-14 w-14 rounded-md bg-[#d7e5da]" />
-                    <div className="h-14 w-14 rounded-md bg-[#d7e5da]" />
-                  </div>
-                  <h3 className="text-xl font-black">{story.title}</h3>
-                  <p className="mt-2 text-sm text-[#535b57]">{story.text}</p>
-                  <div className="mt-2 flex items-center gap-1 text-[#1f9f6a]">
-                    <Star size={13} fill="currentColor" />
-                    <span className="text-sm">4.0</span>
-                    <span className="text-sm">5</span>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </section>
+          {/* Featured Success Stories section removed as requested */}
 
           {/* Footer is now rendered globally in MainLayout */}
         </div>
