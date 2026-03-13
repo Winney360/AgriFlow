@@ -318,7 +318,7 @@ export const SellerDashboardPage = () => {
                         </Link>
                         <button 
                           onClick={() => markSold(product._id)}
-                          className="px-3 py-1 text-sm font-semibold text-[#20a46b] hover:bg-[#e8f6ef] rounded"
+                          className="px-3 py-1 text-sm font-semibold text-[#f0a000] hover:bg-[#fffbf0] rounded"
                         >
                           Sold
                         </button>
