@@ -565,7 +565,7 @@ export const CreateListingPage = () => {
                       className="h-10"
                       required
                     />
-                    <div className="w-3/8 min-w-[120px] max-w-[220px]">
+                    <div className="w-3/8 min-w-30 max-w-55">
                       <Listbox value={unitLabel} onChange={setUnitLabel}>
                         <div className="relative">
                           <Listbox.Button className="h-10 w-full rounded-xl border border-[#c9ddd4] bg-[#f8fcfa] px-3 text-sm font-semibold text-[#193f30] text-left flex items-center justify-between">
@@ -646,17 +646,34 @@ export const CreateListingPage = () => {
                           className="h-10"
                           required
                         />
-                        <select
-                          className="h-10 rounded-xl border border-[#c9ddd4] bg-[#f8fcfa] px-3 text-sm font-semibold text-[#193f30]"
-                          value={unitLabel}
-                          onChange={(event) => setUnitLabel(event.target.value)}
-                        >
-                          <option value="Kgs">Kgs</option>
-                          <option value="Pieces">Pieces</option>
-                          <option value="Bags">Bags</option>
-                          <option value="Tons">Tons</option>
-                          <option value="Bunches">Bunches</option>
-                        </select>
+                        <Listbox value={unitLabel} onChange={setUnitLabel}>
+                          <div className="relative">
+                            <Listbox.Button className="h-10 w-full rounded-xl border border-[#c9ddd4] bg-[#f8fcfa] px-3 text-sm font-semibold text-[#193f30] text-left flex items-center justify-between">
+                              {unitLabel}
+                              <span className="ml-2">▼</span>
+                            </Listbox.Button>
+                            <Transition as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
+                              <Listbox.Options className="absolute z-10 mt-1 top-full max-h-60 w-full overflow-auto rounded-xl bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                                {['Kgs', 'Pieces', 'Bags', 'Tons', 'Bunches'].map((option, idx, arr) => (
+                                  <Listbox.Option
+                                    key={option}
+                                    className={({ active }) => {
+                                      let base = 'cursor-pointer select-none px-4 py-2 text-sm font-semibold';
+                                      let rounded = '';
+                                      if (idx === 0) rounded += ' rounded-t-xl';
+                                      if (idx === arr.length - 1) rounded += ' rounded-b-xl';
+                                      let color = active ? 'bg-[#20a46b] text-white' : 'text-[#193f30]';
+                                      return `${base}${rounded} ${color}`;
+                                    }}
+                                    value={option}
+                                  >
+                                    {option}
+                                  </Listbox.Option>
+                                ))}
+                              </Listbox.Options>
+                            </Transition>
+                          </div>
+                        </Listbox>
                       </div>
                       {quantityError ? (
                         <p className="mt-1 flex items-center gap-1 text-xs font-bold text-[#ba2a2a]">
