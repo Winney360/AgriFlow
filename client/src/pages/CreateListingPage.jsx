@@ -566,7 +566,7 @@ export const CreateListingPage = () => {
                       required
                     />
                     <select
-                      className="h-10 rounded-xl border border-[#c9ddd4] bg-[#f8fcfa] px-3 text-sm font-semibold text-[#193f30]"
+                      className="h-10--full rounded-xl border border-[#c9ddd4] bg-[#f8fcfa] px-3 text-sm font-semibold text-[#193f30]"
                       value={unitLabel}
                       onChange={(event) => setUnitLabel(event.target.value)}
                     >
