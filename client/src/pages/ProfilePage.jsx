@@ -365,24 +365,26 @@ export const ProfilePage = () => {
               </label>
             </div>
 
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Button
-                className="rounded-lg bg-[#1fa56f] px-6 font-bold"
-                onClick={onSaveProfile}
-                disabled={saveBusy}
-              >
-                <ShieldCheck size={16} /> {saveBusy ? 'Saving...' : 'Save Settings'}
-              </Button>
-              <Button
-                className="rounded-lg bg-[#1fa56f] px-6 font-bold"
-                onClick={onToggleNotifications}
-                disabled={busy}
-              >
-                <Bell size={16} /> Notifications {user.notificationEnabled ? 'ON' : 'OFF'}
-              </Button>
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+              <div className="flex gap-2 w-full">
+                <Button
+                  className="rounded-lg bg-[#1fa56f] px-4 font-bold w-1/2 sm:w-auto text-xs sm:text-base"
+                  onClick={onSaveProfile}
+                  disabled={saveBusy}
+                >
+                  <ShieldCheck size={16} /> {saveBusy ? 'Saving...' : 'Save Settings'}
+                </Button>
+                <Button
+                  className="rounded-lg bg-[#1fa56f] px-4 font-bold w-1/2 sm:w-auto text-xs sm:text-base"
+                  onClick={onToggleNotifications}
+                  disabled={busy}
+                >
+                  <Bell size={16} /> Notifications {user.notificationEnabled ? 'ON' : 'OFF'}
+                </Button>
+              </div>
               <Button
                 variant="outline"
-                className="rounded-lg border-[#1fa56f] bg-[#f8fbfa] text-[#0f5c40]"
+                className="rounded-lg border-[#1fa56f] bg-[#f8fbfa] text-[#0f5c40] w-full sm:w-auto"
                 onClick={onSwitchRole}
                 disabled={busy}
               >
