@@ -321,7 +321,10 @@ export const ProfilePage = () => {
           </Card>
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1.2fr]">
-            <Card className="border-[#a9d4c2] bg-[#f8fbfa] p-4">
+            <Card
+              id={user.role === 'buyer' ? 'my-emergency-requests' : undefined}
+              className="border-[#a9d4c2] bg-[#f8fbfa] p-4"
+            >
               <p className="text-3xl font-black text-[#12281f]">{user.role === 'seller' ? 'Recent Activity' : 'My Emergency Requests'}</p>
               {user.role === 'seller' ? (
                 activityBusy ? (
@@ -361,30 +364,39 @@ export const ProfilePage = () => {
             <Card className="border-[#a9d4c2] bg-[#f8fbfa] p-4">
               <p className="text-3xl font-black text-[#12281f]">{user.role === 'seller' ? 'Recent Listings' : 'Quick Actions'}</p>
               {user.role === 'seller' ? (
-                <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  {recentListings.length === 0 ? (
-                    <p className="text-sm font-semibold text-[#3c6356]">No listings yet.</p>
-                  ) : (
-                    recentListings.slice(0, 4).map((listing) => (
-                      <article
-                        key={listing._id}
-                        className="overflow-hidden rounded-xl border border-[#c8e0d6] bg-white"
-                      >
-                        <img src={listing.imageUrl} alt={listing.title} className="h-24 w-full object-cover" />
-                        <div className="space-y-1 p-2">
-                          <p className="text-sm font-black text-[#17342a]">{listing.title}</p>
-                          <p className="text-xs font-semibold text-[#567d70] capitalize">{listing.status}</p>
-                          <p className="text-xs font-black text-[#183e31]">
-                            {formatCurrency(listing.price)} / unit
-                          </p>
-                          <p className="text-[11px] font-semibold text-[#4f776a]">
-                            Est. total {formatCurrency(getListingEstimatedTotal(listing.price, listing.quantity))}
-                          </p>
-                          <p className="text-xs font-semibold text-[#4f776a]">{formatShortDate(listing.updatedAt)}</p>
-                        </div>
-                      </article>
-                    ))
-                  )}
+                <div className="mt-3 space-y-3">
+                  <Link to="/emergency-board">
+                    <Button className="h-10 w-full rounded-lg bg-[#ff2b2b] font-bold text-white hover:bg-[#e61f1f]">View Emergency Requests</Button>
+                  </Link>
+                  <Link to="/emergency-board">
+                    <Button variant="outline" className="h-10 w-full rounded-lg border-[#1fa56f] text-[#0f5c40]">View Request Board</Button>
+                  </Link>
+
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    {recentListings.length === 0 ? (
+                      <p className="text-sm font-semibold text-[#3c6356]">No listings yet.</p>
+                    ) : (
+                      recentListings.slice(0, 4).map((listing) => (
+                        <article
+                          key={listing._id}
+                          className="overflow-hidden rounded-xl border border-[#c8e0d6] bg-white"
+                        >
+                          <img src={listing.imageUrl} alt={listing.title} className="h-24 w-full object-cover" />
+                          <div className="space-y-1 p-2">
+                            <p className="text-sm font-black text-[#17342a]">{listing.title}</p>
+                            <p className="text-xs font-semibold text-[#567d70] capitalize">{listing.status}</p>
+                            <p className="text-xs font-black text-[#183e31]">
+                              {formatCurrency(listing.price)} / unit
+                            </p>
+                            <p className="text-[11px] font-semibold text-[#4f776a]">
+                              Est. total {formatCurrency(getListingEstimatedTotal(listing.price, listing.quantity))}
+                            </p>
+                            <p className="text-xs font-semibold text-[#4f776a]">{formatShortDate(listing.updatedAt)}</p>
+                          </div>
+                        </article>
+                      ))
+                    )}
+                  </div>
                 </div>
               ) : (
                 <div className="mt-3 space-y-2">
@@ -392,10 +404,7 @@ export const ProfilePage = () => {
                     <Button className="h-10 w-full rounded-lg bg-[#1fa56f] font-bold text-white">Browse Marketplace</Button>
                   </Link>
                   <Link to="/emergency-request">
-                    <Button variant="outline" className="h-10 w-full rounded-lg border-[#1fa56f] text-[#0f5c40]">Post Emergency Request</Button>
-                  </Link>
-                  <Link to="/emergency-board">
-                    <Button variant="outline" className="h-10 w-full rounded-lg border-[#1fa56f] text-[#0f5c40]">View Request Board</Button>
+                    <Button className="h-10 w-full rounded-lg bg-[#c62828] font-bold text-white hover:bg-[#a81f1f]">Post Emergency Request</Button>
                   </Link>
                 </div>
               )}
@@ -525,29 +534,31 @@ export const ProfilePage = () => {
           </Card>
           )}
 
-          <Card className="border-[#a9d4c2] bg-[#f8fbfa] p-4">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xl font-black text-[#142f24]">You are currently:</p>
-                <p className="text-lg font-bold capitalize text-[#3b6557]">{user.role}</p>
+          {user.role === 'seller' ? (
+            <Card className="border-[#a9d4c2] bg-[#f8fbfa] p-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-xl font-black text-[#142f24]">You are currently:</p>
+                  <p className="text-lg font-bold capitalize text-[#3b6557]">{user.role}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={onSwitchRole}
+                  disabled={busy}
+                  className={`relative inline-flex h-8 w-14 items-center rounded-full transition ${
+                    roleSwitchChecked ? 'bg-[#1ea26c]' : 'bg-[#8caea0]'
+                  } disabled:opacity-60`}
+                >
+                  <span
+                    className={`inline-block h-6 w-6 rounded-full bg-white shadow transition ${
+                      roleSwitchChecked ? 'translate-x-7' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={onSwitchRole}
-                disabled={busy}
-                className={`relative inline-flex h-8 w-14 items-center rounded-full transition ${
-                  roleSwitchChecked ? 'bg-[#1ea26c]' : 'bg-[#8caea0]'
-                } disabled:opacity-60`}
-              >
-                <span
-                  className={`inline-block h-6 w-6 rounded-full bg-white shadow transition ${
-                    roleSwitchChecked ? 'translate-x-7' : 'translate-x-1'
-                  }`}
-                />
-              </button>
-            </div>
-            <p className="mt-3 text-sm font-bold text-[#3b6557]">Switch to {nextRole} mode</p>
-          </Card>
+              <p className="mt-3 text-sm font-bold text-[#3b6557]">Switch to {nextRole} mode</p>
+            </Card>
+          ) : null}
 
           <Card className="border-[#a9d4c2] bg-[#f8fbfa] p-4">
             <div className="grid grid-cols-2 gap-3">
