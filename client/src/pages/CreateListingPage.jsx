@@ -582,7 +582,24 @@ export const CreateListingPage = () => {
                 <div className="rounded-xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-3">
                   <p className="text-4xl leading-none font-black text-[#1f9f6a]">Define Your Harvest & Price.</p>
 
-                  <div className="mt-4 space-y-4">
+                  {/* Category Dropdown */}
+                  <div className="mt-4">
+                    <label className="block text-sm font-bold text-[#2f6152] mb-1">Category</label>
+                    <select
+                      className="h-10 w-full rounded-xl border border-[#c9ddd4] bg-[#f8fcfa] px-3 text-sm font-semibold text-[#193f30] mb-4"
+                      value={form.productType}
+                      onChange={e => setForm({ ...form, productType: e.target.value })}
+                      required
+                    >
+                      <option value="crop">Crop</option>
+                      <option value="livestock">Livestock</option>
+                      <option value="grain">Grain</option>
+                      <option value="vegetable">Vegetable</option>
+                      <option value="fruit">Fruit</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-4">
                     <div>
                       <p className="text-2xl font-black text-[#143629]">Quantity</p>
                       <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -641,12 +658,6 @@ export const CreateListingPage = () => {
                         <option value="trucks_only">🟡 Trucks Only</option>
                       </select>
                       <p className="mt-1 text-xs text-[#4a6e60]">Help buyers know if they can reach your farm during emergencies</p>
-                    </div>
-
-                    <div className="rounded-xl border border-[#d8e7e1] bg-[#f8fcfb] p-3">
-                      <p className="text-xl leading-tight font-black text-[#203f33]">
-                        Price & Unit data will be linked for local trust and visible JWT validation.
-                      </p>
                     </div>
                   </div>
                 </div>
