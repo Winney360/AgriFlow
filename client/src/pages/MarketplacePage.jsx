@@ -371,51 +371,51 @@ export const MarketplacePage = () => {
                   </div>
                 </article>
               );
-                  {/* Crop Modal */}
-                  <Dialog open={showModal} onClose={() => setShowModal(false)} className="relative z-50">
-                    <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
-                    <div className="fixed inset-0 flex items-center justify-center p-4">
-                      <Dialog.Panel className="w-full max-w-2xl rounded-xl bg-white p-6 shadow-xl">
-                        <Dialog.Title className="text-2xl font-black mb-2">{selectedProduct?.title}</Dialog.Title>
-                        <div className="flex flex-col md:flex-row gap-4">
-                          <div className="flex-1">
-                            {selectedProduct?.imageUrls && selectedProduct.imageUrls.length > 0 ? (
-                              <div className="grid grid-cols-2 gap-2">
-                                {selectedProduct.imageUrls.map((img, idx) => (
-                                  <img
-                                    key={img}
-                                    src={img}
-                                    alt={`Crop image ${idx + 1}`}
-                                    className="w-full h-32 object-cover rounded-lg"
-                                  />
-                                ))}
-                              </div>
-                            ) : (
-                              <img src={selectedProduct?.imageUrl} alt={selectedProduct?.title} className="w-full h-40 object-cover rounded-lg" />
-                            )}
-                          </div>
-                          <div className="flex-1 space-y-2">
-                            <p className="text-lg font-bold">Price: <span className="text-[#1f9f6a]">Ksh {Number(selectedProduct?.price || 0).toLocaleString()}</span></p>
-                            <p className="text-md font-semibold">Quantity: {selectedProduct?.quantity}</p>
-                            <p className="text-md font-semibold">Type: {selectedProduct?.productType}</p>
-                            <p className="text-md font-semibold">Location: {selectedProduct?.location?.locationName}</p>
-                            <p className="text-md">{selectedProduct?.description}</p>
-                            <div className="flex gap-2 mt-4">
-                              <Button onClick={() => setShowModal(false)} className="bg-gray-200 text-gray-800">Close</Button>
-                              {selectedProduct?.sellerId?.phoneNumber && (
-                                <a href={`https://wa.me/${normalizePhoneForWhatsApp(selectedProduct.sellerId.phoneNumber)}`} target="_blank" rel="noreferrer">
-                                  <Button className="bg-[#1f9f6a] text-white">Contact Seller</Button>
-                                </a>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </Dialog.Panel>
-                    </div>
-                  </Dialog>
             })}
           </div>
           )}
+          {/* Crop Modal (moved outside map loop) */}
+          <Dialog open={showModal} onClose={() => setShowModal(false)} className="relative z-50">
+            <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
+            <div className="fixed inset-0 flex items-center justify-center p-4">
+              <Dialog.Panel className="w-full max-w-2xl rounded-xl bg-white p-6 shadow-xl">
+                <Dialog.Title className="text-2xl font-black mb-2">{selectedProduct?.title}</Dialog.Title>
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="flex-1">
+                    {selectedProduct?.imageUrls && selectedProduct.imageUrls.length > 0 ? (
+                      <div className="grid grid-cols-2 gap-2">
+                        {selectedProduct.imageUrls.map((img, idx) => (
+                          <img
+                            key={img}
+                            src={img}
+                            alt={`Crop image ${idx + 1}`}
+                            className="w-full h-32 object-cover rounded-lg"
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <img src={selectedProduct?.imageUrl} alt={selectedProduct?.title} className="w-full h-40 object-cover rounded-lg" />
+                    )}
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <p className="text-lg font-bold">Price: <span className="text-[#1f9f6a]">Ksh {Number(selectedProduct?.price || 0).toLocaleString()}</span></p>
+                    <p className="text-md font-semibold">Quantity: {selectedProduct?.quantity}</p>
+                    <p className="text-md font-semibold">Type: {selectedProduct?.productType}</p>
+                    <p className="text-md font-semibold">Location: {selectedProduct?.location?.locationName}</p>
+                    <p className="text-md">{selectedProduct?.description}</p>
+                    <div className="flex gap-2 mt-4">
+                      <Button onClick={() => setShowModal(false)} className="bg-gray-200 text-gray-800">Close</Button>
+                      {selectedProduct?.sellerId?.phoneNumber && (
+                        <a href={`https://wa.me/${normalizePhoneForWhatsApp(selectedProduct.sellerId.phoneNumber)}`} target="_blank" rel="noreferrer">
+                          <Button className="bg-[#1f9f6a] text-white">Contact Seller</Button>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </Dialog.Panel>
+            </div>
+          </Dialog>
         </section>
 
         {/* Removed Local Market Tips and Actions cards for buyers */}
