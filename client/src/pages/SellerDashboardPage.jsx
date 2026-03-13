@@ -182,23 +182,24 @@ export const SellerDashboardPage = () => {
 
   return (
     <div className="min-h-screen bg-[#f7f8f7]">
-      <div className="px-6 py-6 space-y-6">
+      <div className="px-2 sm:px-6 py-4 space-y-4 sm:space-y-6 max-w-full">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-black text-[#1f1f1f]">Dashboard</h1>
-          <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <h1 className="text-2xl sm:text-3xl font-black text-[#1f1f1f]">Dashboard</h1>
+          <div className="flex gap-2 sm:gap-3">
             <Link to="/create-listing">
-              <button className="flex items-center gap-2 rounded-lg bg-[#20a46b] px-4 py-2.5 font-semibold text-white hover:bg-[#1a8657]">
+              <button className="flex items-center gap-2 rounded-lg bg-[#20a46b] px-4 py-2.5 font-semibold text-white hover:bg-[#1a8657] w-full sm:w-auto">
                 <Plus size={16} />
-                Add New Crop
+                <span className="hidden xs:inline">Add New Crop</span>
+                <span className="inline xs:hidden">Add</span>
               </button>
             </Link>
           </div>
         </div>
 
         {/* Seller Profile Card */}
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-          <div className="rounded-lg border border-[#d8ddda] bg-white p-4 lg:col-span-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="rounded-lg border border-[#d8ddda] bg-white p-4 md:col-span-2">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-start gap-3">
                 {profileImageUrl ? (
@@ -255,7 +256,7 @@ export const SellerDashboardPage = () => {
           </div>
 
           {/* Stats Cards */}
-          <div className="rounded-lg border border-[#d8ddda] bg-white p-4">
+          <div className="rounded-lg border border-[#d8ddda] bg-white p-4 flex flex-col gap-3">
             <div className="space-y-3">
               <div className="rounded-lg border border-[#d0e0d6] bg-[#f0f9f5] p-3">
                 <p className="text-xs font-semibold text-[#666] mb-1">Active Listings</p>
@@ -274,100 +275,95 @@ export const SellerDashboardPage = () => {
         </div>
 
         {/* View Crops Button */}
-        <button className="flex items-center gap-2 rounded-lg border border-[#20a46b] bg-white px-4 py-2 font-semibold text-[#20a46b] hover:bg-[#f0f9f5]">
+        <button className="flex items-center gap-2 rounded-lg border border-[#20a46b] bg-white px-4 py-2 font-semibold text-[#20a46b] hover:bg-[#f0f9f5] w-full sm:w-auto">
           <Eye size={16} />
-          View crops
+          <span className="hidden xs:inline">View crops</span>
+          <span className="inline xs:hidden">Crops</span>
         </button>
 
-        {/* Active Listings Table */}
-        <div className="rounded-lg border border-[#d8ddda] bg-white overflow-hidden">
-          <div className="px-6 py-4 border-b border-[#e0e5e1]">
-            <h2 className="text-2xl font-black text-[#1f1f1f]">Active Listings</h2>
+        {/* Active Listings Table - Responsive */}
+        <div className="rounded-lg border border-[#d8ddda] bg-white overflow-x-auto">
+          <div className="px-2 sm:px-6 py-4 border-b border-[#e0e5e1]">
+            <h2 className="text-xl sm:text-2xl font-black text-[#1f1f1f]">Active Listings</h2>
           </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="border-b border-[#e0e5e1] bg-[#f9fbfa]">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-[#666]">Product Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-[#666]">Quantity</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-[#666]">Price</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-[#666]">Actions</th>
+          <table className="min-w-[600px] w-full text-sm">
+            <thead className="border-b border-[#e0e5e1] bg-[#f9fbfa]">
+              <tr>
+                <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-[#666] whitespace-nowrap">Product Name</th>
+                <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-[#666] whitespace-nowrap">Quantity</th>
+                <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-[#666] whitespace-nowrap">Price</th>
+                <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-[#666] whitespace-nowrap">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#e0e5e1]">
+              {products.map((product) => (
+                <tr key={product._id} className="hover:bg-[#f9fbfa] transition">
+                  <td className="px-4 sm:px-6 py-4 text-left align-top">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <img src={product.imageUrl} alt={product.title} className="h-10 w-10 rounded object-cover flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="font-semibold text-[#1f1f1f] truncate">{product.title}</p>
+                        <p className="text-xs text-[#999] truncate">{product.productType} • {product.location?.locationName || 'No location'}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 sm:px-6 py-4 text-left font-semibold text-[#1f1f1f] align-top whitespace-nowrap">{product.quantity}</td>
+                  <td className="px-4 sm:px-6 py-4 text-left font-semibold text-[#1f1f1f] align-top whitespace-nowrap">
+                    <div>
+                      <p>{formatCurrency(product.price)} / unit</p>
+                      <p className="text-xs font-semibold text-[#666]">
+                        Est. total {formatCurrency(getListingEstimatedTotal(product.price, product.quantity))}
+                      </p>
+                    </div>
+                  </td>
+                  <td className="px-4 sm:px-6 py-4 text-left align-top whitespace-nowrap">
+                    <div className="flex flex-row items-center gap-2">
+                      <Link to={`/create-listing?edit=${product._id}`}>
+                        <button className="px-3 py-1 text-sm font-semibold text-[#20a46b] hover:bg-[#f0f9f5] rounded">
+                          Edit
+                        </button>
+                      </Link>
+                      <button 
+                        onClick={() => markSold(product._id)}
+                        className="px-3 py-1 text-sm font-semibold text-[#f0a000] hover:bg-[#fffbf0] rounded"
+                      >
+                        Sold
+                      </button>
+                      <button 
+                        onClick={() => archiveProduct(product._id)}
+                        className="px-3 py-1 text-sm font-semibold text-[#e0b000] hover:bg-[#fff8e1] rounded"
+                      >
+                        Archive
+                      </button>
+                      <button 
+                        onClick={() => remove(product._id)}
+                        className="px-3 py-1 text-sm font-semibold text-red-600 hover:bg-[#fff0f0] rounded"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-[#e0e5e1]">
-                {products.map((product) => (
-                  <tr key={product._id} className="hover:bg-[#f9fbfa] transition">
-                    <td className="px-6 py-4 text-left">
-                      <div className="flex items-center gap-3">
-                        <img src={product.imageUrl} alt={product.title} className="h-10 w-10 rounded object-cover" />
-                        <div>
-                          <p className="font-semibold text-[#1f1f1f]">{product.title}</p>
-                          <p className="text-xs text-[#999]">{product.productType} • {product.location?.locationName || 'No location'}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-left font-semibold text-[#1f1f1f]">{product.quantity}</td>
-                    <td className="px-6 py-4 text-left font-semibold text-[#1f1f1f]">
-                      <div>
-                        <p>{formatCurrency(product.price)} / unit</p>
-                        <p className="text-xs font-semibold text-[#666]">
-                          Est. total {formatCurrency(getListingEstimatedTotal(product.price, product.quantity))}
-                        </p>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-left">
-                      <div className="flex items-center gap-2">
-                        <Link to={`/create-listing?edit=${product._id}`}>
-                          <button className="px-3 py-1 text-sm font-semibold text-[#20a46b] hover:bg-[#f0f9f5] rounded">
-                            Edit
-                          </button>
-                        </Link>
-                        <button 
-                          onClick={() => markSold(product._id)}
-                          className="px-3 py-1 text-sm font-semibold text-[#f0a000] hover:bg-[#fffbf0] rounded"
-                        >
-                          Sold
-                        </button>
-                        <button 
-                          onClick={() => archiveProduct(product._id)}
-                          className="px-3 py-1 text-sm font-semibold text-[#e0b000] hover:bg-[#fff8e1] rounded"
-                        >
-                          Archive
-                        </button>
-                        <button 
-                          onClick={() => remove(product._id)}
-                          className="px-3 py-1 text-sm font-semibold text-red-600 hover:bg-[#fff0f0] rounded"
-                        >
-                          Delete
-                        </button>
-                        <button className="px-2 py-1 text-[#999] hover:bg-[#f9f9f9] rounded">
-                          <MoreHorizontal size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {products.length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-8 text-center text-sm text-[#666]">
-                      No active listings yet. Add your first crop to see data here.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+              ))}
+              {products.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="px-4 sm:px-6 py-8 text-center text-sm text-[#666]">
+                    No active listings yet. Add your first crop to see data here.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
 
         {/* Recent Sales & Performance Chart */}
-        <div className="rounded-lg border border-[#d8ddda] bg-white p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-black text-[#1f1f1f]">Recent Sales & Performance Chart</h2>
+        <div className="rounded-lg border border-[#d8ddda] bg-white p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+            <h2 className="text-xl sm:text-2xl font-black text-[#1f1f1f]">Recent Sales & Performance Chart</h2>
             <select
               value={selectedHistoryRange}
               onChange={(event) => setSelectedHistoryRange(event.target.value)}
-              className="rounded-lg border border-[#d8ddda] bg-white px-3 py-2 text-sm font-semibold text-[#20a46b] outline-none"
+              className="rounded-lg border border-[#d8ddda] bg-white px-3 py-2 text-sm font-semibold text-[#20a46b] outline-none w-full sm:w-auto"
               aria-label="Select history range"
             >
               {historyRangeOptions.map((option) => (
@@ -378,7 +374,7 @@ export const SellerDashboardPage = () => {
             </select>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             {/* Performance Quick Stats */}
             <div className="space-y-3">
               <div className="flex items-center gap-2">
