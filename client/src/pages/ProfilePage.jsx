@@ -303,7 +303,8 @@ export const ProfilePage = () => {
           <Card className="border-[#a9d4c2] bg-[#f8fbfa]">
             <h2 className="text-4xl leading-none font-black tracking-tight text-[#12281f]">Settings Overview</h2>
 
-            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-2">
+              {/* 2x2 grid for first four fields on desktop */}
               <label className="rounded-xl bg-[#ecf6f1] p-3">
                 <p className="mb-2 inline-flex items-center gap-2 font-black text-[#17342a]">
                   <CircleUserRound size={16} /> Display Picture
@@ -328,7 +329,6 @@ export const ProfilePage = () => {
                   </button>
                 ) : null}
               </label>
-
               <label className="rounded-xl bg-[#ecf6f1] p-3">
                 <p className="mb-2 inline-flex items-center gap-2 font-black text-[#17342a]">
                   <CircleUserRound size={16} /> Full Name
@@ -339,7 +339,6 @@ export const ProfilePage = () => {
                   className="h-10 w-full rounded-lg border border-[#c6ddd2] bg-white px-3 text-sm font-semibold outline-none"
                 />
               </label>
-
               <label className="rounded-xl bg-[#ecf6f1] p-3">
                 <p className="mb-2 inline-flex items-center gap-2 font-black text-[#17342a]">
                   <Mail size={16} /> Email
@@ -351,7 +350,6 @@ export const ProfilePage = () => {
                   placeholder="you@example.com"
                 />
               </label>
-
               <label className="rounded-xl bg-[#ecf6f1] p-3">
                 <p className="mb-2 inline-flex items-center gap-2 font-black text-[#17342a]">
                   <MapPin size={16} /> Location
@@ -364,27 +362,25 @@ export const ProfilePage = () => {
                 />
               </label>
             </div>
-
-            <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-              <div className="flex gap-2 w-full">
-                <Button
-                  className="rounded-lg bg-[#1fa56f] px-4 font-bold w-1/2 sm:w-auto text-xs sm:text-base"
-                  onClick={onSaveProfile}
-                  disabled={saveBusy}
-                >
-                  <ShieldCheck size={16} /> {saveBusy ? 'Saving...' : 'Save Settings'}
-                </Button>
-                <Button
-                  className="rounded-lg bg-[#1fa56f] px-4 font-bold w-1/2 sm:w-auto text-xs sm:text-base"
-                  onClick={onToggleNotifications}
-                  disabled={busy}
-                >
-                  <Bell size={16} /> Notifications {user.notificationEnabled ? 'ON' : 'OFF'}
-                </Button>
-              </div>
+            {/* 3 by 1 arrangement for buttons on desktop */}
+            <div className="mt-4 flex flex-col gap-2 lg:flex-row lg:gap-4">
+              <Button
+                className="rounded-lg bg-[#1fa56f] px-4 font-bold w-full text-xs sm:text-base lg:w-auto"
+                onClick={onSaveProfile}
+                disabled={saveBusy}
+              >
+                <ShieldCheck size={16} /> {saveBusy ? 'Saving...' : 'Save Settings'}
+              </Button>
+              <Button
+                className="rounded-lg bg-[#1fa56f] px-4 font-bold w-full text-xs sm:text-base lg:w-auto"
+                onClick={onToggleNotifications}
+                disabled={busy}
+              >
+                <Bell size={16} /> Notifications {user.notificationEnabled ? 'ON' : 'OFF'}
+              </Button>
               <Button
                 variant="outline"
-                className="rounded-lg border-[#1fa56f] bg-[#f8fbfa] text-[#0f5c40] w-full sm:w-auto"
+                className="rounded-lg border-[#1fa56f] bg-[#f8fbfa] text-[#0f5c40] w-full lg:w-auto"
                 onClick={onSwitchRole}
                 disabled={busy}
               >
