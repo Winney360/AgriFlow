@@ -12,6 +12,7 @@ import {
   Star,
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
+import { toast } from 'sonner';
 import { productApi } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 import { ENGLISH_MAP_ATTRIBUTION, ENGLISH_MAP_TILE_URL } from '../lib/mapTiles';
@@ -341,7 +342,7 @@ export const MarketplacePage = () => {
                     <p className="flex items-center gap-1 text-sm font-semibold text-[#476f62]">
                       <MapPin size={13} /> {product.location?.locationName || 'Juja, 12km'}
                     </p>
-                    <div className="flex gap-2 mt-2">
+                    <div className="flex flex-wrap gap-2 mt-2">
                       <Button
                         type="button"
                         className="flex-1 h-10 rounded-lg bg-[#1f9f6a] text-white font-bold"
@@ -353,9 +354,9 @@ export const MarketplacePage = () => {
                         <a href={whatsappHref} target="_blank" rel="noreferrer" className="flex-1">
                           <button
                             type="button"
-                            className="h-10 w-full rounded-lg bg-[#1f9f6a] px-3 text-sm font-black text-white"
+                            className="h-10 w-full rounded-lg bg-[#1f9f6a] px-3 text-sm font-black text-white flex items-center justify-center gap-2"
                           >
-                            WhatsApp <MessageCircle size={15} />
+                            <MessageCircle size={16} /> WhatsApp
                           </button>
                         </a>
                       ) : (
@@ -366,6 +367,19 @@ export const MarketplacePage = () => {
                         >
                           Request Quote
                         </button>
+                      )}
+                      {product?.sellerId?.phoneNumber && (
+                        <a href={`tel:${product.sellerId.phoneNumber}`} className="flex-1">
+                          <button
+                            type="button"
+                            className="h-10 w-full rounded-lg bg-[#1f9f6a] px-3 text-sm font-black text-white flex items-center justify-center gap-2"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h0a2.25 2.25 0 002.25-2.25v-2.386a2.25 2.25 0 00-2.007-2.244l-3.342-.418a2.25 2.25 0 00-2.348 1.31l-.7 1.4a12.042 12.042 0 01-5.372-5.372l1.4-.7a2.25 2.25 0 001.31-2.348l-.418-3.342A2.25 2.25 0 006.886 2.25H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+                            </svg>
+                            Call Seller
+                          </button>
+                        </a>
                       )}
                     </div>
                   </div>
@@ -413,6 +427,16 @@ export const MarketplacePage = () => {
                           <a href={`tel:${selectedProduct.sellerId.phoneNumber}`}>
                             <Button className="bg-[#1f9f6a] text-white">Call Seller</Button>
                           </a>
+                          <Button
+                            className="bg-[#1f9f6a] text-white"
+                            onClick={() => {
+                              navigator.clipboard.writeText(selectedProduct.sellerId.phoneNumber).then(() => {
+                                toast.success('Number copied');
+                              });
+                            }}
+                          >
+                            Copy Number
+                          </Button>
                         </>
                       )}
                     </div>
