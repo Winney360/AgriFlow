@@ -403,12 +403,17 @@ export const MarketplacePage = () => {
                     <p className="text-md font-semibold">Type: {selectedProduct?.productType}</p>
                     <p className="text-md font-semibold">Location: {selectedProduct?.location?.locationName}</p>
                     <p className="text-md">{selectedProduct?.description}</p>
-                    <div className="flex gap-2 mt-4">
+                    <div className="flex flex-wrap gap-2 mt-4">
                       <Button onClick={() => setShowModal(false)} className="bg-gray-200 text-gray-800">Close</Button>
                       {selectedProduct?.sellerId?.phoneNumber && (
-                        <a href={`https://wa.me/${normalizePhoneForWhatsApp(selectedProduct.sellerId.phoneNumber)}`} target="_blank" rel="noreferrer">
-                          <Button className="bg-[#1f9f6a] text-white">Contact Seller</Button>
-                        </a>
+                        <>
+                          <a href={`https://wa.me/${normalizePhoneForWhatsApp(selectedProduct.sellerId.phoneNumber)}`} target="_blank" rel="noreferrer">
+                            <Button className="bg-[#1f9f6a] text-white">WhatsApp Seller</Button>
+                          </a>
+                          <a href={`tel:${selectedProduct.sellerId.phoneNumber}`}>
+                            <Button className="bg-[#1f9f6a] text-white">Call Seller</Button>
+                          </a>
+                        </>
                       )}
                     </div>
                   </div>
