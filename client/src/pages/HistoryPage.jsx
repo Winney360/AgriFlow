@@ -438,31 +438,7 @@ export const HistoryPage = () => {
             )}
           </div>
 
-          {/* Export Button */}
-          <button className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#20a46b] px-4 py-2.5 font-semibold text-white hover:bg-[#1a8657]">
-            <Download size={16} />
-            Export Custom Report (CSV/PDF)
-          </button>
-
-          {/* Quick Links */}
-          <div className="rounded-lg border border-[#d8ddda] bg-white p-4 space-y-3">
-            <h3 className="text-sm font-black text-[#1f1f1f]">Quick Links</h3>
-            <div className="space-y-2">
-              {[
-                { icon: Eye, label: 'View Active Listings' },
-                { icon: Phone, label: 'Contact Support' },
-                { icon: null, label: 'Settings' },
-              ].map((link, idx) => {
-                const Icon = link.icon;
-                return (
-                  <button key={idx} className="flex w-full items-center gap-2 rounded px-2 py-1 text-sm text-[#333] hover:bg-[#f9f9f9]">
-                    {Icon && <Icon size={14} />}
-                    <span>{link.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          {/* Export Button and Quick Links removed as requested */}
         </aside>
 
         {/* Main Content */}
