@@ -62,6 +62,51 @@ const hasDraftContent = (form, productSearch) => {
   return textFields.some((value) => String(value || '').trim().length > 0);
 };
 
+const resolveLocationName = async (latitude, longitude) => {
+  const endpoint = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&addressdetails=1&namedetails=1&zoom=18&lat=${latitude}&lon=${longitude}`;
+
+  const response = await fetch(endpoint);
+  if (!response.ok) {
+    return '';
+  }
+
+  const data = await response.json();
+  const address = data?.address || {};
+  const landmark =
+    data?.name ||
+    data?.namedetails?.name ||
+    address.attraction ||
+    address.amenity ||
+    address.building ||
+    address.university ||
+    address.school ||
+    address.hospital ||
+    address.commercial ||
+    address.shop;
+
+  if (landmark) {
+    return `Near ${landmark}`;
+  }
+
+  const area =
+    address.neighbourhood ||
+    address.suburb ||
+    address.village ||
+    address.town ||
+    address.city ||
+    address.county;
+
+  if (address.road && area) {
+    return `${address.road}, ${area}`;
+  }
+
+  return (
+    area ||
+    data?.display_name?.split(',')?.slice(0, 3)?.join(', ') ||
+    ''
+  );
+};
+
 export const CreateListingPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -225,12 +270,28 @@ export const CreateListingPage = () => {
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+
         setForm((prev) => ({
           ...prev,
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
+          latitude,
+          longitude,
         }));
         toast.success('GPS location captured.');
+
+        void resolveLocationName(latitude, longitude)
+          .then((resolvedLocationName) => {
+            if (!resolvedLocationName) {
+              return;
+            }
+
+            setForm((prev) => ({
+              ...prev,
+              locationName: resolvedLocationName,
+            }));
+          })
+          .catch(() => null);
       },
       () => {
         setError('Could not access your GPS location. Try map selection instead.');
