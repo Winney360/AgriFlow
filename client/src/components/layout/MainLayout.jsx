@@ -64,7 +64,7 @@ export const MainLayout = () => {
 
       {(!isHomePage || isAuthenticated) && (
         <header className="sticky top-0 z-20 border-b border-outline bg-[var(--surface)/0.9] backdrop-blur">
-          <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
+          <div className="mx-auto flex flex-col sm:flex-row max-w-7xl items-center gap-2 sm:gap-4 px-2 sm:px-4 py-2 sm:py-3">
             <Link to={logoTarget} className="text-2xl font-black tracking-tight">
               <span className="text-[#1f9f6a]">Agri</span>
               <span className="text-[#1f1f1f]">Flow</span>
@@ -139,17 +139,17 @@ export const MainLayout = () => {
         </header>
       )}
 
-      <main className={isHomePage ? 'w-full' : 'mx-auto w-full max-w-6xl px-4 pb-24 pt-6'}>
+      <main className={isHomePage ? 'w-full' : 'mx-auto w-full max-w-7xl px-2 sm:px-4 pb-24 pt-6'}>
         <Outlet />
       </main>
 
       <nav
         className={cn(
-          'fixed bottom-0 left-0 right-0 z-30 border-t border-outline bg-[var(--surface)/0.95] p-2 backdrop-blur md:hidden',
+          'fixed bottom-0 left-0 right-0 z-30 border-t border-outline bg-[var(--surface)/0.95] p-1 sm:p-2 backdrop-blur md:hidden',
           isHomePage && !isAuthenticated && 'hidden',
         )}
       >
-        <ul className="mx-auto flex max-w-md items-center justify-between">
+        <ul className="mx-auto flex max-w-xs sm:max-w-md items-center justify-between">
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = location.pathname === item.to;

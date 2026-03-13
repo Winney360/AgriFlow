@@ -187,10 +187,10 @@ export const ProductDetailsPage = () => {
                     </Popup>
                   </Marker>
                 </MapContainer>
-                <div className="absolute top-3 right-3 rounded bg-white px-3 py-1 text-sm font-semibold shadow-sm">
+                <div className="absolute top-2 right-2 sm:top-3 sm:right-3 rounded bg-white px-2 sm:px-3 py-1 text-xs sm:text-sm font-semibold shadow-sm">
                   Exact Pickup Location
                 </div>
-                <div className="absolute bottom-2 left-2 right-2 rounded bg-white/95 px-2 py-1 text-xs text-[#666]">
+                <div className="absolute bottom-1 left-1 right-1 sm:bottom-2 sm:left-2 sm:right-2 rounded bg-white/95 px-1 sm:px-2 py-1 text-[10px] sm:text-xs text-[#666]">
                   Leaflet
                 </div>
               </div>
@@ -211,7 +211,7 @@ export const ProductDetailsPage = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:grid-cols-5">
               {relatedProducts.map((item) => (
                 <Link key={item._id} to={`/products/${item._id}`}>
                   <div className="overflow-hidden rounded-lg border border-[#d8ddda] bg-white hover:shadow-sm transition">

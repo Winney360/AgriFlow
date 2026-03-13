@@ -128,8 +128,8 @@ export const MarketplacePage = () => {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[15rem_1fr_14rem]">
-        <aside className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_2.5fr] xl:grid-cols-[15rem_1fr_14rem]">
+        <aside className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-2 sm:p-3">
           <h1 className="text-[3rem] leading-[0.95] font-black tracking-tight text-[#1f9f6a] xl:hidden">
             Explore the Local Market.
           </h1>
@@ -139,7 +139,7 @@ export const MarketplacePage = () => {
               <p className="text-lg font-black text-[#16382c]">Map Search</p>
               <span className="text-[#6b8d80]">x</span>
             </div>
-            <div className="relative isolate h-42 overflow-hidden rounded-xl border border-[#d2e4db]">
+            <div className="relative isolate h-40 sm:h-48 md:h-56 overflow-hidden rounded-xl border border-[#d2e4db]">
               <MapContainer center={center} zoom={10} className="h-full w-full" attributionControl={false}>
                 <TileLayer
                   url={ENGLISH_MAP_TILE_URL}
@@ -157,7 +157,7 @@ export const MarketplacePage = () => {
             </div>
           </div>
 
-          <div className="mt-3 rounded-xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-3">
+          <div className="mt-3 rounded-xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-2 sm:p-3">
             <p className="text-4xl leading-none font-black text-[#1f9f6a]">Filters</p>
 
             <div className="mt-2">
@@ -245,17 +245,17 @@ export const MarketplacePage = () => {
             Find Your Ideal Harvest.
           </h1>
 
-          <div className="flex items-center overflow-hidden rounded-xl border border-[#c2d9ce] bg-white">
+          <div className="flex flex-col sm:flex-row items-center overflow-hidden rounded-xl border border-[#c2d9ce] bg-white">
             <Search size={18} className="ml-3 text-[#5d7f72]" />
             <input
-              className="h-12 w-full px-3 text-lg font-semibold outline-none"
+              className="h-10 sm:h-12 w-full px-3 text-base sm:text-lg font-semibold outline-none"
               value={filters.search}
               onChange={(event) => setFilters({ ...filters, search: event.target.value })}
               placeholder="Maize"
             />
             <Button
               type="button"
-              className="mr-1 h-10 rounded-lg bg-[#1e9f6a] px-3"
+              className="mt-2 sm:mt-0 mr-1 h-10 rounded-lg bg-[#1e9f6a] px-3"
               onClick={onApplyFilters}
             >
               <ArrowRight size={16} />
@@ -294,7 +294,7 @@ export const MarketplacePage = () => {
           </div>
 
           {mapView ? (
-            <div className="relative isolate overflow-hidden rounded-xl border border-[#cddfd7]" style={{ height: '480px' }}>
+            <div className="relative isolate overflow-hidden rounded-xl border border-[#cddfd7] h-60 sm:h-80 md:h-[480px]">
               <MapContainer center={center} zoom={9} className="h-full w-full" attributionControl={false}>
                 <TileLayer url={ENGLISH_MAP_TILE_URL} />
                 {mapProducts.map((product) => (

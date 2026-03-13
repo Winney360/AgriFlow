@@ -51,20 +51,38 @@ body {
   opacity: 0.35;
 }
 
+@media (max-width: 640px) {
+  .blob-one {
+    height: 120px;
+    width: 120px;
+    top: -20px;
+    left: -15px;
+  }
+  .blob-two {
+    height: 160px;
+    width: 160px;
+    bottom: -40px;
+    right: -30px;
+  }
+}
 .blob-one {
-  height: 240px;
-  width: 240px;
+  height: 15vw;
+  width: 15vw;
+  min-height: 120px;
+  min-width: 120px;
   background: #47bf8b;
-  top: -40px;
-  left: -30px;
+  top: -2vw;
+  left: -2vw;
 }
 
 .blob-two {
-  height: 320px;
-  width: 320px;
+  height: 20vw;
+  width: 20vw;
+  min-height: 160px;
+  min-width: 160px;
   background: #2ea875;
-  bottom: -80px;
-  right: -60px;
+  bottom: -4vw;
+  right: -3vw;
 }
 
 .grain {

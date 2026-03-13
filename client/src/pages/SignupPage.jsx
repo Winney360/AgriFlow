@@ -81,9 +81,9 @@ export const SignupPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f7f8f7] px-4 py-6">
-      <div className="w-full max-w-sm rounded-lg border border-[#d8ddda] bg-white shadow-sm">
-        <form onSubmit={onSubmit} className="space-y-4 px-6 py-6">
+    <div className="flex min-h-screen items-center justify-center bg-[#f7f8f7] px-2 sm:px-4 py-6">
+      <div className="w-full max-w-xs sm:max-w-sm rounded-lg border border-[#d8ddda] bg-white shadow-sm">
+        <form onSubmit={onSubmit} className="space-y-4 px-3 sm:px-6 py-6">
           <div>
             <h1 className="text-3xl font-black text-[#1f1f1f]">Create your AgriFlow account.</h1>
             <p className="mt-2 text-sm text-[#666]">Sign up with your details to start buying or selling locally.</p>
@@ -91,7 +91,7 @@ export const SignupPage = () => {
 
           <div>
             <label className="mb-3 block text-xs font-semibold text-[#555]">I want to</label>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <label className="flex flex-1 cursor-pointer items-center gap-2 rounded-lg border-2 p-3 transition-colors" style={{borderColor: form.role === 'buyer' ? '#20a46b' : '#d0d6d2', backgroundColor: form.role === 'buyer' ? '#f0fdf6' : '#fff'}}>
                 <input
                   type="radio"
@@ -125,7 +125,7 @@ export const SignupPage = () => {
 
           <div>
             <label className="mb-1 block text-xs font-semibold text-[#555]">Name</label>
-            <div className="flex h-11 items-center rounded-lg border border-[#d0d6d2] bg-white px-3">
+            <div className="flex h-11 flex-col sm:flex-row items-center rounded-lg border border-[#d0d6d2] bg-white px-2 sm:px-3 gap-2 sm:gap-0">
               <User size={16} className="text-[#999]" />
               <input
                 type="text"
@@ -140,7 +140,7 @@ export const SignupPage = () => {
 
           <div>
             <label className="mb-1 block text-xs font-semibold text-[#555]">Phone Number</label>
-            <div className="flex h-11 items-center rounded-lg border border-[#d0d6d2] bg-white px-3">
+            <div className="flex h-11 flex-col sm:flex-row items-center rounded-lg border border-[#d0d6d2] bg-white px-2 sm:px-3 gap-2 sm:gap-0">
               <Phone size={16} className="text-[#999]" />
               <select
                 value={form.countryCode}
@@ -167,7 +167,7 @@ export const SignupPage = () => {
 
           <div>
             <label className="mb-1 block text-xs font-semibold text-[#555]">Password</label>
-            <div className="flex h-11 items-center rounded-lg border border-[#d0d6d2] bg-white px-3">
+            <div className="flex h-11 flex-col sm:flex-row items-center rounded-lg border border-[#d0d6d2] bg-white px-2 sm:px-3 gap-2 sm:gap-0">
               <input
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Enter password"
@@ -188,7 +188,7 @@ export const SignupPage = () => {
 
           <div>
             <label className="mb-1 block text-xs font-semibold text-[#555]">Email (Optional)</label>
-            <div className="flex h-11 items-center rounded-lg border border-[#d0d6d2] bg-white px-3">
+            <div className="flex h-11 flex-col sm:flex-row items-center rounded-lg border border-[#d0d6d2] bg-white px-2 sm:px-3 gap-2 sm:gap-0">
               <Mail size={16} className="text-[#999]" />
               <input
                 type="email"
@@ -202,7 +202,7 @@ export const SignupPage = () => {
 
           <div>
             <label className="mb-1 block text-xs font-semibold text-[#555]">Location (Optional)</label>
-            <div className="flex h-11 items-center rounded-lg border border-[#d0d6d2] bg-white px-3">
+            <div className="flex h-11 flex-col sm:flex-row items-center rounded-lg border border-[#d0d6d2] bg-white px-2 sm:px-3 gap-2 sm:gap-0">
               <MapPin size={16} className="text-[#999]" />
               <input
                 type="text"

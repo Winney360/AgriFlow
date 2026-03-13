@@ -100,7 +100,7 @@ export const HomePage = () => {
   return (
     <div className="bg-[#f7f8f7] text-[#1f1f1f]">
       <section className="min-h-screen border-b border-[#dce3df] bg-[#f7f8f7]">
-        <div className="mx-auto w-full max-w-315 px-4 md:px-6">
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-2 md:px-6">
           {!isAuthenticated && (
             <header className="flex flex-wrap items-center gap-3 border-b border-[#e1e5e2] py-3">
             <div className="text-2xl font-black">
@@ -136,15 +136,15 @@ export const HomePage = () => {
             </header>
           )}
 
-          <div className="grid grid-cols-1 overflow-hidden rounded-md border border-[#d8ddda] lg:grid-cols-2">
-            <div className="bg-[#e4ece5] p-6 md:p-12">
-              <h1 className="max-w-xl text-4xl font-black leading-[1.08] text-[#131313] md:text-6xl">
+          <div className="grid grid-cols-1 overflow-hidden rounded-md border border-[#d8ddda] md:grid-cols-2">
+            <div className="bg-[#e4ece5] p-4 sm:p-6 md:p-12">
+              <h1 className="max-w-xl text-3xl font-black leading-[1.08] text-[#131313] sm:text-4xl md:text-6xl">
                 Connect Directly. Trade Locally.
               </h1>
-              <p className="mt-4 max-w-xl text-[17px] text-[#3c4440]">
+              <p className="mt-4 max-w-xl text-base sm:text-lg text-[#3c4440]">
                 Connect directly with trusted local farmers and buyers through a simple agricultural marketplace built for nearby trade.
               </p>
-              <div className="mt-7 flex flex-wrap gap-3">
+              <div className="mt-7 flex flex-col sm:flex-row flex-wrap gap-3">
                 <Link
                   to="/create-listing"
                   className="rounded-md bg-[#2ca06e] px-5 py-2.5 text-sm font-semibold text-white"
@@ -159,18 +159,18 @@ export const HomePage = () => {
                 </Link>
               </div>
             </div>
-            <div className="relative bg-white p-3">
+            <div className="relative bg-white p-2 sm:p-3 min-h-[200px] md:min-h-[350px]">
               <ListingsMap products={listingData} />
             </div>
           </div>
 
-          <section className="mt-6 rounded-md border border-[#d8ddda] bg-[#f2f5f3] p-5 text-center">
+          <section className="mt-6 rounded-md border border-[#d8ddda] bg-[#f2f5f3] p-4 sm:p-5 text-center">
             <p className="text-sm font-semibold uppercase tracking-wide text-[#3d5c50]">New to AgriFlow?</p>
-            <h2 className="mt-2 text-3xl font-black text-[#151515]">Get started in under 2 minutes</h2>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-[#4f5854]">
+            <h2 className="mt-2 text-2xl sm:text-3xl font-black text-[#151515]">Get started in under 2 minutes</h2>
+            <p className="mx-auto mt-2 max-w-2xl text-xs sm:text-sm text-[#4f5854]">
               Create an account to post your harvest, switch between buyer and seller roles, and connect with local farmers instantly.
             </p>
-            <div className="mt-4 flex flex-wrap justify-center gap-3">
+            <div className="mt-4 flex flex-col sm:flex-row flex-wrap justify-center gap-3">
               <Link to="/signup" className="rounded-md bg-[#2ca06e] px-5 py-2.5 text-sm font-semibold text-white">
                 Sign Up and Get Started
               </Link>
@@ -183,20 +183,20 @@ export const HomePage = () => {
       </section>
 
       <section className="min-h-screen bg-[#f3f6f4]">
-        <div className="mx-auto w-full max-w-315 px-4 md:px-6">
-          <section className="py-10 md:py-14">
-            <div className="px-4 py-8 md:px-8 md:py-10">
-              <h2 className="text-center text-4xl font-black text-[#161616] md:text-5xl">How It Works</h2>
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-2 md:px-6">
+          <section className="py-8 sm:py-10 md:py-14">
+            <div className="px-2 py-6 sm:px-4 sm:py-8 md:px-8 md:py-10">
+              <h2 className="text-center text-2xl sm:text-4xl font-black text-[#161616] md:text-5xl">How It Works</h2>
 
-              <div className="mt-8 grid grid-cols-1 items-start gap-5 md:grid-cols-[1fr_auto_1fr_auto_1fr]">
+              <div className="mt-8 grid grid-cols-1 items-start gap-5 sm:grid-cols-3 md:grid-cols-[1fr_auto_1fr_auto_1fr]">
                 <article className="text-center">
                   <img
                     src={step1Image}
                     alt="Step 1 List or Find"
-                    className="mx-auto h-28 w-auto object-contain mix-blend-multiply md:h-32"
+                    className="mx-auto h-20 w-auto object-contain mix-blend-multiply sm:h-28 md:h-32"
                   />
-                  <h3 className="mt-3 text-2xl font-black text-[#151515]">Step 1: List or Find</h3>
-                  <p className="mx-auto mt-2 max-w-57.5 text-sm leading-tight text-[#3e4642]">
+                  <h3 className="mt-3 text-lg sm:text-2xl font-black text-[#151515]">Step 1: List or Find</h3>
+                  <p className="mx-auto mt-2 max-w-57.5 text-xs sm:text-sm leading-tight text-[#3e4642]">
                     List or find produce in your area and view live market activity.
                   </p>
                 </article>
@@ -210,10 +210,10 @@ export const HomePage = () => {
                   <img
                     src={step2Image}
                     alt="Step 2 Connect via WhatsApp"
-                    className="mx-auto h-28 w-auto object-contain mix-blend-multiply md:h-32"
+                    className="mx-auto h-20 w-auto object-contain mix-blend-multiply sm:h-28 md:h-32"
                   />
-                  <h3 className="mt-3 text-2xl font-black text-[#151515]">Step 2: Connect via WhatsApp</h3>
-                  <p className="mx-auto mt-2 max-w-62.5 text-sm leading-tight text-[#3e4642]">
+                  <h3 className="mt-3 text-lg sm:text-2xl font-black text-[#151515]">Step 2: Connect via WhatsApp</h3>
+                  <p className="mx-auto mt-2 max-w-62.5 text-xs sm:text-sm leading-tight text-[#3e4642]">
                     Connect sellers and buyers directly on WhatsApp to agree on quantity and price.
                   </p>
                 </article>
@@ -227,10 +227,10 @@ export const HomePage = () => {
                   <img
                     src={step3Image}
                     alt="Step 3 Local Pickup"
-                    className="mx-auto h-28 w-auto object-contain mix-blend-multiply md:h-32"
+                    className="mx-auto h-20 w-auto object-contain mix-blend-multiply sm:h-28 md:h-32"
                   />
-                  <h3 className="mt-3 text-2xl font-black text-[#151515]">Step 3: Local Pickup</h3>
-                  <p className="mx-auto mt-2 max-w-57.5 text-sm leading-tight text-[#3e4642]">
+                  <h3 className="mt-3 text-lg sm:text-2xl font-black text-[#151515]">Step 3: Local Pickup</h3>
+                  <p className="mx-auto mt-2 max-w-57.5 text-xs sm:text-sm leading-tight text-[#3e4642]">
                     Finalize the order and complete the trade with convenient local pickup.
                   </p>
                 </article>
@@ -238,16 +238,16 @@ export const HomePage = () => {
             </div>
           </section>
 
-          <section className="rounded-md border border-[#d8ddda] bg-[#eef3f0] p-5 md:p-6">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-4xl font-black text-[#161616]">Featured Success Stories</h2>
+          <section className="rounded-md border border-[#d8ddda] bg-[#eef3f0] p-4 sm:p-5 md:p-6">
+            <div className="mb-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+              <h2 className="text-2xl sm:text-4xl font-black text-[#161616]">Featured Success Stories</h2>
               <div className="hidden gap-2 md:flex">
                 <button type="button" className="rounded border border-[#ccd4cf] bg-white px-2 py-1">{'<'}</button>
                 <button type="button" className="rounded border border-[#ccd4cf] bg-white px-2 py-1">{'>'}</button>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
               {successStories.map((story) => (
                 <article key={story.id} className="rounded-md border border-[#d8ddda] bg-white p-3">
                   <div className="mb-3 flex gap-2">
@@ -267,7 +267,7 @@ export const HomePage = () => {
             </div>
           </section>
 
-          <footer className="mt-8 grid grid-cols-2 gap-5 rounded-t-md bg-[#27333c] px-6 py-8 text-[#d3dde3] md:grid-cols-5">
+          <footer className="mt-8 grid grid-cols-1 gap-5 rounded-t-md bg-[#27333c] px-4 py-6 text-[#d3dde3] sm:grid-cols-2 md:grid-cols-5">
             <div className="col-span-2 md:col-span-1">
               <div className="text-xl font-black">
                 <span className="text-[#1f9f6a]">Agri</span>

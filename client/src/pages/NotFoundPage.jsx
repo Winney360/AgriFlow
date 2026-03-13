@@ -5,7 +5,7 @@ export const NotFoundPage = () => {
   return (
     <div className="min-h-screen bg-[#f0f5f2] flex items-center justify-center px-4 py-6">
       {/* Breadcrumb */}
-      <div className="absolute top-0 left-0 right-0 border-b border-[#d8ddda] bg-white px-6 py-3">
+      <div className="absolute top-0 left-0 right-0 border-b border-[#d8ddda] bg-white px-2 sm:px-6 py-2 sm:py-3">
         <div className="flex items-center gap-2 text-sm">
           <Link to="/" className="text-[#20a46b] hover:underline">
             Home
@@ -15,7 +15,7 @@ export const NotFoundPage = () => {
         </div>
       </div>
 
-      <div className="w-full max-w-lg rounded-2xl border border-[#d8ddda] bg-white shadow-md p-8 space-y-6 mt-12">
+      <div className="w-full max-w-xs sm:max-w-lg rounded-2xl border border-[#d8ddda] bg-white shadow-md p-4 sm:p-8 space-y-6 mt-12">
         {/* 404 Illustration & Number */}
         <div className="flex flex-col items-center space-y-4">
           {/* Illustration */}
