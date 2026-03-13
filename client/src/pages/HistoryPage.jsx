@@ -87,6 +87,20 @@ const buildAreaPath = (points, baselineY) => {
   return `M ${points[0].x},${baselineY} L ${line} L ${points[points.length - 1].x},${baselineY} Z`;
 };
 
+const resolveCreatedLocation = (item) => {
+  const locationName =
+    item?.location?.locationName ||
+    item?.locationName ||
+    item?.createdLocationName ||
+    item?.createdFromLocation;
+
+  if (typeof locationName === 'string' && locationName.trim()) {
+    return locationName.trim();
+  }
+
+  return '—';
+};
+
 
 export const HistoryPage = () => {
   const [history, setHistory] = useState([]);
@@ -547,7 +561,7 @@ export const HistoryPage = () => {
                             {formatCurrency(item.price)}
                           </td>
                           <td className="px-6 py-4 text-left text-sm text-[#666]">
-                            {item.location?.locationName || '—'}
+                            {resolveCreatedLocation(item)}
                           </td>
                           <td className="px-6 py-4 text-left text-sm text-[#666]">
                             {formatDate(item.updatedAt)}
