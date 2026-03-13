@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MoreHorizontal, Plus, Edit, Pause, Trash2, Eye, TrendingUp, MessageSquare, Package } from 'lucide-react';
 import { productApi } from '../lib/api';
@@ -17,6 +17,66 @@ const historyRangeOptions = [
   { value: 'last12Months', label: 'Last 12 months' },
   { value: 'all', label: 'All time' },
 ];
+
+const getDateRangeBounds = (range) => {
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  switch (range) {
+    case 'today':
+      return { from: startOfToday, to: now };
+    case 'last7': {
+      const from = new Date(startOfToday);
+      from.setDate(from.getDate() - 6);
+      return { from, to: now };
+    }
+    case 'last14': {
+      const from = new Date(startOfToday);
+      from.setDate(from.getDate() - 13);
+      return { from, to: now };
+    }
+    case 'last30': {
+      const from = new Date(startOfToday);
+      from.setDate(from.getDate() - 29);
+      return { from, to: now };
+    }
+    case 'last90': {
+      const from = new Date(startOfToday);
+      from.setDate(from.getDate() - 89);
+      return { from, to: now };
+    }
+    case 'thisMonth': {
+      const from = new Date(now.getFullYear(), now.getMonth(), 1);
+      return { from, to: now };
+    }
+    case 'previousMonth': {
+      const from = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const to = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+      return { from, to };
+    }
+    case 'ytd': {
+      const from = new Date(now.getFullYear(), 0, 1);
+      return { from, to: now };
+    }
+    case 'last12Months': {
+      const from = new Date(startOfToday);
+      from.setMonth(from.getMonth() - 12);
+      return { from, to: now };
+    }
+    case 'all':
+    default:
+      return { from: null, to: null };
+  }
+};
+
+const formatRangeDate = (value) =>
+  value
+    ? value.toLocaleDateString('en-KE', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      })
+    : '—';
 
 export const SellerDashboardPage = () => {
   const { user } = useAuth();
@@ -76,8 +136,40 @@ export const SellerDashboardPage = () => {
     await loadMine(selectedHistoryRange);
   };
 
-  const completedOrders = history.filter((item) => item.status === 'sold').length;
-  const inactiveListings = history.filter((item) => item.status === 'inactive').length;
+  const { from: rangeFrom, to: rangeTo } = useMemo(
+    () => getDateRangeBounds(selectedHistoryRange),
+    [selectedHistoryRange],
+  );
+
+  const dateFilteredHistory = useMemo(() => {
+    return history.filter((item) => {
+      const updated = new Date(item.updatedAt);
+      if (Number.isNaN(updated.getTime())) {
+        return false;
+      }
+
+      if (rangeFrom && updated < rangeFrom) {
+        return false;
+      }
+      if (rangeTo && updated > rangeTo) {
+        return false;
+      }
+      return true;
+    });
+  }, [history, rangeFrom, rangeTo]);
+
+  const soldInRange = useMemo(
+    () => dateFilteredHistory.filter((item) => item.status === 'sold'),
+    [dateFilteredHistory],
+  );
+
+  const completedOrders = soldInRange.length;
+  const inactiveListings = dateFilteredHistory.filter((item) => item.status === 'inactive').length;
+  const totalSoldQuantity = soldInRange.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+  const totalSoldRevenue = soldInRange.reduce(
+    (sum, item) => sum + getListingEstimatedTotal(item.price, item.quantity),
+    0,
+  );
 
   return (
     <div className="min-h-screen bg-[#f7f8f7]">
@@ -131,7 +223,7 @@ export const SellerDashboardPage = () => {
               </div>
               <div className="rounded-lg border border-[#d8ddda] bg-white p-3">
                 <p className="text-xs font-semibold text-[#666] mb-1">Total Sales</p>
-                <p className="text-2xl font-black text-[#1f1f1f]">{stats.totalSales || 0}kg <span className="text-sm">📈</span></p>
+                <p className="text-2xl font-black text-[#1f1f1f]">{Math.round(totalSoldQuantity) || 0}kg <span className="text-sm">📈</span></p>
               </div>
             </div>
           </div>
@@ -268,8 +360,12 @@ export const SellerDashboardPage = () => {
             {/* Chart Area */}
             <div className="lg:col-span-2 h-48 rounded-lg border border-[#e0e5e1] bg-[#f9fbfa] flex items-center justify-center">
               <div className="text-center">
-                <p className="text-sm text-[#999]">{history.length} historical listings recorded</p>
-                <p className="text-xs text-[#ccc]">Total sold quantity: {stats.totalSales}kg</p>
+                <p className="text-sm text-[#999]">{dateFilteredHistory.length} historical listings in selected range</p>
+                <p className="text-xs text-[#ccc]">
+                  Date range: {formatRangeDate(rangeFrom)} - {formatRangeDate(rangeTo)}
+                </p>
+                <p className="text-xs text-[#ccc]">Total sold quantity: {Math.round(totalSoldQuantity)}kg</p>
+                <p className="text-xs text-[#ccc]">Estimated revenue: {formatCurrency(totalSoldRevenue)}</p>
               </div>
             </div>
           </div>
