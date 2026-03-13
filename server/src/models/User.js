@@ -42,6 +42,11 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    avatarUrl: {
+      type: String,
+      default: '',
+      trim: true,
+    },
   },
   {
     timestamps: { createdAt: true, updatedAt: true },

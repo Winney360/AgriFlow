@@ -5,14 +5,12 @@ import {
   Bell,
   Check,
   CircleUserRound,
-  Leaf,
   Mail,
   MapPin,
   Phone,
   Repeat2,
   Search,
   ShieldCheck,
-  Wheat,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/button';
@@ -49,6 +47,7 @@ export const ProfilePage = () => {
     name: '',
     email: '',
     locationName: '',
+    avatarUrl: '',
   });
 
   useEffect(() => {
@@ -57,8 +56,23 @@ export const ProfilePage = () => {
       name: user.name || '',
       email: user.email || '',
       locationName: user.locationName || '',
+      avatarUrl: user.avatarUrl || '',
     });
   }, [user]);
+
+  const onAvatarFileChange = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const nextAvatar = String(reader.result || '');
+      setProfileForm((prev) => ({ ...prev, avatarUrl: nextAvatar }));
+    };
+    reader.readAsDataURL(file);
+  };
 
   useEffect(() => {
     if (!user || user.role !== 'seller') {
@@ -190,8 +204,8 @@ export const ProfilePage = () => {
     }
   };
 
-  const profileImageUrl =
-    'https://images.unsplash.com/photo-1557862921-37829c790f19?auto=format&fit=crop&w=200&q=80';
+  const profileImageUrl = profileForm.avatarUrl || user.avatarUrl || '';
+  const profileInitial = (profileForm.name || user.name || '?').trim().charAt(0).toUpperCase() || '?';
 
   if (!user) {
     return <p className="py-10 text-center">Profile unavailable.</p>;
@@ -206,11 +220,17 @@ export const ProfilePage = () => {
           <Card className="border-[#a9d4c2] bg-[#f6fbf9] p-0">
             <div className="grid grid-cols-1 gap-0 md:grid-cols-[1.3fr_1fr]">
               <div className="flex items-center gap-4 border-b border-[#d4e7de] p-4 md:border-b-0 md:border-r">
-                <img
-                  src={profileImageUrl}
-                  alt={user.name}
-                  className="h-16 w-16 rounded-full border-2 border-[#9bc7b4] object-cover"
-                />
+                {profileImageUrl ? (
+                  <img
+                    src={profileImageUrl}
+                    alt={user.name}
+                    className="h-16 w-16 rounded-full border-2 border-[#9bc7b4] object-cover"
+                  />
+                ) : (
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-[#9bc7b4] bg-[#1f9f6a] text-2xl font-black text-white">
+                    {profileInitial}
+                  </div>
+                )}
                 <div className="space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="text-3xl leading-none font-black text-[#0e2a1f]">{user.name}</p>
@@ -256,6 +276,29 @@ export const ProfilePage = () => {
             <h2 className="text-4xl leading-none font-black tracking-tight text-[#12281f]">Settings Overview</h2>
 
             <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <label className="rounded-xl bg-[#ecf6f1] p-3">
+                <p className="mb-2 inline-flex items-center gap-2 font-black text-[#17342a]">
+                  <CircleUserRound size={16} /> Display Picture
+                </p>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={onAvatarFileChange}
+                    className="w-full rounded-lg border border-[#c6ddd2] bg-white px-2 py-2 text-sm font-semibold"
+                  />
+                </div>
+                {profileForm.avatarUrl ? (
+                  <button
+                    type="button"
+                    className="mt-2 text-xs font-bold text-[#a81f1f] hover:underline"
+                    onClick={() => setProfileForm((prev) => ({ ...prev, avatarUrl: '' }))}
+                  >
+                    Remove picture
+                  </button>
+                ) : null}
+              </label>
+
               <label className="rounded-xl bg-[#ecf6f1] p-3">
                 <p className="mb-2 inline-flex items-center gap-2 font-black text-[#17342a]">
                   <CircleUserRound size={16} /> Full Name
@@ -560,18 +603,6 @@ export const ProfilePage = () => {
             </Card>
           ) : null}
 
-          <Card className="border-[#a9d4c2] bg-[#f8fbfa] p-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-2xl border border-[#cde5da] bg-[#eef8f3] p-4 text-center">
-                <Wheat className="mx-auto text-[#1c9464]" size={34} />
-                <p className="mt-2 text-xl font-black text-[#17342a]">Farmer</p>
-              </div>
-              <div className="rounded-2xl border border-[#cde5da] bg-[#eef8f3] p-4 text-center">
-                <Leaf className="mx-auto text-[#1c9464]" size={34} />
-                <p className="mt-2 text-xl font-black text-[#17342a]">Buyer</p>
-              </div>
-            </div>
-          </Card>
         </div>
       </div>
     </div>

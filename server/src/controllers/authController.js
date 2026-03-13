@@ -16,6 +16,7 @@ const sanitizeUser = (user) => ({
   notificationEnabled: user.notificationEnabled,
   locationName: user.locationName || '',
   locationVerified: Boolean(user.locationVerified),
+  avatarUrl: user.avatarUrl || '',
   createdAt: user.createdAt,
 });
 
@@ -178,7 +179,7 @@ export const updateNotifications = async (req, res, next) => {
 
 export const updateProfile = async (req, res, next) => {
   try {
-    const { name, email, locationName } = req.body;
+    const { name, email, locationName, avatarUrl } = req.body;
     const updates = {};
 
     if (name !== undefined) {
@@ -205,6 +206,10 @@ export const updateProfile = async (req, res, next) => {
       const cleanLocation = String(locationName || '').trim();
       updates.locationName = cleanLocation;
       updates.locationVerified = Boolean(cleanLocation);
+    }
+
+    if (avatarUrl !== undefined) {
+      updates.avatarUrl = String(avatarUrl || '').trim();
     }
 
     const updatedUser = await User.findByIdAndUpdate(req.user._id, updates, { new: true });
