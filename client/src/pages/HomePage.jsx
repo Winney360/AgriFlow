@@ -159,7 +159,7 @@ export const HomePage = () => {
                 </Link>
               </div>
             </div>
-            <div className="relative bg-white p-2 sm:p-3 min-h-[200px] md:min-h-[350px]">
+            <div className="relative bg-white p-2 sm:p-3 min-h-50 md:min-h-87.5">
               <ListingsMap products={listingData} />
             </div>
           </div>

@@ -241,11 +241,11 @@ export const SellerDashboardPage = () => {
               </div>
               {/* Notifications and Current Role side by side, Account Status full width at bottom */}
               <div className="flex flex-row gap-2 mt-2 w-full">
-                <div className="rounded-lg border border-[#dbe3df] bg-[#fafcfb] px-3 py-2 flex-1 min-w-[120px]">
+                <div className="rounded-lg border border-[#dbe3df] bg-[#fafcfb] px-3 py-2 flex-1 min-w-30">
                   <p className="text-xs font-semibold text-[#66736d]">Notifications</p>
                   <p className="font-black text-[#2f4c40]">{user?.notificationEnabled ? 'Enabled' : 'Disabled'}</p>
                 </div>
-                <div className="rounded-lg border border-[#dbe3df] bg-[#fafcfb] px-3 py-2 flex-1 min-w-[120px]">
+                <div className="rounded-lg border border-[#dbe3df] bg-[#fafcfb] px-3 py-2 flex-1 min-w-30">
                   <p className="text-xs font-semibold text-[#66736d]">Current Role</p>
                   <p className="font-black text-[#2f4c40]">Seller</p>
                 </div>
@@ -288,7 +288,7 @@ export const SellerDashboardPage = () => {
           <div className="px-2 sm:px-6 py-4 border-b border-[#e0e5e1]">
             <h2 className="text-xl sm:text-2xl font-black text-[#1f1f1f]">Active Listings</h2>
           </div>
-          <table className="min-w-[600px] w-full text-sm">
+          <table className="min-w-150 w-full text-sm">
             <thead className="border-b border-[#e0e5e1] bg-[#f9fbfa]">
               <tr>
                 <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-[#666] whitespace-nowrap">Product Name</th>
@@ -302,7 +302,7 @@ export const SellerDashboardPage = () => {
                 <tr key={product._id} className="hover:bg-[#f9fbfa] transition">
                   <td className="px-4 sm:px-6 py-4 text-left align-top">
                     <div className="flex items-center gap-3 min-w-0">
-                      <img src={product.imageUrl} alt={product.title} className="h-10 w-10 rounded object-cover flex-shrink-0" />
+                      <img src={product.imageUrl} alt={product.title} className="h-10 w-10 rounded object-cover shrink-0" />
                       <div className="min-w-0">
                         <p className="font-semibold text-[#1f1f1f] truncate">{product.title}</p>
                         <p className="text-xs text-[#999] truncate">{product.productType} • {product.location?.locationName || 'No location'}</p>

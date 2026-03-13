@@ -160,7 +160,7 @@ export const MainLayout = () => {
           </div>
           {/* Mobile menu dropdown */}
           {mobileMenuOpen && (
-            <div className="md:hidden absolute right-2 top-14 w-48 rounded-lg border border-outline bg-[var(--surface)] shadow-lg z-50 animate-fade-in">
+            <div className="md:hidden absolute right-2 top-14 w-48 rounded-lg border border-outline bg-(--surface) shadow-lg z-50 animate-fade-in">
               <ul className="flex flex-col py-2">
                 {isAuthenticated && navItems.map((item) => (
                   <li key={item.to}>

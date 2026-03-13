@@ -55,96 +55,22 @@ const DEFAULT_FORM_STATE = {
   longitude: 36.817223,
   image: null,
   imageUrl: '',
-  pathAccessibility: 'open',
 };
 
-const fileToDataUrl = (file) =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : '');
-    reader.onerror = () => reject(new Error('Unable to read file'));
-    reader.readAsDataURL(file);
+// Utility to check if there is any content worth saving as a draft
+function hasDraftContent(form, productSearch, images) {
+  // Check if any form field is filled (except defaults)
+  const hasFormContent = Object.entries(form).some(([key, value]) => {
+    if (key === 'latitude' || key === 'longitude' || key === 'image' || key === 'imageUrl') return false;
+    if (typeof value === 'string') {
+      return value.trim() !== '' && value !== (key === 'productType' ? 'crop' : '');
+    }
+    return value !== '' && value != null;
   });
-
-const dataUrlToFile = async (dataUrl, fileName, mimeType, lastModified) => {
-  const response = await fetch(dataUrl);
-  const blob = await response.blob();
-  const fallbackType = mimeType || blob.type || 'image/jpeg';
-  const extension = fallbackType.split('/')[1] || 'jpg';
-
-  return new File([blob], fileName || `draft-image.${extension}`, {
-    type: fallbackType,
-    lastModified: lastModified || Date.now(),
-  });
-};
-
-const hasDraftContent = (form, productSearch, draftImages) => {
-  const textFields = [
-    form?.title,
-    form?.description,
-    form?.quantity,
-    form?.price,
-    form?.locationName,
-    productSearch,
-  ];
-
-  return (
-    textFields.some((value) => String(value || '').trim().length > 0) ||
-    Array.isArray(draftImages) && draftImages.length > 0
-  );
-};
-
-const toListingImageFromRemote = (url) => ({
-  previewUrl: url,
-  remoteUrl: url,
-  file: null,
-  source: 'remote',
-});
-
-const resolveLocationName = async (latitude, longitude) => {
-  const endpoint = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&addressdetails=1&namedetails=1&zoom=18&lat=${latitude}&lon=${longitude}`;
-
-  const response = await fetch(endpoint);
-  if (!response.ok) {
-    return '';
-  }
-
-  const data = await response.json();
-  const address = data?.address || {};
-  const landmark =
-    data?.name ||
-    data?.namedetails?.name ||
-    address.attraction ||
-    address.amenity ||
-    address.building ||
-    address.university ||
-    address.school ||
-    address.hospital ||
-    address.commercial ||
-    address.shop;
-
-  if (landmark) {
-    return `Near ${landmark}`;
-  }
-
-  const area =
-    address.neighbourhood ||
-    address.suburb ||
-    address.village ||
-    address.town ||
-    address.city ||
-    address.county;
-
-  if (address.road && area) {
-    return `${address.road}, ${area}`;
-  }
-
-  return (
-    area ||
-    data?.display_name?.split(',')?.slice(0, 3)?.join(', ') ||
-    ''
-  );
-};
+  const hasProductSearch = typeof productSearch === 'string' && productSearch.trim() !== '';
+  const hasImages = Array.isArray(images) && images.length > 0;
+  return hasFormContent || hasProductSearch || hasImages;
+}
 
 export const CreateListingPage = () => {
   const navigate = useNavigate();
@@ -201,108 +127,9 @@ export const CreateListingPage = () => {
       )
         .slice(0, MAX_LISTING_IMAGES)
         .map((url) => toListingImageFromRemote(url));
-
-      setForm((prev) => ({
-        ...prev,
-        title: item.title,
-        description: item.description,
-        productType: item.productType,
-        quantity: item.quantity,
-        price: item.price,
-        locationName: item.location.locationName,
-        latitude: item.location.latitude,
-        longitude: item.location.longitude,
-        imageUrl: existingImages[0]?.remoteUrl || item.imageUrl || '',
-        pathAccessibility: item.pathAccessibility || 'open',
-      }));
-      setListingImages(existingImages);
-      setProductSearch(item.title || '');
-      setUnitLabel(String(item.quantity || '').toLowerCase().includes('bag') ? 'Bags' : 'Kgs');
+      // ...existing code for loading edit product...
     };
-
-    loadEditProduct().catch(() => null);
-  }, [editId]);
-
-  useEffect(() => {
-    if (!form.title && productSearch) {
-      setForm((prev) => ({ ...prev, title: productSearch }));
-    }
-  }, [productSearch, form.title]);
-
-  useEffect(() => {
-    if (editId) {
-      return;
-    }
-
-    const restoreDraft = async () => {
-      try {
-        const rawDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
-        if (!rawDraft) {
-          return;
-        }
-
-        const parsedDraft = JSON.parse(rawDraft);
-        if (!parsedDraft?.form) {
-          return;
-        }
-
-        if (!hasDraftContent(parsedDraft.form, parsedDraft.productSearch, parsedDraft.draftImages)) {
-          return;
-        }
-
-        setForm((prev) => ({
-          ...prev,
-          ...parsedDraft.form,
-          image: null,
-        }));
-
-        const restoredDraftImages = Array.isArray(parsedDraft.draftImages)
-          ? parsedDraft.draftImages.slice(0, MAX_LISTING_IMAGES)
-          : [];
-
-        const restoredListingImages = [];
-
-        for (const item of restoredDraftImages) {
-          if (item?.source === 'remote' && item.remoteUrl) {
-            restoredListingImages.push(toListingImageFromRemote(item.remoteUrl));
-            continue;
-          }
-
-          if (item?.dataUrl) {
-            const restoredFile = await dataUrlToFile(
-              item.dataUrl,
-              item.fileName,
-              item.mimeType,
-              item.lastModified,
-            );
-
-            restoredListingImages.push({
-              previewUrl: item.dataUrl,
-              remoteUrl: '',
-              file: restoredFile,
-              source: 'local',
-            });
-          }
-        }
-
-        if (restoredListingImages.length) {
-          setListingImages(restoredListingImages);
-          setDraftImages(restoredDraftImages);
-          setForm((prev) => ({
-            ...prev,
-            imageUrl: restoredListingImages[0]?.remoteUrl || '',
-          }));
-        }
-
-        setProductSearch(parsedDraft.productSearch || '');
-        setUnitLabel(parsedDraft.unitLabel || 'Kgs');
-        toast.success('Saved draft restored.');
-      } catch {
-        localStorage.removeItem(DRAFT_STORAGE_KEY);
-      }
-    };
-
-    void restoreDraft();
+    // ...existing code for restoring draft (should be in a separate useEffect)...
   }, [editId]);
 
   useEffect(() => {
@@ -585,13 +412,13 @@ export const CreateListingPage = () => {
         payload.append('unitLabel', unitLabel);
       }
 
-
       if (editId) {
         await productApi.update(editId, payload);
       } else {
         await productApi.create(payload);
       }
 
+      // Remove draft after successful post
       localStorage.removeItem(DRAFT_STORAGE_KEY);
       setDraftImages([]);
 
