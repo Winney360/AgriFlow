@@ -32,14 +32,14 @@ const Footer = () => (
                 Contact Us
               </button>
             </li>
-            <li><a href="/faq" className="hover:underline hover:text-[#1f9f6a] transition-colors">FAQs</a></li>
+            <li><a href="/faq" className="footer-quick-link">FAQs</a></li>
           </ul>
         </div>
         <div>
           <h4 className="font-bold text-white mb-2">Legal</h4>
           <ul className="space-y-1">
-            <li><a href="/privacy" className="hover:underline hover:text-[#1f9f6a] transition-colors">Privacy Policy</a></li>
-            <li><a href="/terms" className="hover:underline hover:text-[#1f9f6a] transition-colors">Terms of Service</a></li>
+            <li><a href="/privacy" className="footer-quick-link">Privacy Policy</a></li>
+            <li><a href="/terms" className="footer-quick-link">Terms of Service</a></li>
           </ul>
         </div>
       </div>
