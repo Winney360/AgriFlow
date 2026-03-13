@@ -136,6 +136,13 @@ export const SellerDashboardPage = () => {
     await loadMine(selectedHistoryRange);
   };
 
+  const archiveProduct = async (id) => {
+    if (window.confirm('Are you sure you want to archive this listing?')) {
+      await productApi.archive(id);
+      await loadMine(selectedHistoryRange);
+    }
+  };
+
   const { from: rangeFrom, to: rangeTo } = useMemo(
     () => getDateRangeBounds(selectedHistoryRange),
     [selectedHistoryRange],
@@ -321,6 +328,12 @@ export const SellerDashboardPage = () => {
                           className="px-3 py-1 text-sm font-semibold text-[#f0a000] hover:bg-[#fffbf0] rounded"
                         >
                           Sold
+                        </button>
+                        <button 
+                          onClick={() => archiveProduct(product._id)}
+                          className="px-3 py-1 text-sm font-semibold text-[#e0b000] hover:bg-[#fff8e1] rounded"
+                        >
+                          Archive
                         </button>
                         <button 
                           onClick={() => remove(product._id)}
