@@ -135,7 +135,7 @@ export const MainLayout = () => {
             </div>
             {/* Desktop nav */}
             {isAuthenticated && (
-              <nav className="hidden md:block ml-4">
+              <nav className="hidden md:flex items-center ml-4 gap-4">
                 <ul className="flex items-center gap-2">
                   {navItems.map((item) => {
                     const active =
@@ -158,6 +158,9 @@ export const MainLayout = () => {
                     );
                   })}
                 </ul>
+                <div className="ml-4 flex items-center">
+                  <ThemeToggle />
+                </div>
               </nav>
             )}
           </div>
