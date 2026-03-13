@@ -184,7 +184,7 @@ export const SellerDashboardPage = () => {
     <div className="min-h-screen bg-[#f7f8f7]">
       <div className="px-2 sm:px-6 py-4 space-y-4 sm:space-y-6 max-w-full">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex flex-row items-center justify-between gap-3 w-full">
           <h1 className="text-2xl sm:text-3xl font-black text-[#1f1f1f]">Dashboard</h1>
           <div className="flex gap-2 sm:gap-3">
             <Link to="/create-listing">
