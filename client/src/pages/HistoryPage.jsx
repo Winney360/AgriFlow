@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Download, Phone, Eye, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
+import { toast } from 'sonner';
 import { productApi } from '../lib/api';
 import { formatCurrency } from '../lib/utils';
 
@@ -316,13 +317,32 @@ export const HistoryPage = () => {
   };
 
   const removeHistoryRecord = async (id) => {
-    const confirmed = window.confirm('Delete this crop record from sales history? This cannot be undone.');
-    if (!confirmed) {
-      return;
-    }
-
-    await productApi.removeHistory(id);
-    await loadHistory();
+    toast('Delete this history record?', {
+      description: 'This action cannot be undone.',
+      style: {
+        border: '1px solid #20a46b',
+      },
+      action: {
+        label: 'Delete',
+        onClick: async () => {
+          try {
+            await productApi.removeHistory(id);
+            await loadHistory();
+            toast.success('History record deleted.');
+          } catch {
+            toast.error('Could not delete history record. Try again.');
+          }
+        },
+      },
+      actionButtonStyle: {
+        backgroundColor: '#dc2626',
+        color: '#ffffff',
+      },
+      cancel: {
+        label: 'Cancel',
+      },
+      duration: Infinity,
+    });
   };
 
   return (
