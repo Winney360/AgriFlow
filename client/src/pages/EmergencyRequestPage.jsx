@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
+import { reverseGeocode } from '../lib/reverseGeocode';
 import { useNavigate } from 'react-router-dom';
 import { MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet';
 import { AlertCircle, ChevronRight, MapPin, Plus } from 'lucide-react';
@@ -34,12 +36,13 @@ export const EmergencyRequestPage = () => {
     quantity: '',
     latitude: -1.286389,
     longitude: 36.817223,
+    locationName: '',
     radius: 50,
   });
 
   const marker = useMemo(() => [form.latitude, form.longitude], [form.latitude, form.longitude]);
 
-  const useCurrentLocation = () => {
+  const useCurrentLocation = async () => {
     setError('');
 
     if (!navigator.geolocation) {
@@ -47,19 +50,55 @@ export const EmergencyRequestPage = () => {
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setForm((prev) => ({
-          ...prev,
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        }));
-      },
-      () => {
-        setError('Could not access your GPS location. Try map selection instead.');
-      },
-      { enableHighAccuracy: true },
-    );
+    toast.custom((toastItem) => (
+      <div className="w-full max-w-sm rounded-lg border border-[#20a46b] bg-white p-4 shadow-sm">
+        <p className="text-sm font-black text-[#1f1f1f]">Allow GPS access to use your current location?</p>
+        <p className="mt-1 text-xs text-[#5a6b64]">
+          Tap Allow to continue and approve location permission in your browser.
+        </p>
+        <div className="mt-3 flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              toast.dismiss(toastItem);
+              navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                  const lat = position.coords.latitude;
+                  const lng = position.coords.longitude;
+                  let locationName = '';
+                  try {
+                    locationName = await reverseGeocode(lat, lng);
+                  } catch (e) {
+                    locationName = '';
+                  }
+                  setForm((prev) => ({
+                    ...prev,
+                    latitude: lat,
+                    longitude: lng,
+                    locationName,
+                  }));
+                  toast.success('Location detected!');
+                },
+                () => {
+                  setError('Could not access your GPS location. Try map selection instead.');
+                },
+                { enableHighAccuracy: true },
+              );
+            }}
+            className="h-10 rounded-md bg-[#20a46b] px-3 text-sm font-semibold text-white"
+          >
+            Allow
+          </button>
+          <button
+            type="button"
+            onClick={() => toast.dismiss(toastItem)}
+            className="h-10 rounded-md border border-[#d0d6d2] bg-white px-3 text-sm font-semibold text-[#334a41]"
+          >
+            Not now
+          </button>
+        </div>
+      </div>
+    ));
   };
 
   const onSubmit = async (event) => {
@@ -243,7 +282,9 @@ export const EmergencyRequestPage = () => {
             <div className="mt-4 rounded-lg border border-[#d8e7e1] bg-[#f8fcfb] p-3">
               <p className="font-bold text-[#203f33]">Current Location</p>
               <p className="text-xs text-[#4a6e60] mt-1">
-                Lat: {form.latitude.toFixed(4)} | Lng: {form.longitude.toFixed(4)}
+                {form.locationName
+                  ? form.locationName
+                  : `Lat: ${form.latitude.toFixed(4)} | Lng: ${form.longitude.toFixed(4)}`}
               </p>
             </div>
           </div>
