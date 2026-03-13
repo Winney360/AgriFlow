@@ -12,6 +12,7 @@ import {
   Search,
   Upload,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { productApi } from '../lib/api';
 import { ENGLISH_MAP_ATTRIBUTION, ENGLISH_MAP_TILE_URL } from '../lib/mapTiles';
 import { Input } from '../components/ui/input';
@@ -116,11 +117,12 @@ export const CreateListingPage = () => {
     }
   }, [productSearch, form.title]);
 
-  const useCurrentLocation = () => {
+  const requestCurrentLocation = () => {
     setError('');
 
     if (!navigator.geolocation) {
       setError('Geolocation is not supported in this browser.');
+      toast.error('GPS is not supported in this browser.');
       return;
     }
 
@@ -131,12 +133,28 @@ export const CreateListingPage = () => {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
         }));
+        toast.success('GPS location captured.');
       },
       () => {
         setError('Could not access your GPS location. Try map selection instead.');
+        toast.error('Location permission denied or unavailable.');
       },
       { enableHighAccuracy: true },
     );
+  };
+
+  const useCurrentLocation = () => {
+    toast('Allow GPS access for this listing?', {
+      description: 'Tap Allow now to continue and approve location permission in your browser.',
+      action: {
+        label: 'Allow now',
+        onClick: () => requestCurrentLocation(),
+      },
+      cancel: {
+        label: 'Not now',
+      },
+      duration: 7000,
+    });
   };
 
   const onSubmit = async (event) => {
