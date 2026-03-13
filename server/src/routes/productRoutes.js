@@ -20,8 +20,8 @@ router.get('/mine/active', protect, getSellerProducts);
 router.get('/mine/history', protect, getSellerHistory);
 router.get('/:id', getProductDetails);
 
-router.post('/', protect, upload.single('image'), createProduct);
-router.put('/:id', protect, upload.single('image'), updateProduct);
+router.post('/', protect, upload.array('images', 4), createProduct);
+router.put('/:id', protect, upload.array('images', 4), updateProduct);
 router.patch('/:id/sold', protect, setProductSold);
 router.delete('/:id/history', protect, deleteHistoryProduct);
 router.delete('/:id', protect, deleteProduct);

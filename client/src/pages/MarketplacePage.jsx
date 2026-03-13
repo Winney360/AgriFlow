@@ -327,7 +327,9 @@ export const MarketplacePage = () => {
 
               return (
                 <article key={product._id} className="overflow-hidden rounded-xl border border-[#cddfd7] bg-white">
-                  <img src={product.imageUrl} alt={product.title} className="h-32 w-full object-cover" />
+                  <div className="flex h-40 w-full items-center justify-center bg-[#f3f8f5] p-2">
+                    <img src={product.imageUrl} alt={product.title} className="h-full w-full rounded-lg object-contain" />
+                  </div>
                   <div className="space-y-1 p-2.5">
                     <p className="text-3xl leading-none font-black text-[#102f24]">{product.title}</p>
                     <p className="text-2xl leading-none font-black text-[#112e23]">

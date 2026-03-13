@@ -34,6 +34,7 @@ const LocationPicker = ({ selected, setSelected }) => {
 };
 
 const DRAFT_STORAGE_KEY = 'cropconnect_create_listing_draft';
+const MAX_LISTING_IMAGES = 4;
 
 const DEFAULT_FORM_STATE = {
   title: '',
@@ -69,22 +70,28 @@ const dataUrlToFile = async (dataUrl, fileName, mimeType, lastModified) => {
   });
 };
 
-const hasDraftContent = (form, productSearch, draftImage) => {
+const hasDraftContent = (form, productSearch, draftImages) => {
   const textFields = [
     form?.title,
     form?.description,
     form?.quantity,
     form?.price,
     form?.locationName,
-    form?.imageUrl,
     productSearch,
   ];
 
   return (
     textFields.some((value) => String(value || '').trim().length > 0) ||
-    Boolean(draftImage?.dataUrl)
+    Array.isArray(draftImages) && draftImages.length > 0
   );
 };
+
+const toListingImageFromRemote = (url) => ({
+  previewUrl: url,
+  remoteUrl: url,
+  file: null,
+  source: 'remote',
+});
 
 const resolveLocationName = async (latitude, longitude) => {
   const endpoint = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&addressdetails=1&namedetails=1&zoom=18&lat=${latitude}&lon=${longitude}`;
@@ -139,7 +146,8 @@ export const CreateListingPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [productSearch, setProductSearch] = useState('');
   const [unitLabel, setUnitLabel] = useState('Kgs');
-  const [draftImage, setDraftImage] = useState(null);
+  const [draftImages, setDraftImages] = useState([]);
+  const [listingImages, setListingImages] = useState([]);
 
 
   const [form, setForm] = useState(DEFAULT_FORM_STATE);
@@ -168,9 +176,7 @@ export const CreateListingPage = () => {
     'Chicken (Broilers)',
   ];
 
-  const imagePreview = form.image
-    ? URL.createObjectURL(form.image)
-    : form.imageUrl || null;
+  const primaryImagePreview = listingImages[0]?.previewUrl || null;
 
   useEffect(() => {
     const loadEditProduct = async () => {
@@ -179,6 +185,15 @@ export const CreateListingPage = () => {
       }
       const response = await productApi.details(editId);
       const item = response.data.data;
+      const existingImages = (Array.isArray(item.imageUrls) && item.imageUrls.length
+        ? item.imageUrls
+        : item.imageUrl
+          ? [item.imageUrl]
+          : []
+      )
+        .slice(0, MAX_LISTING_IMAGES)
+        .map((url) => toListingImageFromRemote(url));
+
       setForm((prev) => ({
         ...prev,
         title: item.title,
@@ -189,9 +204,10 @@ export const CreateListingPage = () => {
         locationName: item.location.locationName,
         latitude: item.location.latitude,
         longitude: item.location.longitude,
-        imageUrl: item.imageUrl,
+        imageUrl: existingImages[0]?.remoteUrl || item.imageUrl || '',
         pathAccessibility: item.pathAccessibility || 'open',
       }));
+      setListingImages(existingImages);
       setProductSearch(item.title || '');
       setUnitLabel(String(item.quantity || '').toLowerCase().includes('bag') ? 'Bags' : 'Kgs');
     };
@@ -222,7 +238,7 @@ export const CreateListingPage = () => {
           return;
         }
 
-        if (!hasDraftContent(parsedDraft.form, parsedDraft.productSearch, parsedDraft.draftImage)) {
+        if (!hasDraftContent(parsedDraft.form, parsedDraft.productSearch, parsedDraft.draftImages)) {
           return;
         }
 
@@ -232,20 +248,42 @@ export const CreateListingPage = () => {
           image: null,
         }));
 
-        if (parsedDraft?.draftImage?.dataUrl) {
-          const restoredImage = await dataUrlToFile(
-            parsedDraft.draftImage.dataUrl,
-            parsedDraft.draftImage.fileName,
-            parsedDraft.draftImage.mimeType,
-            parsedDraft.draftImage.lastModified,
-          );
+        const restoredDraftImages = Array.isArray(parsedDraft.draftImages)
+          ? parsedDraft.draftImages.slice(0, MAX_LISTING_IMAGES)
+          : [];
 
+        const restoredListingImages = [];
+
+        for (const item of restoredDraftImages) {
+          if (item?.source === 'remote' && item.remoteUrl) {
+            restoredListingImages.push(toListingImageFromRemote(item.remoteUrl));
+            continue;
+          }
+
+          if (item?.dataUrl) {
+            const restoredFile = await dataUrlToFile(
+              item.dataUrl,
+              item.fileName,
+              item.mimeType,
+              item.lastModified,
+            );
+
+            restoredListingImages.push({
+              previewUrl: item.dataUrl,
+              remoteUrl: '',
+              file: restoredFile,
+              source: 'local',
+            });
+          }
+        }
+
+        if (restoredListingImages.length) {
+          setListingImages(restoredListingImages);
+          setDraftImages(restoredDraftImages);
           setForm((prev) => ({
             ...prev,
-            image: restoredImage,
-            imageUrl: '',
+            imageUrl: restoredListingImages[0]?.remoteUrl || '',
           }));
-          setDraftImage(parsedDraft.draftImage);
         }
 
         setProductSearch(parsedDraft.productSearch || '');
@@ -264,7 +302,7 @@ export const CreateListingPage = () => {
       return;
     }
 
-    if (!hasDraftContent(form, productSearch, draftImage)) {
+    if (!hasDraftContent(form, productSearch, draftImages)) {
       return;
     }
 
@@ -273,7 +311,7 @@ export const CreateListingPage = () => {
         ...form,
         image: null,
       },
-      draftImage,
+      draftImages,
       productSearch,
       unitLabel,
       savedAt: new Date().toISOString(),
@@ -287,40 +325,94 @@ export const CreateListingPage = () => {
           DRAFT_STORAGE_KEY,
           JSON.stringify({
             ...draftPayload,
-            draftImage: null,
+            draftImages: [],
           }),
         );
       } catch {
         // Ignore storage failures in background autosave.
       }
     }
-  }, [editId, form, productSearch, unitLabel, draftImage]);
+  }, [draftImages, editId, form, productSearch, unitLabel]);
 
-  const handleImageSelection = async (file) => {
+  const syncDraftImages = (nextListingImages) => {
+    setDraftImages(
+      nextListingImages.map((item) =>
+        item.source === 'remote'
+          ? {
+              source: 'remote',
+              remoteUrl: item.remoteUrl,
+            }
+          : {
+              source: 'local',
+              dataUrl: item.previewUrl,
+              fileName: item.file?.name || 'listing-image.jpg',
+              mimeType: item.file?.type || 'image/jpeg',
+              lastModified: item.file?.lastModified || Date.now(),
+            },
+      ),
+    );
+  };
+
+  const removeImageAt = (index) => {
+    const nextListingImages = listingImages.filter((_, itemIndex) => itemIndex !== index);
+    setListingImages(nextListingImages);
+    syncDraftImages(nextListingImages);
+    setForm((prev) => ({
+      ...prev,
+      imageUrl: nextListingImages[0]?.remoteUrl || '',
+    }));
+  };
+
+  const handleImageSelectionAt = async (index, file) => {
     if (!file) {
-      setForm((prev) => ({ ...prev, image: null }));
-      setDraftImage(null);
       return;
     }
 
-    setForm((prev) => ({ ...prev, image: file, imageUrl: '' }));
+    if (index >= MAX_LISTING_IMAGES) {
+      return;
+    }
 
     try {
       const dataUrl = await fileToDataUrl(file);
-      setDraftImage({
-        dataUrl,
-        fileName: file.name,
-        mimeType: file.type,
-        lastModified: file.lastModified,
-      });
+      const imageEntry = {
+        previewUrl: dataUrl,
+        remoteUrl: '',
+        file,
+        source: 'local',
+      };
+
+      const nextListingImages = [...listingImages];
+
+      if (nextListingImages[index]) {
+        nextListingImages[index] = imageEntry;
+      } else if (nextListingImages.length < MAX_LISTING_IMAGES) {
+        nextListingImages.push(imageEntry);
+      }
+
+      const trimmedImages = nextListingImages.slice(0, MAX_LISTING_IMAGES);
+      setListingImages(trimmedImages);
+      syncDraftImages(trimmedImages);
+      setForm((prev) => ({ ...prev, imageUrl: trimmedImages[0]?.remoteUrl || '' }));
     } catch {
-      setDraftImage(null);
       toast.error('Selected image preview could not be saved for draft restore.');
     }
   };
 
+  const addImageFromPicker = async (file) => {
+    if (!file) {
+      return;
+    }
+
+    if (listingImages.length >= MAX_LISTING_IMAGES) {
+      toast.info('You can upload up to 4 photos per crop.');
+      return;
+    }
+
+    await handleImageSelectionAt(listingImages.length, file);
+  };
+
   const onSaveDraft = () => {
-    if (!hasDraftContent(form, productSearch, draftImage)) {
+    if (!hasDraftContent(form, productSearch, draftImages)) {
       toast.info('Add listing details before saving a draft.');
       return;
     }
@@ -331,7 +423,7 @@ export const CreateListingPage = () => {
           ...form,
           image: null,
         },
-        draftImage,
+        draftImages,
         productSearch,
         unitLabel,
         savedAt: new Date().toISOString(),
@@ -348,13 +440,13 @@ export const CreateListingPage = () => {
               ...form,
               image: null,
             },
-            draftImage: null,
+            draftImages: [],
             productSearch,
             unitLabel,
             savedAt: new Date().toISOString(),
           }),
         );
-        toast.info('Draft saved, but image was too large to keep offline.');
+        toast.info('Draft saved, but some images were too large to keep offline.');
       } catch {
         toast.error('Could not save draft on this device.');
       }
@@ -421,8 +513,13 @@ export const CreateListingPage = () => {
     event.preventDefault();
     setError('');
 
-    if (!editId && !form.image && !form.imageUrl.trim()) {
-      setError('Please add a listing photo before publishing.');
+    if (listingImages.length < 2) {
+      setError('Please add at least 2 listing photos before publishing.');
+      return;
+    }
+
+    if (listingImages.length > MAX_LISTING_IMAGES) {
+      setError('You can upload a maximum of 4 photos per crop.');
       return;
     }
 
@@ -436,13 +533,24 @@ export const CreateListingPage = () => {
     try {
       const payload = new FormData();
       Object.entries(form).forEach(([key, value]) => {
-        if (value !== null && value !== undefined && key !== 'image') {
+        if (value !== null && value !== undefined && key !== 'image' && key !== 'imageUrl') {
           payload.append(key, value);
         }
       });
-      if (form.image) {
-        payload.append('image', form.image);
+
+      const uploadedFiles = listingImages.filter((item) => item.source === 'local' && item.file).map((item) => item.file);
+      const retainedRemoteUrls = listingImages
+        .filter((item) => item.source === 'remote' && item.remoteUrl)
+        .map((item) => item.remoteUrl);
+
+      uploadedFiles.slice(0, MAX_LISTING_IMAGES).forEach((file) => {
+        payload.append('images', file);
+      });
+
+      if (retainedRemoteUrls.length > 0) {
+        payload.append('imageUrls', JSON.stringify(retainedRemoteUrls.slice(0, MAX_LISTING_IMAGES)));
       }
+
       if (unitLabel) {
         payload.append('unitLabel', unitLabel);
       }
@@ -455,7 +563,7 @@ export const CreateListingPage = () => {
       }
 
       localStorage.removeItem(DRAFT_STORAGE_KEY);
-      setDraftImage(null);
+      setDraftImages([]);
 
       navigate('/dashboard');
     } catch (apiError) {
@@ -547,27 +655,37 @@ export const CreateListingPage = () => {
                   </Button>
 
                   <div className="mt-3 grid grid-cols-2 gap-2">
-                    {imagePreview ? (
-                      <div className="flex h-24 w-full items-center justify-center rounded-xl border border-[#dbe8e2] bg-white p-1">
+                    {primaryImagePreview ? (
+                      <div className="relative flex h-32 w-full items-center justify-center rounded-xl border border-[#dbe8e2] bg-[#f4faf7] p-1.5">
+                        {listingImages.length > 0 ? (
+                          <button
+                            type="button"
+                            onClick={() => removeImageAt(0)}
+                            className="absolute right-1 top-1 z-10 text-xs font-black leading-none text-red-600 hover:text-red-700"
+                            aria-label="Remove selected image"
+                          >
+                            X
+                          </button>
+                        ) : null}
                         <img
-                          src={imagePreview}
+                          src={primaryImagePreview}
                           alt="Crop preview"
                           className="h-full w-full rounded-lg object-contain"
                         />
                       </div>
                     ) : (
-                      <div className="flex h-24 items-center justify-center rounded-xl border border-dashed border-[#c8ddd4] bg-[#f6fbf9] text-xs font-semibold text-[#52786a]">
+                      <div className="flex h-32 items-center justify-center rounded-xl border border-dashed border-[#c8ddd4] bg-[#f6fbf9] text-xs font-semibold text-[#52786a]">
                         No image yet
                       </div>
                     )}
-                    <label className="flex h-24 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-[#c8ddd4] bg-[#f6fbf9] text-[#52786a]">
+                    <label className="flex h-32 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-[#c8ddd4] bg-[#f6fbf9] text-[#52786a]">
                       <Upload size={16} />
                       <span className="text-xs font-bold">Add preview</span>
                       <input
                         type="file"
                         accept="image/*"
                         className="hidden"
-                        onChange={(event) => void handleImageSelection(event.target.files?.[0] || null)}
+                        onChange={(event) => void addImageFromPicker(event.target.files?.[0] || null)}
                       />
                     </label>
                   </div>
@@ -695,33 +813,51 @@ export const CreateListingPage = () => {
         <section className="space-y-4">
           <div className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-4">
             <p className="text-4xl leading-none font-black text-[#1f9f6a]">Visuals</p>
-            <div className="mt-3 grid grid-cols-4 gap-2">
-              {imagePreview ? (
-                <div className="col-span-2 flex h-28 w-full items-center justify-center rounded-xl border border-[#c8ddd4] bg-white p-1">
-                  <img src={imagePreview} alt="Crop visual" className="h-full w-full rounded-lg object-contain" />
-                </div>
-              ) : (
-                <div className="col-span-2 flex h-28 items-center justify-center rounded-xl border border-dashed border-[#c8ddd4] bg-[#f9fdfb] text-xs font-semibold text-[#5a7f72]">
-                  No image uploaded
-                </div>
-              )}
-              {[1, 2].map((slot) => (
-                <label
-                  key={slot}
-                  className="flex h-28 cursor-pointer items-center justify-center rounded-xl border border-dashed border-[#c8ddd4] bg-[#f9fdfb] text-[#5a7f72]"
-                >
-                  <Camera size={19} />
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(event) => void handleImageSelection(event.target.files?.[0] || null)}
-                  />
-                </label>
-              ))}
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {Array.from({ length: MAX_LISTING_IMAGES }, (_, slotIndex) => {
+                const slotImage = listingImages[slotIndex] || null;
+
+                if (slotImage) {
+                  return (
+                    <div
+                      key={`image-slot-${slotIndex}`}
+                      className="relative flex h-32 w-full items-center justify-center rounded-xl border border-[#c8ddd4] bg-[#f4faf7] p-1.5"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => removeImageAt(slotIndex)}
+                        className="absolute right-1 top-1 z-10 text-xs font-black leading-none text-red-600 hover:text-red-700"
+                        aria-label={`Remove image ${slotIndex + 1}`}
+                      >
+                        X
+                      </button>
+                      <img
+                        src={slotImage.previewUrl}
+                        alt={`Crop visual ${slotIndex + 1}`}
+                        className="h-full w-full rounded-lg object-contain"
+                      />
+                    </div>
+                  );
+                }
+
+                return (
+                  <label
+                    key={`image-slot-${slotIndex}`}
+                    className="flex h-32 cursor-pointer items-center justify-center rounded-xl border border-dashed border-[#c8ddd4] bg-[#f9fdfb] text-[#5a7f72]"
+                  >
+                    <Camera size={19} />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(event) => void handleImageSelectionAt(slotIndex, event.target.files?.[0] || null)}
+                    />
+                  </label>
+                );
+              })}
             </div>
             <p className="mt-2 text-sm font-bold text-[#315d4f]">
-              Reminder: Photos of the actual crop required for verification.
+              Reminder: You can upload up to 4 photos of the actual crop; minimum required is 2.
             </p>
 
             <p className="mt-4 text-4xl leading-none font-black text-[#1f9f6a]">Description</p>

@@ -27,12 +27,54 @@ const distanceInKm = (lat1, lon1, lat2, lon2) => {
   return earthRadius * c;
 };
 
-const mapImageUrl = (req, file, imageUrl) => {
-  if (file) {
-    return `${req.protocol}://${req.get('host')}/uploads/${file.filename}`;
+const parseIncomingImageUrls = (rawValue) => {
+  if (!rawValue) {
+    return [];
   }
 
-  return imageUrl;
+  if (Array.isArray(rawValue)) {
+    return rawValue.filter((value) => typeof value === 'string' && value.trim());
+  }
+
+  if (typeof rawValue === 'string') {
+    const trimmed = rawValue.trim();
+    if (!trimmed) {
+      return [];
+    }
+
+    if (trimmed.startsWith('[')) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) {
+          return parsed.filter((value) => typeof value === 'string' && value.trim());
+        }
+      } catch {
+        return [];
+      }
+    }
+
+    return [trimmed];
+  }
+
+  return [];
+};
+
+const buildUploadedImageUrls = (req, files = []) =>
+  files.map((file) => `${req.protocol}://${req.get('host')}/uploads/${file.filename}`);
+
+const resolveProductImageUrls = (req) => {
+  const uploaded = buildUploadedImageUrls(req, req.files || []);
+  const existing = parseIncomingImageUrls(req.body.imageUrls || req.body.imageUrl);
+
+  const merged = [...existing, ...uploaded]
+    .map((value) => String(value || '').trim())
+    .filter(Boolean)
+    .slice(0, 4);
+
+  return {
+    imageUrls: merged,
+    primaryImageUrl: merged[0] || '',
+  };
 };
 
 export const createProduct = async (req, res, next) => {
@@ -46,7 +88,6 @@ export const createProduct = async (req, res, next) => {
       latitude,
       longitude,
       locationName,
-      imageUrl,
       pathAccessibility,
     } = req.body;
 
@@ -72,13 +113,13 @@ export const createProduct = async (req, res, next) => {
       throw error;
     }
 
-    if (!req.file && !imageUrl) {
+    const { imageUrls, primaryImageUrl } = resolveProductImageUrls(req);
+
+    if (!primaryImageUrl) {
       const error = new Error('A product photo is mandatory');
       error.statusCode = 400;
       throw error;
     }
-
-    const resolvedImageUrl = mapImageUrl(req, req.file, imageUrl);
 
     const product = await Product.create({
       title,
@@ -86,7 +127,8 @@ export const createProduct = async (req, res, next) => {
       productType,
       quantity,
       price: numericPrice,
-      imageUrl: resolvedImageUrl,
+      imageUrl: primaryImageUrl,
+      imageUrls,
       sellerId: req.user._id,
       location: {
         latitude: lat,
@@ -136,7 +178,7 @@ export const updateProduct = async (req, res, next) => {
       throw error;
     }
 
-    const updatedImage = mapImageUrl(req, req.file, req.body.imageUrl) || existingProduct.imageUrl;
+    const { imageUrls, primaryImageUrl } = resolveProductImageUrls(req);
 
     existingProduct.title = req.body.title || existingProduct.title;
     existingProduct.description = req.body.description ?? existingProduct.description;
@@ -151,7 +193,10 @@ export const updateProduct = async (req, res, next) => {
       }
       existingProduct.price = nextPrice;
     }
-    existingProduct.imageUrl = updatedImage;
+    if (primaryImageUrl) {
+      existingProduct.imageUrl = primaryImageUrl;
+      existingProduct.imageUrls = imageUrls;
+    }
 
     if (req.body.latitude !== undefined) {
       const nextLat = Number(req.body.latitude);

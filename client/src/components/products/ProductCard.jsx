@@ -25,7 +25,9 @@ export const ProductCard = ({ product }) => {
 
   return (
     <Card className="overflow-hidden p-0">
-      <img src={product.imageUrl} alt={product.title} className="h-44 w-full object-cover" />
+      <div className="flex h-44 w-full items-center justify-center bg-[#f3f8f5] p-2">
+        <img src={product.imageUrl} alt={product.title} className="h-full w-full rounded-lg object-contain" />
+      </div>
       <div className="space-y-3 p-4">
         <div className="flex items-start justify-between gap-3">
           <h3 className="text-lg font-bold">{product.title}</h3>

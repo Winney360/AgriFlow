@@ -31,6 +31,14 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    imageUrls: {
+      type: [String],
+      default: [],
+      validate: {
+        validator: (value) => Array.isArray(value) && value.length <= 4,
+        message: 'A listing can have at most 4 photos',
+      },
+    },
     sellerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
