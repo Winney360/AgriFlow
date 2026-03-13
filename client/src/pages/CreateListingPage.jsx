@@ -33,6 +33,7 @@ const LocationPicker = ({ selected, setSelected }) => {
 };
 
 export const CreateListingPage = () => {
+  const DRAFT_STORAGE_KEY = 'cropconnect_create_listing_draft';
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const editId = searchParams.get('edit');
@@ -117,6 +118,54 @@ export const CreateListingPage = () => {
     }
   }, [productSearch, form.title]);
 
+  useEffect(() => {
+    if (editId) {
+      return;
+    }
+
+    try {
+      const rawDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
+      if (!rawDraft) {
+        return;
+      }
+
+      const parsedDraft = JSON.parse(rawDraft);
+      if (!parsedDraft?.form) {
+        return;
+      }
+
+      setForm((prev) => ({
+        ...prev,
+        ...parsedDraft.form,
+        image: null,
+      }));
+      setProductSearch(parsedDraft.productSearch || '');
+      setUnitLabel(parsedDraft.unitLabel || 'Kgs');
+      toast.success('Saved draft restored.');
+    } catch {
+      localStorage.removeItem(DRAFT_STORAGE_KEY);
+    }
+  }, [editId, DRAFT_STORAGE_KEY]);
+
+  const onSaveDraft = () => {
+    try {
+      const draftPayload = {
+        form: {
+          ...form,
+          image: null,
+        },
+        productSearch,
+        unitLabel,
+        savedAt: new Date().toISOString(),
+      };
+
+      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draftPayload));
+      toast.success('Draft saved. You can continue later.');
+    } catch {
+      toast.error('Could not save draft on this device.');
+    }
+  };
+
   const requestCurrentLocation = () => {
     setError('');
 
@@ -193,6 +242,8 @@ export const CreateListingPage = () => {
       } else {
         await productApi.create(payload);
       }
+
+      localStorage.removeItem(DRAFT_STORAGE_KEY);
 
       navigate('/dashboard');
     } catch (apiError) {
@@ -539,7 +590,13 @@ export const CreateListingPage = () => {
             <Button type="button" variant="outline" className="h-10 rounded-lg border-[#bed8cd] text-[#2f5c4d]">
               Previous (disabled)
             </Button>
-            <Button type="button" variant="outline" className="h-10 rounded-lg border-[#bed8cd] text-[#2f5c4d]">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-10 rounded-lg border-[#bed8cd] text-[#2f5c4d]"
+              onClick={onSaveDraft}
+              disabled={submitting}
+            >
               Save Draft
             </Button>
             <Button type="button" variant="outline" className="h-10 rounded-lg border-[#8cc8ae] text-[#1e6f4f]">
