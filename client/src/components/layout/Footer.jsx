@@ -1,27 +1,40 @@
+
 const Footer = () => (
-  <footer className="mt-8 grid grid-cols-1 gap-5 rounded-t-md bg-[#27333c] px-4 py-6 text-[#d3dde3] sm:grid-cols-2 md:grid-cols-5">
-    <div className="col-span-2 md:col-span-1">
-      <div className="text-xl font-black">
-        <span>
+  <footer className="mt-8 w-full bg-[#27333c] px-4 py-8 text-[#d3dde3]">
+    <div className="max-w-5xl mx-auto flex flex-col gap-6">
+      <div className="flex flex-col items-center gap-1">
+        <div className="text-2xl font-black">
           <span className="text-[#1f9f6a]">Agri</span><span className="text-white">Flow</span>
-        </span>
+        </div>
+        <p className="text-sm text-[#b6c6d1]">Connecting farmers and buyers.</p>
       </div>
+      <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-3 text-center sm:text-left">
+        <div>
+          <h4 className="font-bold text-white mb-2">Quick Links</h4>
+          <ul className="space-y-1">
+            <li><a href="/" className="hover:underline">Home</a></li>
+            <li><a href="/marketplace" className="hover:underline">Marketplace</a></li>
+            <li><a href="/post-listing" className="hover:underline">Post Listing</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 className="font-bold text-white mb-2">Support</h4>
+          <ul className="space-y-1">
+            <li><a href="/contact" className="hover:underline">Contact Us</a></li>
+            <li><a href="/help" className="hover:underline">Help Center</a></li>
+            <li><a href="/faq" className="hover:underline">FAQ</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 className="font-bold text-white mb-2">Legal</h4>
+          <ul className="space-y-1">
+            <li><a href="/privacy" className="hover:underline">Privacy Policy</a></li>
+            <li><a href="/terms" className="hover:underline">Terms of Service</a></li>
+          </ul>
+        </div>
+      </div>
+      <div className="mt-6 text-center text-xs text-[#aab7bf]">© 2026 AgriFlow. All rights reserved.</div>
     </div>
-    <div>
-      <h4 className="font-bold text-white">About Us</h4>
-      <p className="mt-1 text-sm">Contact</p>
-      <p className="text-sm">Support</p>
-    </div>
-    <div>
-      <h4 className="font-bold text-white">Links</h4>
-      <p className="mt-1 text-sm">Contact</p>
-    </div>
-    <div>
-      <h4 className="font-bold text-white">Social</h4>
-      <p className="mt-1 text-sm">Facebook</p>
-      <p className="text-sm">Twitter</p>
-    </div>
-    <div className="self-end text-sm text-[#aab7bf]">Copyright AgriFlow.com</div>
   </footer>
 );
 
