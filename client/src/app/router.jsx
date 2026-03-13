@@ -13,6 +13,8 @@ import { HistoryPage } from '../pages/HistoryPage';
 import { ProfilePage } from '../pages/ProfilePage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import FAQPage from '../pages/FAQPage';
+import PrivacyPolicyPage from '../pages/PrivacyPolicyPage';
+import TermsOfServicePage from '../pages/TermsOfServicePage';
 import { EmergencyRequestPage } from '../pages/EmergencyRequestPage';
 import { EmergencyRequestsBoard } from '../pages/EmergencyRequestsBoard';
 
@@ -31,6 +33,8 @@ export const router = createBrowserRouter([
       },
       { path: 'marketplace', element: <MarketplacePage /> },
       { path: 'faq', element: <FAQPage /> },
+      { path: 'privacy', element: <PrivacyPolicyPage /> },
+      { path: 'terms', element: <TermsOfServicePage /> },
       { path: 'products/:id', element: <ProductDetailsPage /> },
       { path: 'login', element: <LoginPage /> },
       { path: 'signup', element: <SignupPage /> },
