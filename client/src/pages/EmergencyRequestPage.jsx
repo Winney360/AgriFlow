@@ -125,11 +125,12 @@ export const EmergencyRequestPage = () => {
         quantity: form.quantity,
         latitude: form.latitude,
         longitude: form.longitude,
+        locationName: form.locationName,
         radius: form.radius,
       };
 
       await emergencyRequestApi.create(payload);
-      navigate('/emergency-board');
+      navigate('/marketplace');
     } catch (apiError) {
       setError(apiError?.response?.data?.message || 'Failed to create emergency request.');
     } finally {
@@ -235,25 +236,27 @@ export const EmergencyRequestPage = () => {
               </p>
             ) : null}
 
-            <div className="flex flex-wrap gap-2 border-t border-[#dbe9e3] pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                className="h-10 rounded-lg border-[#bed8cd] text-[#2f5c4d]"
-                onClick={() => navigate(-1)}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                className="h-10 rounded-lg bg-[#d83c31] px-5 font-black text-white"
-                disabled={submitting}
-              >
-                {submitting ? 'Posting...' : '🚨 Post Emergency Request'}
-              </Button>
-            </div>
-          </section>
-        </form>
+          {/* Action buttons moved here to ensure submit works */}
+          <div className="flex flex-wrap gap-2 border-t border-[#dbe9e3] pt-4 mt-6">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-10 rounded-lg border-[#bed8cd] text-[#2f5c4d]"
+              onClick={() => navigate(-1)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              className="h-10 rounded-lg bg-[#d83c31] px-5 font-black text-white"
+              disabled={submitting}
+            >
+              {submitting ? 'Posting...' : '🚨 Post Emergency Request'}
+            </Button>
+          </div>
+        </section>
+      </form>
+
 
         <section className="space-y-4">
           <div className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-4">
