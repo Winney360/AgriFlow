@@ -49,7 +49,27 @@ const DEFAULT_FORM_STATE = {
   pathAccessibility: 'open',
 };
 
-const hasDraftContent = (form, productSearch) => {
+const fileToDataUrl = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : '');
+    reader.onerror = () => reject(new Error('Unable to read file'));
+    reader.readAsDataURL(file);
+  });
+
+const dataUrlToFile = async (dataUrl, fileName, mimeType, lastModified) => {
+  const response = await fetch(dataUrl);
+  const blob = await response.blob();
+  const fallbackType = mimeType || blob.type || 'image/jpeg';
+  const extension = fallbackType.split('/')[1] || 'jpg';
+
+  return new File([blob], fileName || `draft-image.${extension}`, {
+    type: fallbackType,
+    lastModified: lastModified || Date.now(),
+  });
+};
+
+const hasDraftContent = (form, productSearch, draftImage) => {
   const textFields = [
     form?.title,
     form?.description,
@@ -60,7 +80,10 @@ const hasDraftContent = (form, productSearch) => {
     productSearch,
   ];
 
-  return textFields.some((value) => String(value || '').trim().length > 0);
+  return (
+    textFields.some((value) => String(value || '').trim().length > 0) ||
+    Boolean(draftImage?.dataUrl)
+  );
 };
 
 const resolveLocationName = async (latitude, longitude) => {
@@ -116,6 +139,7 @@ export const CreateListingPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [productSearch, setProductSearch] = useState('');
   const [unitLabel, setUnitLabel] = useState('Kgs');
+  const [draftImage, setDraftImage] = useState(null);
 
 
   const [form, setForm] = useState(DEFAULT_FORM_STATE);
@@ -186,32 +210,53 @@ export const CreateListingPage = () => {
       return;
     }
 
-    try {
-      const rawDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
-      if (!rawDraft) {
-        return;
-      }
+    const restoreDraft = async () => {
+      try {
+        const rawDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
+        if (!rawDraft) {
+          return;
+        }
 
-      const parsedDraft = JSON.parse(rawDraft);
-      if (!parsedDraft?.form) {
-        return;
-      }
+        const parsedDraft = JSON.parse(rawDraft);
+        if (!parsedDraft?.form) {
+          return;
+        }
 
-      if (!hasDraftContent(parsedDraft.form, parsedDraft.productSearch)) {
-        return;
-      }
+        if (!hasDraftContent(parsedDraft.form, parsedDraft.productSearch, parsedDraft.draftImage)) {
+          return;
+        }
 
-      setForm((prev) => ({
-        ...prev,
-        ...parsedDraft.form,
-        image: null,
-      }));
-      setProductSearch(parsedDraft.productSearch || '');
-      setUnitLabel(parsedDraft.unitLabel || 'Kgs');
-      toast.success('Saved draft restored.');
-    } catch {
-      localStorage.removeItem(DRAFT_STORAGE_KEY);
-    }
+        setForm((prev) => ({
+          ...prev,
+          ...parsedDraft.form,
+          image: null,
+        }));
+
+        if (parsedDraft?.draftImage?.dataUrl) {
+          const restoredImage = await dataUrlToFile(
+            parsedDraft.draftImage.dataUrl,
+            parsedDraft.draftImage.fileName,
+            parsedDraft.draftImage.mimeType,
+            parsedDraft.draftImage.lastModified,
+          );
+
+          setForm((prev) => ({
+            ...prev,
+            image: restoredImage,
+            imageUrl: '',
+          }));
+          setDraftImage(parsedDraft.draftImage);
+        }
+
+        setProductSearch(parsedDraft.productSearch || '');
+        setUnitLabel(parsedDraft.unitLabel || 'Kgs');
+        toast.success('Saved draft restored.');
+      } catch {
+        localStorage.removeItem(DRAFT_STORAGE_KEY);
+      }
+    };
+
+    void restoreDraft();
   }, [editId]);
 
   useEffect(() => {
@@ -219,7 +264,7 @@ export const CreateListingPage = () => {
       return;
     }
 
-    if (!hasDraftContent(form, productSearch)) {
+    if (!hasDraftContent(form, productSearch, draftImage)) {
       return;
     }
 
@@ -228,16 +273,54 @@ export const CreateListingPage = () => {
         ...form,
         image: null,
       },
+      draftImage,
       productSearch,
       unitLabel,
       savedAt: new Date().toISOString(),
     };
 
-    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draftPayload));
-  }, [editId, form, productSearch, unitLabel]);
+    try {
+      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draftPayload));
+    } catch {
+      try {
+        localStorage.setItem(
+          DRAFT_STORAGE_KEY,
+          JSON.stringify({
+            ...draftPayload,
+            draftImage: null,
+          }),
+        );
+      } catch {
+        // Ignore storage failures in background autosave.
+      }
+    }
+  }, [editId, form, productSearch, unitLabel, draftImage]);
+
+  const handleImageSelection = async (file) => {
+    if (!file) {
+      setForm((prev) => ({ ...prev, image: null }));
+      setDraftImage(null);
+      return;
+    }
+
+    setForm((prev) => ({ ...prev, image: file, imageUrl: '' }));
+
+    try {
+      const dataUrl = await fileToDataUrl(file);
+      setDraftImage({
+        dataUrl,
+        fileName: file.name,
+        mimeType: file.type,
+        lastModified: file.lastModified,
+      });
+    } catch {
+      setDraftImage(null);
+      toast.error('Selected image preview could not be saved for draft restore.');
+    }
+  };
 
   const onSaveDraft = () => {
-    if (!hasDraftContent(form, productSearch)) {
+    if (!hasDraftContent(form, productSearch, draftImage)) {
       toast.info('Add listing details before saving a draft.');
       return;
     }
@@ -248,6 +331,7 @@ export const CreateListingPage = () => {
           ...form,
           image: null,
         },
+        draftImage,
         productSearch,
         unitLabel,
         savedAt: new Date().toISOString(),
@@ -256,7 +340,24 @@ export const CreateListingPage = () => {
       localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draftPayload));
       toast.success('Draft saved. You can continue later.');
     } catch {
-      toast.error('Could not save draft on this device.');
+      try {
+        localStorage.setItem(
+          DRAFT_STORAGE_KEY,
+          JSON.stringify({
+            form: {
+              ...form,
+              image: null,
+            },
+            draftImage: null,
+            productSearch,
+            unitLabel,
+            savedAt: new Date().toISOString(),
+          }),
+        );
+        toast.info('Draft saved, but image was too large to keep offline.');
+      } catch {
+        toast.error('Could not save draft on this device.');
+      }
     }
   };
 
@@ -354,6 +455,7 @@ export const CreateListingPage = () => {
       }
 
       localStorage.removeItem(DRAFT_STORAGE_KEY);
+      setDraftImage(null);
 
       navigate('/dashboard');
     } catch (apiError) {
@@ -465,9 +567,7 @@ export const CreateListingPage = () => {
                         type="file"
                         accept="image/*"
                         className="hidden"
-                        onChange={(event) =>
-                          setForm({ ...form, image: event.target.files?.[0] || null })
-                        }
+                        onChange={(event) => void handleImageSelection(event.target.files?.[0] || null)}
                       />
                     </label>
                   </div>
@@ -615,7 +715,7 @@ export const CreateListingPage = () => {
                     type="file"
                     accept="image/*"
                     className="hidden"
-                    onChange={(event) => setForm({ ...form, image: event.target.files?.[0] || null })}
+                    onChange={(event) => void handleImageSelection(event.target.files?.[0] || null)}
                   />
                 </label>
               ))}
