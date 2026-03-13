@@ -267,11 +267,13 @@ export const CreateListingPage = () => {
 
                   <div className="mt-3 grid grid-cols-2 gap-2">
                     {imagePreview ? (
-                      <img
-                        src={imagePreview}
-                        alt="Crop preview"
-                        className="h-24 w-full rounded-xl object-cover"
-                      />
+                      <div className="flex h-24 w-full items-center justify-center rounded-xl border border-[#dbe8e2] bg-white p-1">
+                        <img
+                          src={imagePreview}
+                          alt="Crop preview"
+                          className="h-full w-full rounded-lg object-contain"
+                        />
+                      </div>
                     ) : (
                       <div className="flex h-24 items-center justify-center rounded-xl border border-dashed border-[#c8ddd4] bg-[#f6fbf9] text-xs font-semibold text-[#52786a]">
                         No image yet
@@ -416,7 +418,9 @@ export const CreateListingPage = () => {
             <p className="text-4xl leading-none font-black text-[#1f9f6a]">Visuals</p>
             <div className="mt-3 grid grid-cols-4 gap-2">
               {imagePreview ? (
-                <img src={imagePreview} alt="Crop visual" className="h-28 w-full rounded-xl object-cover col-span-2" />
+                <div className="col-span-2 flex h-28 w-full items-center justify-center rounded-xl border border-[#c8ddd4] bg-white p-1">
+                  <img src={imagePreview} alt="Crop visual" className="h-full w-full rounded-lg object-contain" />
+                </div>
               ) : (
                 <div className="col-span-2 flex h-28 items-center justify-center rounded-xl border border-dashed border-[#c8ddd4] bg-[#f9fdfb] text-xs font-semibold text-[#5a7f72]">
                   No image uploaded
