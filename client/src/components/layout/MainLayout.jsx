@@ -3,6 +3,7 @@ import { Menu } from 'lucide-react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Store, Tractor, History, UserRound, Plus } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
+import Footer from './Footer';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../ui/button';
 import { cn } from '../../lib/utils';
@@ -204,6 +205,7 @@ export const MainLayout = () => {
       </main>
 
       {/* No bottom nav on mobile, all nav is in the top-right menu */}
+      <Footer />
     </div>
   );
 };
