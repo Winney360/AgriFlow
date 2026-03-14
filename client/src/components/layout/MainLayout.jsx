@@ -157,8 +157,17 @@ export const MainLayout = () => {
                       </li>
                     );
                   })}
+                  {/* Desktop Logout Button */}
+                  <li>
+                    <button
+                      onClick={onLogout}
+                      className="rounded-lg px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 transition-all duration-200"
+                      type="button"
+                    >
+                      Logout
+                    </button>
+                  </li>
                 </ul>
-
               </nav>
             )}
           </div>
