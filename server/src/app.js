@@ -65,8 +65,6 @@ app.use(
   })
 );
 
-// Handle preflight requests
-app.options('*', cors());
 
 // Debug middleware
 app.use((req, res, next) => {
