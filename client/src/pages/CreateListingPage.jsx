@@ -45,26 +45,49 @@ const CATEGORY_OPTIONS = [
   { label: 'Fruit', value: 'fruit' },
 ];
 
+const UNIT_OPTIONS = ['Kgs', 'Pieces', 'Bags', 'Tons', 'Bunches'];
+
 const DEFAULT_FORM_STATE = {
   title: '',
   description: '',
-  productType: 'crop',
+  category: 'crop', // Changed from productType to category
   quantity: '',
   price: '',
-  locationName: '',
+  location: '', // Changed from locationName to location
   latitude: -1.286389,
   longitude: 36.817223,
+  roadAccess: 'open', // Changed from pathAccessibility to roadAccess
   image: null,
   imageUrl: '',
 };
 
+// Utility: Convert a File to a Data URL (for image preview)
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    if (!(file instanceof Blob)) {
+      reject(new Error('Invalid file type.'));
+      return;
+    }
+    const reader = new window.FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error('Failed to read file.'));
+    reader.readAsDataURL(file);
+  });
+}
+
+const toListingImageFromRemote = (url) => ({
+  previewUrl: url,
+  remoteUrl: url,
+  file: null,
+  source: 'remote',
+});
+
 // Utility to check if there is any content worth saving as a draft
 function hasDraftContent(form, productSearch, images) {
-  // Check if any form field is filled (except defaults)
   const hasFormContent = Object.entries(form).some(([key, value]) => {
     if (key === 'latitude' || key === 'longitude' || key === 'image' || key === 'imageUrl') return false;
     if (typeof value === 'string') {
-      return value.trim() !== '' && value !== (key === 'productType' ? 'crop' : '');
+      return value.trim() !== '' && value !== (key === 'category' ? 'crop' : '');
     }
     return value !== '' && value != null;
   });
@@ -80,14 +103,12 @@ export const CreateListingPage = () => {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [productSearch, setProductSearch] = useState('');
-  const [unitLabel, setUnitLabel] = useState('Kgs');
+  const [unit, setUnit] = useState('Kgs'); // Changed from unitLabel to unit
   const [draftImages, setDraftImages] = useState([]);
   const [listingImages, setListingImages] = useState([]);
-
-
   const [form, setForm] = useState(DEFAULT_FORM_STATE);
-
   const [locationMode, setLocationMode] = useState('map');
+  
   const marker = useMemo(() => [form.latitude, form.longitude], [form.latitude, form.longitude]);
 
   const productSuggestions = [
@@ -115,32 +136,88 @@ export const CreateListingPage = () => {
 
   useEffect(() => {
     const loadEditProduct = async () => {
-      if (!editId) {
-        return;
+      if (!editId) return;
+      
+      try {
+        const response = await productApi.details(editId);
+        const item = response.data.data;
+        
+        const existingImages = (Array.isArray(item.imageUrls) && item.imageUrls.length
+          ? item.imageUrls
+          : item.imageUrl
+            ? [item.imageUrl]
+            : []
+        )
+          .slice(0, MAX_LISTING_IMAGES)
+          .map((url) => toListingImageFromRemote(url));
+        
+        setListingImages(existingImages);
+        setDraftImages(existingImages.map(img => ({ source: 'remote', remoteUrl: img.remoteUrl })));
+        
+        setForm({
+          title: item.title || '',
+          description: item.description || '',
+          category: item.category || item.productType || 'crop',
+          quantity: item.quantity?.toString() || '',
+          price: item.price?.toString() || '',
+          location: item.location || item.locationName || '',
+          latitude: item.latitude || -1.286389,
+          longitude: item.longitude || 36.817223,
+          roadAccess: item.roadAccess || item.pathAccessibility || 'open',
+          image: null,
+          imageUrl: existingImages[0]?.remoteUrl || '',
+        });
+        
+        setProductSearch(item.title || '');
+        if (item.unit) setUnit(item.unit);
+      } catch (error) {
+        toast.error('Failed to load product for editing');
       }
-      const response = await productApi.details(editId);
-      const item = response.data.data;
-      const existingImages = (Array.isArray(item.imageUrls) && item.imageUrls.length
-        ? item.imageUrls
-        : item.imageUrl
-          ? [item.imageUrl]
-          : []
-      )
-        .slice(0, MAX_LISTING_IMAGES)
-        .map((url) => toListingImageFromRemote(url));
-      // ...existing code for loading edit product...
     };
-    // ...existing code for restoring draft (should be in a separate useEffect)...
+    
+    loadEditProduct();
+    
+    // Restore draft logic
+    const savedDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
+    if (savedDraft && !editId) {
+      try {
+        const draft = JSON.parse(savedDraft);
+        if (draft.form) {
+          setForm(prev => ({ ...prev, ...draft.form }));
+        }
+        if (draft.productSearch) {
+          setProductSearch(draft.productSearch);
+        }
+        if (draft.unit) {
+          setUnit(draft.unit);
+        }
+        if (draft.draftImages && draft.draftImages.length > 0) {
+          const restoredImages = draft.draftImages.map(img => {
+            if (img.source === 'remote') {
+              return toListingImageFromRemote(img.remoteUrl);
+            } else if (img.source === 'local' && img.dataUrl) {
+              return {
+                previewUrl: img.dataUrl,
+                remoteUrl: '',
+                file: null,
+                source: 'local',
+              };
+            }
+            return null;
+          }).filter(Boolean);
+          setListingImages(restoredImages);
+          setDraftImages(draft.draftImages);
+        }
+        toast.info('Draft restored');
+      } catch (e) {
+        console.error('Failed to restore draft', e);
+      }
+    }
   }, [editId]);
 
   useEffect(() => {
-    if (editId) {
-      return;
-    }
-
-    if (!hasDraftContent(form, productSearch, draftImages)) {
-      return;
-    }
+    if (editId) return;
+    if (!hasDraftContent(form, productSearch, draftImages)) return;
 
     const draftPayload = {
       form: {
@@ -149,7 +226,7 @@ export const CreateListingPage = () => {
       },
       draftImages,
       productSearch,
-      unitLabel,
+      unit,
       savedAt: new Date().toISOString(),
     };
 
@@ -169,7 +246,7 @@ export const CreateListingPage = () => {
         // Ignore storage failures in background autosave.
       }
     }
-  }, [draftImages, editId, form, productSearch, unitLabel]);
+  }, [draftImages, editId, form, productSearch, unit]);
 
   const syncDraftImages = (nextListingImages) => {
     setDraftImages(
@@ -200,12 +277,18 @@ export const CreateListingPage = () => {
     }));
   };
 
+  const MAX_IMAGE_SIZE_MB = 5;
+  
   const handleImageSelectionAt = async (index, file) => {
-    if (!file) {
+    if (!file) return;
+
+    if (file.size > MAX_IMAGE_SIZE_MB * 1024 * 1024) {
+      toast.error(`Image is too large. Please select an image under ${MAX_IMAGE_SIZE_MB}MB.`);
       return;
     }
 
     if (index >= MAX_LISTING_IMAGES) {
+      toast.error(`Maximum ${MAX_LISTING_IMAGES} images allowed`);
       return;
     }
 
@@ -230,13 +313,19 @@ export const CreateListingPage = () => {
       setListingImages(trimmedImages);
       syncDraftImages(trimmedImages);
       setForm((prev) => ({ ...prev, imageUrl: trimmedImages[0]?.remoteUrl || '' }));
-    } catch {
-      toast.error('Selected image preview could not be saved for draft restore.');
+      
+      toast.success('Image added successfully');
+    } catch (error) {
+      console.error('Image upload error:', error);
+      toast.error('Selected image preview could not be saved. Try a smaller image.');
     }
   };
 
   const addImageFromPicker = async (file) => {
-    if (!file) {
+    if (!file) return;
+
+    if (file.size > MAX_IMAGE_SIZE_MB * 1024 * 1024) {
+      toast.error(`Image is too large. Please select an image under ${MAX_IMAGE_SIZE_MB}MB.`);
       return;
     }
 
@@ -262,7 +351,7 @@ export const CreateListingPage = () => {
         },
         draftImages,
         productSearch,
-        unitLabel,
+        unit,
         savedAt: new Date().toISOString(),
       };
 
@@ -279,7 +368,7 @@ export const CreateListingPage = () => {
             },
             draftImages: [],
             productSearch,
-            unitLabel,
+            unit,
             savedAt: new Date().toISOString(),
           }),
         );
@@ -310,19 +399,6 @@ export const CreateListingPage = () => {
           longitude,
         }));
         toast.success('GPS location captured.');
-
-        void resolveLocationName(latitude, longitude)
-          .then((resolvedLocationName) => {
-            if (!resolvedLocationName) {
-              return;
-            }
-
-            setForm((prev) => ({
-              ...prev,
-              locationName: resolvedLocationName,
-            }));
-          })
-          .catch(() => null);
       },
       () => {
         setError('Could not access your GPS location. Try map selection instead.');
@@ -361,9 +437,7 @@ export const CreateListingPage = () => {
           </div>
         </div>
       ),
-      {
-        duration: Infinity,
-      },
+      { duration: Infinity }
     );
   };
 
@@ -371,18 +445,50 @@ export const CreateListingPage = () => {
     event.preventDefault();
     setError('');
 
-    if (listingImages.length < 2) {
-      setError('Please add at least 2 listing photos before publishing.');
+    // Enhanced validation
+    const requiredFields = {
+      title: 'Title',
+      category: 'Category',
+      quantity: 'Quantity',
+      price: 'Price',
+      location: 'Location',
+    };
+
+    const missingFields = [];
+    Object.entries(requiredFields).forEach(([key, label]) => {
+      if (!form[key] || form[key].toString().trim() === '') {
+        missingFields.push(label);
+      }
+    });
+
+    if (missingFields.length > 0) {
+      setError(`Missing required fields: ${missingFields.join(', ')}`);
       return;
     }
 
-    if (listingImages.length > MAX_LISTING_IMAGES) {
-      setError('You can upload a maximum of 4 photos per crop.');
+    // Validate numbers
+    const quantityNum = Number(form.quantity);
+    const priceNum = Number(form.price);
+    const latNum = Number(form.latitude);
+    const lngNum = Number(form.longitude);
+
+    if (!Number.isFinite(quantityNum) || quantityNum <= 0) {
+      setError('Quantity must be a positive number.');
+      return;
+    }
+    if (!Number.isFinite(priceNum) || priceNum <= 0) {
+      setError('Price must be a positive number.');
       return;
     }
 
-    if (!Number.isFinite(Number(form.latitude)) || !Number.isFinite(Number(form.longitude))) {
+    if (!Number.isFinite(latNum) || !Number.isFinite(lngNum) || 
+        latNum < -90 || latNum > 90 || lngNum < -180 || lngNum > 180) {
       setError('Please provide a valid location using GPS or map selection.');
+      return;
+    }
+
+    if (listingImages.length < 1) {
+      setError('Please add at least 1 listing photo before publishing.');
       return;
     }
 
@@ -390,42 +496,76 @@ export const CreateListingPage = () => {
 
     try {
       const payload = new FormData();
-      Object.entries(form).forEach(([key, value]) => {
-        if (value !== null && value !== undefined && key !== 'image' && key !== 'imageUrl') {
-          payload.append(key, value);
-        }
-      });
 
-      const uploadedFiles = listingImages.filter((item) => item.source === 'local' && item.file).map((item) => item.file);
+      // Append form fields with correct API field names
+      payload.append('title', form.title);
+      payload.append('description', form.description || '');
+      payload.append('category', form.category);
+      payload.append('quantity', Number(form.quantity));
+      payload.append('price', Number(form.price));
+      payload.append('location', form.location);
+      payload.append('latitude', Number(form.latitude));
+      payload.append('longitude', Number(form.longitude));
+      payload.append('roadAccess', form.roadAccess);
+      payload.append('unit', unit);
+
+      // Handle images
+      const uploadedFiles = listingImages
+        .filter((item) => item.source === 'local' && item.file)
+        .map((item) => item.file);
+
       const retainedRemoteUrls = listingImages
         .filter((item) => item.source === 'remote' && item.remoteUrl)
         .map((item) => item.remoteUrl);
 
+      // Append new images
       uploadedFiles.slice(0, MAX_LISTING_IMAGES).forEach((file) => {
         payload.append('images', file);
       });
 
+      // Append existing image URLs if any
       if (retainedRemoteUrls.length > 0) {
-        payload.append('imageUrls', JSON.stringify(retainedRemoteUrls.slice(0, MAX_LISTING_IMAGES)));
+        payload.append('existingImages', JSON.stringify(retainedRemoteUrls));
       }
 
-      if (unitLabel) {
-        payload.append('unitLabel', unitLabel);
+      // Log the complete payload for debugging
+      console.log('=== Form Data being sent ===');
+      for (let [key, value] of payload.entries()) {
+        console.log(key, value instanceof File ? `File: ${value.name}` : value);
       }
 
+      // Make the API call
+      let response;
       if (editId) {
-        await productApi.update(editId, payload);
+        response = await productApi.update(editId, payload);
       } else {
-        await productApi.create(payload);
+        response = await productApi.create(payload);
       }
 
-      // Remove draft after successful post
+      console.log('API Response:', response);
+
+      // Success - remove draft and redirect
       localStorage.removeItem(DRAFT_STORAGE_KEY);
       setDraftImages([]);
-
+      toast.success('Listing saved successfully!');
       navigate('/dashboard');
+
     } catch (apiError) {
-      setError(apiError?.response?.data?.message || 'Failed to save listing.');
+      console.error('=== API Error Details ===');
+      console.error('Error object:', apiError);
+      console.error('Response status:', apiError.response?.status);
+      console.error('Response data:', apiError.response?.data);
+      console.error('Response headers:', apiError.response?.headers);
+      
+      // Show specific error message from server
+      const serverMessage = apiError.response?.data?.message || 
+                           apiError.response?.data?.error || 
+                           'Failed to save listing. Please check all fields and try again.';
+      setError(serverMessage);
+      
+      if (apiError.response?.data?.errors) {
+        console.error('Validation errors:', apiError.response.data.errors);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -433,7 +573,7 @@ export const CreateListingPage = () => {
 
   const totalValue = Number(form.quantity || 0) * Number(form.price || 0);
   const headlineValue = form.title || productSearch || 'Untitled listing';
-  const quantityError = form.quantity && Number(form.quantity) <= 0 ? 'Quantity is too low.' : '';
+  const quantityError = form.quantity && Number(form.quantity) <= 0 ? 'Quantity must be positive.' : '';
 
   const selectSuggestion = (value) => {
     setProductSearch(value);
@@ -543,7 +683,13 @@ export const CreateListingPage = () => {
                         type="file"
                         accept="image/*"
                         className="hidden"
-                        onChange={(event) => void addImageFromPicker(event.target.files?.[0] || null)}
+                        onChange={(event) => {
+                          const file = event.target.files?.[0];
+                          if (file) {
+                            addImageFromPicker(file);
+                          }
+                          event.target.value = '';
+                        }}
                       />
                     </label>
                   </div>
@@ -565,16 +711,18 @@ export const CreateListingPage = () => {
                       className="h-10"
                       required
                     />
-                    <div className="w-3/8 min-w-30 max-w-55">
-                      <Listbox value={unitLabel} onChange={setUnitLabel}>
+                    
+                    {/* Unit Dropdown - Only One! */}
+                    <div className="w-full">
+                      <Listbox value={unit} onChange={setUnit}>
                         <div className="relative">
                           <Listbox.Button className="h-10 w-full rounded-xl border border-[#c9ddd4] bg-[#f8fcfa] px-3 text-sm font-semibold text-[#193f30] text-left flex items-center justify-between">
-                            {unitLabel}
+                            {unit}
                             <span className="ml-2">▼</span>
                           </Listbox.Button>
                           <Transition as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
-                            <Listbox.Options className="absolute z-10 bottom-full mb-1 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                              {['Kgs','Pieces','Bags','Tons','Bunches'].map((option, idx, arr) => (
+                            <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                              {UNIT_OPTIONS.map((option, idx, arr) => (
                                 <Listbox.Option
                                   key={option}
                                   className={({ active }) => {
@@ -595,20 +743,19 @@ export const CreateListingPage = () => {
                         </div>
                       </Listbox>
                     </div>
-
                   </div>
                 </div>
 
                 <div className="rounded-xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-3">
                   <p className="text-4xl leading-none font-black text-[#1f9f6a]">Define Your Harvest & Price.</p>
 
-                  {/* Category Dropdown with Headless UI Listbox */}
+                  {/* Category Dropdown */}
                   <div className="mt-4">
                     <label className="block text-sm font-bold text-[#2f6152] mb-1">Category</label>
-                    <Listbox value={form.productType} onChange={val => setForm({ ...form, productType: val })}>
+                    <Listbox value={form.category} onChange={val => setForm({ ...form, category: val })}>
                       <div className="relative">
-                        <Listbox.Button className="h-10 w-full rounded-xl border border-[#c9ddd4] bg-[#f8fcfa] px-3 text-sm font-semibold text-[#193f30] mb-4 text-left flex items-center justify-between">
-                          {CATEGORY_OPTIONS.find(opt => opt.value === form.productType)?.label || 'Select Category'}
+                        <Listbox.Button className="h-10 w-full rounded-xl border border-[#c9ddd4] bg-[#f8fcfa] px-3 text-sm font-semibold text-[#193f30] text-left flex items-center justify-between">
+                          {CATEGORY_OPTIONS.find(opt => opt.value === form.category)?.label || 'Select Category'}
                           <span className="ml-2">▼</span>
                         </Listbox.Button>
                         <Transition as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
@@ -638,7 +785,7 @@ export const CreateListingPage = () => {
                   <div className="space-y-4">
                     <div>
                       <p className="text-2xl font-black text-[#143629]">Quantity</p>
-                      <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      <div className="mt-2 grid grid-cols-1 gap-2">
                         <Input
                           placeholder="Total Quantity"
                           value={form.quantity}
@@ -646,34 +793,6 @@ export const CreateListingPage = () => {
                           className="h-10"
                           required
                         />
-                        <Listbox value={unitLabel} onChange={setUnitLabel}>
-                          <div className="relative">
-                            <Listbox.Button className="h-10 w-full rounded-xl border border-[#c9ddd4] bg-[#f8fcfa] px-3 text-sm font-semibold text-[#193f30] text-left flex items-center justify-between">
-                              {unitLabel}
-                              <span className="ml-2">▼</span>
-                            </Listbox.Button>
-                            <Transition as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
-                              <Listbox.Options className="absolute z-10 mt-1 top-full max-h-60 w-full overflow-auto rounded-xl bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                                {['Kgs', 'Pieces', 'Bags', 'Tons', 'Bunches'].map((option, idx, arr) => (
-                                  <Listbox.Option
-                                    key={option}
-                                    className={({ active }) => {
-                                      let base = 'cursor-pointer select-none px-4 py-2 text-sm font-semibold';
-                                      let rounded = '';
-                                      if (idx === 0) rounded += ' rounded-t-xl';
-                                      if (idx === arr.length - 1) rounded += ' rounded-b-xl';
-                                      let color = active ? 'bg-[#20a46b] text-white' : 'text-[#193f30]';
-                                      return `${base}${rounded} ${color}`;
-                                    }}
-                                    value={option}
-                                  >
-                                    {option}
-                                  </Listbox.Option>
-                                ))}
-                              </Listbox.Options>
-                            </Transition>
-                          </div>
-                        </Listbox>
                       </div>
                       {quantityError ? (
                         <p className="mt-1 flex items-center gap-1 text-xs font-bold text-[#ba2a2a]">
@@ -683,8 +802,8 @@ export const CreateListingPage = () => {
                     </div>
 
                     <div>
-                      <p className="text-2xl font-black text-[#143629]">Price</p>
-                      <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      <p className="text-2xl font-black text-[#143629]">Price (per {unit})</p>
+                      <div className="mt-2 grid grid-cols-1 gap-2">
                         <Input
                           type="number"
                           placeholder="Price per Unit"
@@ -693,16 +812,20 @@ export const CreateListingPage = () => {
                           className="h-10"
                           required
                         />
-                        <Input value={totalValue ? `Ksh ${totalValue.toLocaleString()}` : 'Ksh 0'} readOnly className="h-10" />
+                        <Input 
+                          value={totalValue ? `Ksh ${totalValue.toLocaleString()}` : 'Ksh 0'} 
+                          readOnly 
+                          className="h-10 bg-gray-50" 
+                        />
                       </div>
                     </div>
 
                     <div>
                       <p className="text-sm font-black text-[#2f6152]">Road Accessibility Status</p>
                       <select
-                        value={form.pathAccessibility}
+                        value={form.roadAccess}
                         onChange={(event) =>
-                          setForm({ ...form, pathAccessibility: event.target.value })
+                          setForm({ ...form, roadAccess: event.target.value })
                         }
                         className="mt-1 h-10 w-full rounded-xl border border-[#c9ddd4] bg-white px-3 text-sm font-semibold text-[#193f30]"
                       >
@@ -718,11 +841,11 @@ export const CreateListingPage = () => {
             </section>
           </div>
 
-          {error ? (
-            <p className="mt-3 rounded-lg border border-[#efc7c7] bg-[#fff2f2] px-3 py-2 text-sm font-semibold text-[#b11e1e]">
+          {error && (
+            <div className="mt-3 rounded-lg border border-[#efc7c7] bg-[#fff2f2] px-3 py-2 text-sm font-semibold text-[#b11e1e]">
               {error}
-            </p>
-          ) : null}
+            </div>
+          )}
 
           <div className="mt-4 flex flex-wrap gap-2 border-t border-[#dbe9e3] pt-4">
             <Button type="button" variant="outline" className="h-10 rounded-lg border-[#8cc8ae] text-[#1e6f4f]">
@@ -771,14 +894,20 @@ export const CreateListingPage = () => {
                       type="file"
                       accept="image/*"
                       className="hidden"
-                      onChange={(event) => void handleImageSelectionAt(slotIndex, event.target.files?.[0] || null)}
+                      onChange={(event) => {
+                        const file = event.target.files?.[0];
+                        if (file) {
+                          handleImageSelectionAt(slotIndex, file);
+                        }
+                        event.target.value = '';
+                      }}
                     />
                   </label>
                 );
               })}
             </div>
             <p className="mt-2 text-sm font-bold text-[#315d4f]">
-              Reminder: You can upload up to 4 photos of the actual crop; minimum required is 2.
+              You can upload up to {MAX_LISTING_IMAGES} photos. Minimum required is 1.
             </p>
 
             <p className="mt-4 text-4xl leading-none font-black text-[#1f9f6a]">Description</p>
@@ -787,6 +916,7 @@ export const CreateListingPage = () => {
               className="mt-3 min-h-26 w-full rounded-xl border border-[#c9ddd4] bg-white p-3 text-sm font-semibold text-[#1d4536] outline-none"
               value={form.description}
               onChange={(event) => setForm({ ...form, description: event.target.value })}
+              rows={4}
             />
           </div>
 
@@ -800,9 +930,10 @@ export const CreateListingPage = () => {
                 </p>
                 <Input
                   className="mt-3 h-10 bg-white"
-                  placeholder="Location name"
-                  value={form.locationName}
-                  onChange={(event) => setForm({ ...form, locationName: event.target.value })}
+                  placeholder="Location name (e.g., Nairobi, Karen)"
+                  value={form.location}
+                  onChange={(event) => setForm({ ...form, location: event.target.value })}
+                  required
                 />
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Button
@@ -829,15 +960,26 @@ export const CreateListingPage = () => {
                 </div>
               </div>
 
-              <div className="overflow-hidden rounded-xl border border-[#c7ddd3]">
-                <div className="flex items-center justify-between border-b border-[#d8e8e2] bg-white px-3 py-2">
+              {/* Fixed Map Container with proper z-index */}
+              <div className="overflow-hidden rounded-xl border border-[#c7ddd3] relative" style={{ zIndex: 1 }}>
+                <div className="flex items-center justify-between border-b border-[#d8e8e2] bg-white px-3 py-2 relative" style={{ zIndex: 2 }}>
                   <p className="font-black text-[#214538]">Set Pickup Location</p>
                   <span className="inline-flex items-center gap-1 rounded-full bg-[#ddf3e8] px-2 py-1 text-xs font-black text-[#15714d]">
-                    <Check size={13} /> GPS Location acquired
+                    <Check size={13} /> Location Set
                   </span>
                 </div>
-                <div className="h-60">
-                  <MapContainer center={marker} zoom={8} className="h-full w-full" attributionControl={false}>
+                <div className="h-60 w-full relative" style={{ zIndex: 1 }}>
+                  <MapContainer 
+                    center={marker} 
+                    zoom={8} 
+                    className="h-full w-full" 
+                    attributionControl={false}
+                    style={{ 
+                      zIndex: 1,
+                      position: 'relative'
+                    }}
+                    scrollWheelZoom={false}
+                  >
                     <TileLayer
                       url={ENGLISH_MAP_TILE_URL}
                     />
@@ -869,7 +1011,7 @@ export const CreateListingPage = () => {
               className="h-10 rounded-lg bg-[#1f9f6a] px-5 font-black"
               disabled={submitting}
             >
-              {submitting ? 'Saving...' : editId ? 'Confirm and Update Listing' : 'Confirm and POST Listing'}
+              {submitting ? 'Saving...' : editId ? 'Update Listing' : 'Post Listing'}
             </Button>
           </div>
         </section>
