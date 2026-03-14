@@ -50,13 +50,13 @@ const UNIT_OPTIONS = ['Kgs', 'Pieces', 'Bags', 'Tons', 'Bunches'];
 const DEFAULT_FORM_STATE = {
   title: '',
   description: '',
-  category: 'crop', // Changed from productType to category
+  category: 'crop',
   quantity: '',
   price: '',
-  location: '', // Changed from locationName to location
+  location: '',
   latitude: -1.286389,
   longitude: 36.817223,
-  roadAccess: 'open', // Changed from pathAccessibility to roadAccess
+  roadAccess: 'open',
   image: null,
   imageUrl: '',
 };
@@ -103,7 +103,7 @@ export const CreateListingPage = () => {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [productSearch, setProductSearch] = useState('');
-  const [unit, setUnit] = useState('Kgs'); // Changed from unitLabel to unit
+  const [unit, setUnit] = useState('Kgs');
   const [draftImages, setDraftImages] = useState([]);
   const [listingImages, setListingImages] = useState([]);
   const [form, setForm] = useState(DEFAULT_FORM_STATE);
@@ -215,6 +215,20 @@ export const CreateListingPage = () => {
     }
   }, [editId]);
 
+  // Sync productSearch with form.title
+  useEffect(() => {
+    if (form.title && form.title !== productSearch) {
+      setProductSearch(form.title);
+    }
+  }, [form.title]);
+
+  // Sync form.title with productSearch
+  useEffect(() => {
+    if (productSearch && productSearch !== form.title) {
+      setForm(prev => ({ ...prev, title: productSearch }));
+    }
+  }, [productSearch]);
+
   useEffect(() => {
     if (editId) return;
     if (!hasDraftContent(form, productSearch, draftImages)) return;
@@ -282,6 +296,8 @@ export const CreateListingPage = () => {
   const handleImageSelectionAt = async (index, file) => {
     if (!file) return;
 
+    console.log('Selected file:', file);
+
     if (file.size > MAX_IMAGE_SIZE_MB * 1024 * 1024) {
       toast.error(`Image is too large. Please select an image under ${MAX_IMAGE_SIZE_MB}MB.`);
       return;
@@ -297,7 +313,7 @@ export const CreateListingPage = () => {
       const imageEntry = {
         previewUrl: dataUrl,
         remoteUrl: '',
-        file,
+        file: file,
         source: 'local',
       };
 
@@ -305,11 +321,19 @@ export const CreateListingPage = () => {
 
       if (nextListingImages[index]) {
         nextListingImages[index] = imageEntry;
-      } else if (nextListingImages.length < MAX_LISTING_IMAGES) {
-        nextListingImages.push(imageEntry);
+      } else {
+        // If index is beyond current length, push to array
+        while (nextListingImages.length <= index) {
+          nextListingImages.push(null);
+        }
+        nextListingImages[index] = imageEntry;
       }
 
-      const trimmedImages = nextListingImages.slice(0, MAX_LISTING_IMAGES);
+      // Filter out null values and keep only valid images
+      const trimmedImages = nextListingImages.filter(img => img !== null).slice(0, MAX_LISTING_IMAGES);
+      
+      console.log('Images after selection:', trimmedImages);
+      
       setListingImages(trimmedImages);
       syncDraftImages(trimmedImages);
       setForm((prev) => ({ ...prev, imageUrl: trimmedImages[0]?.remoteUrl || '' }));
@@ -323,6 +347,8 @@ export const CreateListingPage = () => {
 
   const addImageFromPicker = async (file) => {
     if (!file) return;
+
+    console.log('Adding image from picker:', file);
 
     if (file.size > MAX_IMAGE_SIZE_MB * 1024 * 1024) {
       toast.error(`Image is too large. Please select an image under ${MAX_IMAGE_SIZE_MB}MB.`);
@@ -389,22 +415,86 @@ export const CreateListingPage = () => {
     }
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const latitude = position.coords.latitude;
         const longitude = position.coords.longitude;
 
+        // Update form with coordinates
         setForm((prev) => ({
           ...prev,
           latitude,
           longitude,
         }));
+        
         toast.success('GPS location captured.');
+
+        // Try to get actual address from coordinates (reverse geocoding)
+        try {
+          // Add a small delay to avoid rate limiting
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
+            {
+              headers: {
+                'User-Agent': 'AgriFlow-App'
+              }
+            }
+          );
+          
+          if (response.ok) {
+            const data = await response.json();
+            
+            // Format a nice location name
+            let locationName = '';
+            
+            if (data.address) {
+              const parts = [];
+              if (data.address.road) parts.push(data.address.road);
+              if (data.address.suburb) parts.push(data.address.suburb);
+              if (data.address.town || data.address.city || data.address.village) {
+                parts.push(data.address.town || data.address.city || data.address.village);
+              }
+              if (data.address.county) parts.push(data.address.county);
+              if (data.address.country) parts.push(data.address.country);
+              
+              locationName = parts.join(', ');
+            }
+            
+            if (!locationName) {
+              locationName = data.display_name || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+            }
+            
+            // Update the location field with the address
+            setForm((prev) => ({
+              ...prev,
+              location: locationName,
+            }));
+            
+            toast.success('Location address found!');
+          } else {
+            throw new Error('Reverse geocoding failed');
+          }
+        } catch (error) {
+          console.error('Reverse geocoding failed:', error);
+          // Fallback to coordinates
+          setForm((prev) => ({
+            ...prev,
+            location: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
+          }));
+          toast.info('Using coordinates as location name');
+        }
       },
-      () => {
+      (error) => {
+        console.error('GPS error:', error);
         setError('Could not access your GPS location. Try map selection instead.');
         toast.error('Location permission denied or unavailable.');
       },
-      { enableHighAccuracy: true },
+      { 
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
     );
   };
 
@@ -445,24 +535,40 @@ export const CreateListingPage = () => {
     event.preventDefault();
     setError('');
 
-    // Enhanced validation
+    // Enhanced validation with better checks
+    console.log('Form state before validation:', form);
+
     const requiredFields = {
       title: 'Title',
-      category: 'Category',
+      category: 'Product Type',
       quantity: 'Quantity',
       price: 'Price',
       location: 'Location',
     };
 
     const missingFields = [];
+
     Object.entries(requiredFields).forEach(([key, label]) => {
-      if (!form[key] || form[key].toString().trim() === '') {
+      const value = form[key];
+      
+      if (value === undefined || value === null) {
         missingFields.push(label);
+        console.warn(`Field ${key} is undefined or null`);
+      } else if (typeof value === 'string' && value.trim() === '') {
+        missingFields.push(label);
+        console.warn(`Field ${key} is empty string`);
+      } else if (typeof value === 'number' && (isNaN(value) || value <= 0)) {
+        if (key === 'quantity' || key === 'price') {
+          missingFields.push(label);
+          console.warn(`Field ${key} has invalid number:`, value);
+        }
       }
     });
 
     if (missingFields.length > 0) {
       setError(`Missing required fields: ${missingFields.join(', ')}`);
+      console.error('Missing fields:', missingFields);
+      console.error('Current form state:', form);
       return;
     }
 
@@ -487,7 +593,8 @@ export const CreateListingPage = () => {
       return;
     }
 
-    if (listingImages.length < 1) {
+    // Check if there are any images
+    if (listingImages.length === 0) {
       setError('Please add at least 1 listing photo before publishing.');
       return;
     }
@@ -500,38 +607,56 @@ export const CreateListingPage = () => {
       // Append form fields with correct API field names
       payload.append('title', form.title);
       payload.append('description', form.description || '');
-      payload.append('category', form.category);
+      payload.append('productType', form.category);
       payload.append('quantity', Number(form.quantity));
       payload.append('price', Number(form.price));
-      payload.append('location', form.location);
+      payload.append('locationName', form.location);
       payload.append('latitude', Number(form.latitude));
       payload.append('longitude', Number(form.longitude));
-      payload.append('roadAccess', form.roadAccess);
-      payload.append('unit', unit);
+      payload.append('pathAccessibility', form.roadAccess);
+      payload.append('unitLabel', unit);
 
-      // Handle images
+      // Handle images - FIXED
       const uploadedFiles = listingImages
         .filter((item) => item.source === 'local' && item.file)
         .map((item) => item.file);
+      
+      console.log('Uploaded files:', uploadedFiles);
 
+      // Append new images
+      if (uploadedFiles.length > 0) {
+        uploadedFiles.slice(0, MAX_LISTING_IMAGES).forEach((file, index) => {
+          payload.append('images', file);
+          console.log(`Appending image ${index + 1}:`, file.name, 'Size:', file.size);
+        });
+      } else {
+        console.warn('No local files to upload');
+      }
+
+      // Handle existing remote images
       const retainedRemoteUrls = listingImages
         .filter((item) => item.source === 'remote' && item.remoteUrl)
         .map((item) => item.remoteUrl);
 
-      // Append new images
-      uploadedFiles.slice(0, MAX_LISTING_IMAGES).forEach((file) => {
-        payload.append('images', file);
-      });
-
-      // Append existing image URLs if any
       if (retainedRemoteUrls.length > 0) {
-        payload.append('existingImages', JSON.stringify(retainedRemoteUrls));
+        payload.append('imageUrls', JSON.stringify(retainedRemoteUrls));
+        console.log('Appending existing URLs:', retainedRemoteUrls);
       }
 
       // Log the complete payload for debugging
       console.log('=== Form Data being sent ===');
+      let hasImages = false;
       for (let [key, value] of payload.entries()) {
-        console.log(key, value instanceof File ? `File: ${value.name}` : value);
+        if (key === 'images' && value instanceof File) {
+          hasImages = true;
+          console.log(key, `File: ${value.name} (${value.size} bytes)`);
+        } else {
+          console.log(key, value);
+        }
+      }
+
+      if (!hasImages && retainedRemoteUrls.length === 0) {
+        throw new Error('No images found in payload');
       }
 
       // Make the API call
@@ -560,6 +685,7 @@ export const CreateListingPage = () => {
       // Show specific error message from server
       const serverMessage = apiError.response?.data?.message || 
                            apiError.response?.data?.error || 
+                           apiError.message ||
                            'Failed to save listing. Please check all fields and try again.';
       setError(serverMessage);
       
@@ -572,10 +698,11 @@ export const CreateListingPage = () => {
   };
 
   const totalValue = Number(form.quantity || 0) * Number(form.price || 0);
-  const headlineValue = form.title || productSearch || 'Untitled listing';
+  const headlineValue = form.title || productSearch || '';
   const quantityError = form.quantity && Number(form.quantity) <= 0 ? 'Quantity must be positive.' : '';
 
   const selectSuggestion = (value) => {
+    console.log('Selecting suggestion:', value);
     setProductSearch(value);
     setForm((prev) => ({ ...prev, title: value }));
   };
@@ -697,10 +824,13 @@ export const CreateListingPage = () => {
                   <div className="mt-3 space-y-2">
                     <Input
                       placeholder="Headline"
-                      value={headlineValue}
-                      onChange={(event) =>
-                        setForm((prev) => ({ ...prev, title: event.target.value }))
-                      }
+                      value={form.title || productSearch || ''}
+                      onChange={(event) => {
+                        const newTitle = event.target.value;
+                        console.log('Title changed to:', newTitle);
+                        setForm((prev) => ({ ...prev, title: newTitle }));
+                        setProductSearch(newTitle);
+                      }}
                       required
                       className="h-10"
                     />
