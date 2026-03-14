@@ -298,18 +298,34 @@ export const SignupPage = () => {
 
     try {
       setSignupPending(true);
-      const user = await signup({
+      const payload = {
         name: form.name,
         phoneNumber: composedPhoneNumber,
         password: form.password,
         email: form.email,
         locationName: form.locationName,
         role: form.role,
-      });
+      };
+      // Log payload for debugging mobile issues
+      if (typeof window !== 'undefined' && window.console) {
+        console.log('Signup payload:', payload);
+      }
+      const user = await signup(payload);
       const redirectUrl = user.role === 'seller' ? '/dashboard' : '/marketplace';
       navigate(redirectUrl);
     } catch (err) {
-      setError(err?.response?.data?.message || 'Failed to create account');
+      // Show the most detailed error possible
+      let message = 'Failed to create account';
+      if (err?.response?.data?.message) {
+        message = err.response.data.message;
+      } else if (err?.message) {
+        message = err.message;
+      }
+      setError(message);
+      // Log error for debugging
+      if (typeof window !== 'undefined' && window.console) {
+        console.error('Signup error:', err);
+      }
     } finally {
       setSignupPending(false);
     }
