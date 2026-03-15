@@ -1,6 +1,9 @@
-# CropConnect
 
-CropConnect is a full-stack web application designed to connect farmers, sellers, and buyers in a digital marketplace for agricultural products. The platform also features an emergency request system for urgent needs and a map-based interface for listing and discovering products.
+# AgriFlow
+
+🚀 **Live Demo:** [https://agri-flow-ten.vercel.app/](https://agri-flow-ten.vercel.app/)
+
+AgriFlow is a full-stack web application designed to connect farmers, sellers, and buyers in a digital marketplace for agricultural products. The platform also features an emergency request system for urgent needs and a map-based interface for listing and discovering products.
 
 ## Features
 
@@ -67,7 +70,7 @@ server/           # Backend Node.js app
 
    ```sh
    git clone <repo-url>
-   cd CropConnect
+   cd AgriFlow
    ```
 
 2. **Install dependencies:**
