@@ -8,6 +8,7 @@ import {
   Camera,
   Check,
   List,
+  LocateFixed,
   MapPin,
   Plus,
   Search,
@@ -20,6 +21,7 @@ import { greenMarkerIcon } from '../lib/mapMarkerIcon';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { useRef } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 
 const LocationPicker = ({ selected, setSelected }) => {
   useMapEvents({
@@ -32,6 +34,7 @@ const LocationPicker = ({ selected, setSelected }) => {
     : [-1.286389, 36.817223];
   return <Marker position={markerPos} icon={greenMarkerIcon} />;
 };
+
 // Geocoding search for map location
 function LocationSearchBar({ onSelect }) {
   const [query, setQuery] = useState('');
@@ -173,7 +176,7 @@ const CURRENCY_OPTIONS = [
   { code: 'INR', label: 'Indian Rupee', locale: 'en-IN', symbol: '₹' },
 ];
 
-export const CreateListingPage = () => {
+const CreateListingPageInner = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const editId = searchParams.get('edit');
@@ -182,6 +185,7 @@ export const CreateListingPage = () => {
   const [productSearch, setProductSearch] = useState('');
   const [unit, setUnit] = useState('Kgs');
   const [currency, setCurrency] = useState(CURRENCY_OPTIONS[0]);
+  
   const formatCurrency = (value) => {
     return new Intl.NumberFormat(currency.locale, {
       style: 'currency',
@@ -189,6 +193,7 @@ export const CreateListingPage = () => {
       maximumFractionDigits: 0,
     }).format(value || 0);
   };
+  
   const [draftImages, setDraftImages] = useState([]);
   const [listingImages, setListingImages] = useState([]);
   const [form, setForm] = useState(DEFAULT_FORM_STATE);
@@ -223,60 +228,60 @@ export const CreateListingPage = () => {
     'Beans',
     'Green Grams',
     'Sorghum',
-    'Cassava',
-    'Milk Cow',
-    'Chicken (Broilers)',
   ];
 
-  const primaryImagePreview = listingImages[0]?.previewUrl || null;
+  const primaryImagePreview = useMemo(() => {
+    if (listingImages.length > 0 && listingImages[0]?.previewUrl) {
+      return listingImages[0].previewUrl;
+    }
+    return null;
+  }, [listingImages]);
 
+  // Load draft or edit data
   useEffect(() => {
-    const loadEditProduct = async () => {
-      if (!editId) return;
-      
+    if (editId) {
+      // Load existing listing for editing
+      const loadListing = async () => {
+        try {
+          const response = await productApi.get(editId);
+          const listing = response.data.data;
+          
+          setForm({
+            title: listing.title || '',
+            description: listing.description || '',
+            category: listing.productType || 'crop',
+            quantity: listing.quantity?.toString() || '',
+            price: listing.price?.toString() || '',
+            location: listing.location?.locationName || '',
+            latitude: listing.location?.latitude || -1.286389,
+            longitude: listing.location?.longitude || 36.817223,
+            roadAccess: listing.pathAccessibility || 'open',
+            image: null,
+            imageUrl: listing.imageUrl || '',
+          });
+          
+          setProductSearch(listing.title || '');
+          
+          if (listing.images && listing.images.length > 0) {
+            const remoteImages = listing.images.map(url => toListingImageFromRemote(url));
+            setListingImages(remoteImages);
+            setDraftImages(remoteImages.map(img => ({
+              source: 'remote',
+              remoteUrl: img.remoteUrl,
+            })));
+          }
+        } catch (error) {
+          console.error('Failed to load listing for edit:', error);
+          toast.error('Failed to load listing');
+        }
+      };
+      loadListing();
+    } else {
+      // Try to load draft
       try {
-        const response = await productApi.details(editId);
-        const item = response.data.data;
+        const savedDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
+        if (!savedDraft) return;
         
-        const existingImages = (Array.isArray(item.imageUrls) && item.imageUrls.length
-          ? item.imageUrls
-          : item.imageUrl
-            ? [item.imageUrl]
-            : []
-        )
-          .slice(0, MAX_LISTING_IMAGES)
-          .map((url) => toListingImageFromRemote(url));
-        
-        setListingImages(existingImages);
-        setDraftImages(existingImages.map(img => ({ source: 'remote', remoteUrl: img.remoteUrl })));
-        
-        setForm({
-          title: item.title || '',
-          description: item.description || '',
-          category: item.category || item.productType || 'crop',
-          quantity: item.quantity?.toString() || '',
-          price: item.price?.toString() || '',
-          location: item.location || item.locationName || '',
-          latitude: item.latitude || -1.286389,
-          longitude: item.longitude || 36.817223,
-          roadAccess: item.roadAccess || item.pathAccessibility || 'open',
-          image: null,
-          imageUrl: existingImages[0]?.remoteUrl || '',
-        });
-        
-        setProductSearch(item.title || '');
-        if (item.unit) setUnit(item.unit);
-      } catch (error) {
-        toast.error('Failed to load product for editing');
-      }
-    };
-    
-    loadEditProduct();
-    
-    // Restore draft logic
-    const savedDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
-    if (savedDraft && !editId) {
-      try {
         const draft = JSON.parse(savedDraft);
         if (draft.wasSavedAsDraft) {
           if (draft.form) {
@@ -1103,3 +1108,9 @@ export const CreateListingPage = () => {
     </form>
   );
 };
+
+export const CreateListingPage = (props) => (
+  <ErrorBoundary fallback={<div>Something went wrong. Please try again.</div>}>
+    <CreateListingPageInner {...props} />
+  </ErrorBoundary>
+);
