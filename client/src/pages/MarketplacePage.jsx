@@ -328,13 +328,14 @@ export const MarketplacePage = () => {
               </Button>
 
               {/* Map Toggle */}
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between" style={{zIndex: 0, position: 'relative'}}>
                 <span className="text-sm font-black text-[#255143]">Map View</span>
                 <button
                   type="button"
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                     mapView ? 'bg-[#1f9f6a]' : 'bg-[#9abcae]'
-                  }`}
+                  }`} 
+                  style={{zIndex: 0, position: 'relative'}} 
                   onClick={() => setMapView((prev) => !prev)}
                 >
                   <span
