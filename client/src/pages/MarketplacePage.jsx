@@ -310,7 +310,11 @@ export const MarketplacePage = () => {
                 <button
                   key={tag.value}
                   type="button"
-                  onClick={() => onCategoryTag(tag.value)}
+                  onClick={() => {
+                    onCategoryTag(tag.value);
+                    // Immediately apply filters after tag selection
+                    setTimeout(onApplyFilters, 0);
+                  }}
                   className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-black transition ${
                     selectedTags.includes(tag.value)
                       ? tag.color + ' ring-2 ring-offset-1 ring-' + tag.color.split(' ')[1].replace('bg-', '')
