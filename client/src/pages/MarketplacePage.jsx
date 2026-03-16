@@ -538,28 +538,6 @@ export const MarketplacePage = () => {
             )}
           </section>
 
-          {/* Right Sidebar - Additional Info (Desktop Only) */}
-          <aside className="hidden xl:block space-y-6">
-            <div className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-5 sticky top-4">
-              <h3 className="text-xl font-black text-[#1f9f6a] mb-4">Market Insights</h3>
-              <div className="space-y-4">
-                <div className="bg-white rounded-lg p-3">
-                  <p className="text-sm font-semibold text-[#476f62]">Total Listings</p>
-                  <p className="text-2xl font-black text-[#1f9f6a]">{displayProducts.length}</p>
-                </div>
-                <div className="bg-white rounded-lg p-3">
-                  <p className="text-sm font-semibold text-[#476f62]">Emergency Requests</p>
-                  <p className="text-2xl font-black text-[#d83c31]">{emergencyRequests.length}</p>
-                </div>
-                <div className="bg-white rounded-lg p-3">
-                  <p className="text-sm font-semibold text-[#476f62]">Active Farmers</p>
-                  <p className="text-2xl font-black text-[#1f9f6a]">
-                    {new Set(products.map(p => p.sellerId?._id)).size}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </aside>
         </div>
 
         {/* Product Modal */}
