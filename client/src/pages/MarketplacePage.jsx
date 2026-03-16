@@ -538,7 +538,7 @@ export const MarketplacePage = () => {
                     }
 
                     return (
-                      <article key={product._id} className="overflow-hidden rounded-xl border border-[#cddfd7] bg-white hover:shadow-lg transition-shadow flex flex-col xl:min-h-96 xl:max-w-105 xl:mx-auto">
+                      <article key={product._id} className="overflow-hidden rounded-xl border border-[#cddfd7] bg-white hover:shadow-lg transition-shadow flex flex-col xl:min-h-96">
                         <div className="h-48 xl:h-56 bg-[#f3f8f5]">
                           <img 
                             src={product.imageUrl || '/placeholder-crop.jpg'} 
