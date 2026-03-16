@@ -74,7 +74,7 @@ const CATEGORY_OPTIONS = [
   { label: 'Fruit', value: 'fruit' },
 ];
 
-const UNIT_OPTIONS = ['Kgs', 'Pieces', 'Bags', 'Tons', 'Bunches'];
+const UNIT_OPTIONS = ['Kg', 'Piece', 'Bag', 'Ton', 'Bunche'];
 
 const DEFAULT_FORM_STATE = {
   title: '',
