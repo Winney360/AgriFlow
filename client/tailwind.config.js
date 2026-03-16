@@ -4,6 +4,12 @@ export default {
   darkMode: 'class',
   theme: {
     extend: {
+      maxWidth: {
+        '105': '26.25rem', // adjust as needed
+      },
+      minHeight: {
+        '96': '24rem',
+      },
       colors: {
         bg: 'var(--bg)',
         surface: 'var(--surface)',
