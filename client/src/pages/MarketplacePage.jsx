@@ -423,11 +423,11 @@ export const MarketplacePage = () => {
                       const createdAt = new Date(product.createdAt);
                       const hoursAgo = Math.floor((Date.now() - createdAt) / (1000 * 60 * 60));
                       return (
-                        <Card key={product._id} className="relative overflow-hidden border-2 border-[#d83c31] bg-[#fff7f7] hover:shadow-lg transition-shadow">
+                        <Card key={product._id} className="relative overflow-hidden border-2 border-[#d83c31] bg-[#fff7f7] hover:shadow-lg transition-shadow flex flex-col xl:min-h-[24rem] xl:max-w-[420px] xl:mx-auto">
                           <div className="absolute top-3 right-3 bg-[#d83c31] text-white text-xs font-bold px-3 py-1 rounded-full z-10">
                             EMERGENCY
                           </div>
-                          <div className="bg-linear-to-r from-[#1f9f6a] to-[#27b883] p-5 text-white">
+                          <div className="bg-gradient-to-r from-[#1f9f6a] to-[#27b883] p-5 text-white">
                             <div className="flex items-start justify-between">
                               <div>
                                 <h3 className="text-xl font-black">{product.title}</h3>
@@ -438,7 +438,7 @@ export const MarketplacePage = () => {
                               </span>
                             </div>
                           </div>
-                          <div className="p-5 space-y-4">
+                          <div className="flex-1 p-5 space-y-4 flex flex-col">
                             <div className="flex items-center gap-2 text-sm">
                               <AlertCircle size={18} className="text-[#d83c31]" />
                               <span className="font-bold">Need: {product.quantity}</span>
@@ -460,13 +460,15 @@ export const MarketplacePage = () => {
                                 </p>
                               )}
                             </div>
-                            <Button
-                              type="button"
-                              className="w-full bg-[#1f9f6a] hover:bg-[#168055] font-bold py-3"
-                              onClick={() => { setSelectedProduct(product); setShowModal(true); }}
-                            >
-                              View Emergency Request
-                            </Button>
+                            <div className="mt-auto">
+                              <Button
+                                type="button"
+                                className="w-full bg-[#1f9f6a] hover:bg-[#168055] font-bold py-3"
+                                onClick={() => { setSelectedProduct(product); setShowModal(true); }}
+                              >
+                                View Emergency Request
+                              </Button>
+                            </div>
                           </div>
                         </Card>
                       );
@@ -477,15 +479,15 @@ export const MarketplacePage = () => {
                     const unit = String(product.quantity || 'bag').toLowerCase().includes('kg') ? 'kg' : 'bag';
 
                     return (
-                      <article key={product._id} className="overflow-hidden rounded-xl border border-[#cddfd7] bg-white hover:shadow-lg transition-shadow">
-                        <div className="h-48 bg-[#f3f8f5]">
+                      <article key={product._id} className="overflow-hidden rounded-xl border border-[#cddfd7] bg-white hover:shadow-lg transition-shadow flex flex-col xl:min-h-[24rem] xl:max-w-[420px] xl:mx-auto">
+                        <div className="h-48 xl:h-56 bg-[#f3f8f5]">
                           <img 
                             src={product.imageUrl || '/placeholder-crop.jpg'} 
                             alt={product.title} 
                             className="h-full w-full object-cover"
                           />
                         </div>
-                        <div className="p-4 space-y-3">
+                        <div className="flex-1 p-4 xl:p-6 space-y-3 flex flex-col">
                           <h3 className="text-2xl font-black text-[#102f24]">{product.title}</h3>
                           <p className="text-xl font-black text-[#1f9f6a]">
                             Ksh {Number(product.price || 0).toLocaleString()}/{unit}
@@ -526,6 +528,7 @@ export const MarketplacePage = () => {
                               </Button>
                             </a>
                           )}
+                          <div className="mt-auto" />
                         </div>
                       </article>
                     );
