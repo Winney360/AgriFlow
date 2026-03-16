@@ -32,7 +32,7 @@ export const EmergencyRequestPage = () => {
   const [form, setForm] = useState({
     title: '',
     description: '',
-    productType: 'crops',
+    productType: '',
     quantity: '',
     latitude: -1.286389,
     longitude: 36.817223,
