@@ -196,11 +196,15 @@ export const MarketplacePage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-6 max-w-480">
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[320px_1fr] xl:grid-cols-[350px_1fr]">
+    <div className="h-screen min-h-0 bg-gray-50 flex flex-col" style={{margin: 0, padding: 0}}>
+      <div className="flex flex-1 h-full min-h-0 w-full" style={{margin: 0, padding: 0}}>
+        {/* Use flex for independent scroll on desktop */}
+        <div className="flex flex-col lg:flex-row flex-1 h-full min-h-0 w-full" style={{gap: 0, margin: 0, padding: 0}}>
           {/* Left Sidebar - Filters */}
-          <aside className="space-y-6">
+          <aside
+            className="lg:w-[320px] xl:w-[350px] h-full lg:overflow-y-auto xl:overflow-y-auto lg:sticky xl:sticky lg:top-0 xl:top-0 min-h-0"
+            style={{ flexShrink: 0, maxHeight: '100vh', margin: 0, padding: 0, borderRight: '1px solid #e5e7eb' }}
+          >
             {/* Mobile Header */}
             <h1 className="text-4xl leading-tight font-black tracking-tight text-[#1f9f6a] lg:hidden">
               Explore the Local Market.
@@ -353,7 +357,10 @@ export const MarketplacePage = () => {
           </aside>
 
           {/* Main Content */}
-          <section className="space-y-6">
+          <section
+            className="flex-1 h-full min-h-0 lg:overflow-y-auto xl:overflow-y-auto"
+            style={{maxHeight: '100vh', margin: 0, padding: 0}}
+          >
             {/* Desktop Header */}
             <h1 className="hidden text-5xl xl:text-6xl leading-tight font-black tracking-tight text-[#102d22] lg:block">
               Explore the Local Market.
