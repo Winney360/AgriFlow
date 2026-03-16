@@ -168,7 +168,7 @@ export const MarketplacePage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-6 max-w-480">
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[320px_1fr] xl:grid-cols-[350px_1fr_300px]">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[320px_1fr] xl:grid-cols-[350px_1fr]">
           {/* Left Sidebar - Filters */}
           <aside className="space-y-6">
             {/* Mobile Header */}
