@@ -633,30 +633,8 @@ export const MarketplacePage = () => {
                 </Dialog.Title>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Images */}
-                  <div>
-                    {selectedProduct?.imageUrls && selectedProduct.imageUrls.length > 0 ? (
-                      <div className="grid grid-cols-2 gap-2">
-                        {selectedProduct.imageUrls.map((img, idx) => (
-                          <img
-                            key={img}
-                            src={img}
-                            alt={`Crop image ${idx + 1}`}
-                            className="w-full h-32 object-cover rounded-lg"
-                          />
-                        ))}
-                      </div>
-                    ) : (
-                      <img 
-                        src={selectedProduct?.imageUrl || '/placeholder-crop.jpg'} 
-                        alt={selectedProduct?.title} 
-                        className="w-full h-48 object-cover rounded-lg"
-                      />
-                    )}
-                  </div>
-
-                  {/* Details */}
-                  <div className="space-y-4">
+                  {/* Details (no image for emergency requests) */}
+                  <div className="space-y-4 md:col-span-2">
                     <div>
                       <p className="text-sm text-gray-500">Price</p>
                       <p className="text-3xl font-black text-[#1f9f6a]">
