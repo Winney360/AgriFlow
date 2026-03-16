@@ -166,324 +166,412 @@ export const MarketplacePage = () => {
   ];
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_2.5fr] xl:grid-cols-[15rem_1fr_14rem] max-w-screen-2xl mx-auto">
-        <aside className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-2 sm:p-3 sticky top-4 self-start h-fit">
-          <h1 className="text-[3rem] leading-[0.95] font-black tracking-tight text-[#1f9f6a] xl:hidden">
-            Explore the Local Market.
-          </h1>
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-6 max-w-480">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[320px_1fr] xl:grid-cols-[350px_1fr_300px]">
+          {/* Left Sidebar - Filters */}
+          <aside className="space-y-6">
+            {/* Mobile Header */}
+            <h1 className="text-4xl leading-tight font-black tracking-tight text-[#1f9f6a] lg:hidden">
+              Explore the Local Market.
+            </h1>
 
-          <div className="mt-3 rounded-xl border border-[#d3e6dd] bg-white p-2">
-            <div className="mb-2 flex items-center justify-between">
-              <p className="text-lg font-black text-[#16382c]">Map Search</p>
-              <span className="text-[#6b8d80]">x</span>
-            </div>
-            <div className="relative isolate h-40 sm:h-48 md:h-56 overflow-hidden rounded-xl border border-[#d2e4db]">
-              <MapContainer center={center} zoom={10} className="h-full w-full" attributionControl={false}>
-                <TileLayer
-                  url={ENGLISH_MAP_TILE_URL}
-                />
-                {mapView
-                  ? mapProducts.slice(0, 4).map((product) => (
-                      <Marker
-                        key={product._id}
-                        icon={greenMarkerIcon}
-                        position={[product.location.latitude, product.location.longitude]}
-                      />
-                    ))
-                  : null}
-              </MapContainer>
-            </div>
-          </div>
-
-          <div className="mt-3 rounded-xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-2 sm:p-3">
-            <p className="text-4xl leading-none font-black text-[#1f9f6a]">Filters</p>
-
-            <div className="mt-2">
-              <p className="text-sm font-black text-[#1f9f6a]">Crop Type filters</p>
-              <div className="mt-1 space-y-1 text-sm font-semibold text-[#2c5548]">
-                {['maize', 'tomatoes', 'potatoes'].map((tag) => (
-                  <label key={tag} className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={selectedTags.includes(tag)}
-                      onChange={() => onCategoryTag(tag)}
-                    />
-                    <span className="capitalize">{tag}</span>
-                  </label>
-                ))}
+            {/* Map Preview Card */}
+            <div className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-lg font-black text-[#16382c]">Map Search</h2>
+                <span className="text-sm text-[#6b8d80]">Preview</span>
+              </div>
+              <div className="relative h-48 overflow-hidden rounded-xl border border-[#d2e4db] lg:h-56">
+                <MapContainer center={center} zoom={10} className="h-full w-full" attributionControl={false}>
+                  <TileLayer url={ENGLISH_MAP_TILE_URL} />
+                  {mapView
+                    ? mapProducts.slice(0, 4).map((product) => (
+                        <Marker
+                          key={product._id}
+                          icon={greenMarkerIcon}
+                          position={[product.location.latitude, product.location.longitude]}
+                        />
+                      ))
+                    : null}
+                </MapContainer>
               </div>
             </div>
 
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              <input
-                className="h-10 rounded-xl border border-[#c8ddd4] bg-[#f9fdfb] px-3 text-sm font-semibold"
-                placeholder="Kg"
-                value={filters.minPrice}
-                onChange={(event) => setFilters({ ...filters, minPrice: event.target.value })}
-              />
-              <input
-                className="h-10 rounded-xl border border-[#c8ddd4] bg-[#f9fdfb] px-3 text-sm font-semibold"
-                placeholder="Kg/Tons"
-                value={filters.maxPrice}
-                onChange={(event) => setFilters({ ...filters, maxPrice: event.target.value })}
-              />
-            </div>
+            {/* Filters Card */}
+            <div className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-4">
+              <h2 className="text-3xl font-black text-[#1f9f6a] mb-4">Filters</h2>
 
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              <input
-                className="h-10 rounded-xl border border-[#c8ddd4] bg-[#f9fdfb] px-3 text-sm font-semibold"
-                placeholder="Ksh"
-                value={filters.minPrice}
-                onChange={(event) => setFilters({ ...filters, minPrice: event.target.value })}
-              />
-              <input
-                className="h-10 rounded-xl border border-[#c8ddd4] bg-[#f9fdfb] px-3 text-sm font-semibold"
-                placeholder="km"
-                value={filters.radiusKm}
-                onChange={(event) => setFilters({ ...filters, radiusKm: event.target.value })}
-              />
-            </div>
+              {/* Crop Type Filters */}
+              <div className="mb-4">
+                <p className="text-sm font-black text-[#1f9f6a] mb-2">Crop Type</p>
+                <div className="space-y-2">
+                  {['maize', 'tomatoes', 'potatoes'].map((tag) => (
+                    <label key={tag} className="flex items-center gap-2 text-sm font-semibold text-[#2c5548]">
+                      <input
+                        type="checkbox"
+                        checked={selectedTags.includes(tag)}
+                        onChange={() => onCategoryTag(tag)}
+                        className="rounded border-[#1f9f6a] text-[#1f9f6a] focus:ring-[#1f9f6a]"
+                      />
+                      <span className="capitalize">{tag}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
 
-            <Button
-              type="button"
-              className="mt-3 h-10 w-full rounded-lg bg-[#1f9f6a]"
-              onClick={useMyLocation}
-              disabled={geoBusy}
-            >
-              <LocateFixed size={15} /> {geoBusy ? 'Finding...' : 'Find Near Me'}
+              {/* Quantity Range */}
+              <div className="mb-4">
+                <p className="text-sm font-black text-[#1f9f6a] mb-2">Quantity (Kg/Tons)</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    className="h-10 rounded-xl border border-[#c8ddd4] bg-white px-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#1f9f6a]"
+                    placeholder="Min"
+                    value={filters.minPrice}
+                    onChange={(event) => setFilters({ ...filters, minPrice: event.target.value })}
+                  />
+                  <input
+                    className="h-10 rounded-xl border border-[#c8ddd4] bg-white px-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#1f9f6a]"
+                    placeholder="Max"
+                    value={filters.maxPrice}
+                    onChange={(event) => setFilters({ ...filters, maxPrice: event.target.value })}
+                  />
+                </div>
+              </div>
+
+              {/* Price Range */}
+              <div className="mb-4">
+                <p className="text-sm font-black text-[#1f9f6a] mb-2">Price (Ksh)</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    className="h-10 rounded-xl border border-[#c8ddd4] bg-white px-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#1f9f6a]"
+                    placeholder="Min"
+                    value={filters.minPrice}
+                    onChange={(event) => setFilters({ ...filters, minPrice: event.target.value })}
+                  />
+                  <input
+                    className="h-10 rounded-xl border border-[#c8ddd4] bg-white px-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#1f9f6a]"
+                    placeholder="Max"
+                    value={filters.maxPrice}
+                    onChange={(event) => setFilters({ ...filters, maxPrice: event.target.value })}
+                  />
+                </div>
+              </div>
+
+              {/* Radius */}
+              <div className="mb-4">
+                <p className="text-sm font-black text-[#1f9f6a] mb-2">Search Radius (km)</p>
+                <input
+                  className="h-10 w-full rounded-xl border border-[#c8ddd4] bg-white px-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#1f9f6a]"
+                  placeholder="Radius in km"
+                  value={filters.radiusKm}
+                  onChange={(event) => setFilters({ ...filters, radiusKm: event.target.value })}
+                />
+              </div>
+
+              {/* Location Button */}
+              <Button
+                type="button"
+                className="w-full h-10 mb-4 rounded-lg bg-[#1f9f6a] hover:bg-[#168055] text-white font-semibold flex items-center justify-center gap-2"
+                onClick={useMyLocation}
+                disabled={geoBusy}
+              >
+                <LocateFixed size={16} />
+                {geoBusy ? 'Finding...' : 'Find Near Me'}
               </Button>
 
-            <div className="mt-2 flex items-center justify-end">
-              <label className="flex items-center gap-2 text-sm font-black text-[#255143]">
-                <span>Map View</span>
+              {/* Map Toggle */}
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-black text-[#255143]">Map View</span>
                 <button
                   type="button"
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full ${
-                    mapView ? 'bg-[#1ea26c]' : 'bg-[#9abcae]'
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    mapView ? 'bg-[#1f9f6a]' : 'bg-[#9abcae]'
                   }`}
                   onClick={() => setMapView((prev) => !prev)}
                 >
                   <span
-                    className={`inline-block h-5 w-5 transform rounded-full bg-white transition ${
-                      mapView ? 'translate-x-5' : 'translate-x-1'
+                    className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
+                      mapView ? 'translate-x-6' : 'translate-x-1'
                     }`}
                   />
                 </button>
-              </label>
+              </div>
+
+              {geoError && (
+                <p className="mt-3 text-xs font-semibold text-red-600">{geoError}</p>
+              )}
             </div>
+          </aside>
 
-            {geoError ? <p className="mt-2 text-xs font-semibold text-red-600">{geoError}</p> : null}
-          </div>
-        </aside>
+          {/* Main Content */}
+          <section className="space-y-6">
+            {/* Desktop Header */}
+            <h1 className="hidden text-5xl xl:text-6xl leading-tight font-black tracking-tight text-[#102d22] lg:block">
+              Explore the Local Market.
+              <br />
+              Find Your Ideal Harvest.
+            </h1>
 
-        <section className="space-y-3 min-w-0">
-          <h1 className="hidden text-[4.2rem] leading-[0.9] font-black tracking-tight text-[#102d22] xl:block">
-            Explore the Local Market.
-            <br />
-            Find Your Ideal Harvest.
-          </h1>
-
-          <div className="flex flex-col sm:flex-row sm:items-center overflow-hidden rounded-xl border border-[#c2d9ce] bg-white p-2 sm:p-0">
-            <div className="flex items-center w-full">
-              <Search size={18} className="ml-2 sm:ml-3 text-[#5d7f72]" />
-              <input
-                className="h-10 sm:h-12 w-full px-3 text-base sm:text-lg font-semibold outline-none bg-transparent"
-                value={filters.search}
-                onChange={(event) => setFilters({ ...filters, search: event.target.value })}
-                placeholder="Maize"
-              />
+            {/* Search Bar */}
+            <div className="flex items-center overflow-hidden rounded-xl border border-[#c2d9ce] bg-white">
+              <div className="flex items-center flex-1 px-4">
+                <Search size={20} className="text-[#5d7f72]" />
+                <input
+                  className="h-12 w-full px-3 text-base font-semibold outline-none bg-transparent"
+                  value={filters.search}
+                  onChange={(event) => setFilters({ ...filters, search: event.target.value })}
+                  placeholder="Search for crops, livestock, or products..."
+                />
+              </div>
               <Button
                 type="button"
-                className="h-10 sm:h-12 ml-2 rounded-lg bg-[#1e9f6a] px-3 flex items-center justify-center"
+                className="h-12 px-6 rounded-lg bg-[#1f9f6a] hover:bg-[#168055] text-white font-semibold flex items-center gap-2"
                 onClick={onApplyFilters}
               >
-                <ArrowRight size={16} />
+                Search
+                <ArrowRight size={18} />
               </Button>
             </div>
-          </div>
 
-          <div>
-            <p className="text-sm font-black text-[#244f41]">QUICK CATEGORY TAGS</p>
-            <div className="mt-2 flex flex-wrap gap-2 xl:gap-3">
-              {categoryTags.map((tag) => (
-                <button
-                  key={tag.value}
-                  type="button"
-                  onClick={() => {
-                    onCategoryTag(tag.value);
-                    // Immediately apply filters after tag selection
-                    setTimeout(onApplyFilters, 0);
-                  }}
-                  className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-black transition ${
-                    selectedTags.includes(tag.value)
-                      ? tag.color + ' ring-2 ring-offset-1 ring-' + tag.color.split(' ')[1].replace('bg-', '')
-                      : 'border-gray-200 bg-white text-gray-700'
-                  }`}
-                >
-                  <Sprout size={14} /> {tag.label}
-                </button>
-              ))}
-            </div>
-              <div className="mt-1 flex gap-1">
+            {/* Category Tags */}
+            <div>
+              <p className="text-sm font-black text-[#244f41] mb-3">QUICK CATEGORY TAGS</p>
+              <div className="flex flex-wrap gap-2">
+                {categoryTags.map((tag) => (
+                  <button
+                    key={tag.value}
+                    type="button"
+                    onClick={() => {
+                      onCategoryTag(tag.value);
+                      setTimeout(onApplyFilters, 0);
+                    }}
+                    className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-black transition-all ${
+                      selectedTags.includes(tag.value)
+                        ? tag.color + ' ring-2 ring-offset-2 ring-[#1f9f6a]'
+                        : 'border-gray-200 bg-white text-gray-700 hover:border-[#1f9f6a] hover:text-[#1f9f6a]'
+                    }`}
+                  >
+                    <Sprout size={16} />
+                    {tag.label}
+                  </button>
+                ))}
+              </div>
+              
+              {/* Custom Crop Input */}
+              <div className="mt-3 flex gap-2">
                 <input
                   type="text"
                   value={customCropInput}
                   onChange={(e) => setCustomCropInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); onAddCustomCrop(); } }}
-                  placeholder="Other crop..."
-                  className="h-8 flex-1 rounded-lg border border-[#c8ddd4] bg-[#f9fdfb] px-2 text-xs font-semibold outline-none"
+                  placeholder="Add custom crop..."
+                  className="flex-1 h-10 rounded-lg border border-[#c8ddd4] bg-white px-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-[#1f9f6a]"
                 />
-                <button type="button" onClick={onAddCustomCrop} className="h-8 rounded-lg bg-[#1f9f6a] px-2 text-xs font-black text-white">+</button>
+                <button 
+                  type="button" 
+                  onClick={onAddCustomCrop} 
+                  className="h-10 px-4 rounded-lg bg-[#1f9f6a] hover:bg-[#168055] text-sm font-black text-white transition-colors"
+                >
+                  Add
+                </button>
               </div>
-          </div>
-
-          {mapView ? (
-            <div className="relative isolate overflow-hidden rounded-xl border border-[#cddfd7] h-60 sm:h-80 md:h-120 xl:h-128">
-              <MapContainer center={center} zoom={9} className="h-full w-full" attributionControl={false}>
-                <TileLayer url={ENGLISH_MAP_TILE_URL} />
-                {mapProducts.map((product) => (
-                  <Marker key={product._id} icon={greenMarkerIcon} position={[product.location.latitude, product.location.longitude]}>
-                    <Popup>
-                      <div className="text-sm">
-                        <p className="font-bold">{product.title}</p>
-                        <p>Ksh {Number(product.price || 0).toLocaleString()}</p>
-                        <p className="text-xs text-[#666]">{product.location?.locationName}</p>
-                      </div>
-                    </Popup>
-                  </Marker>
-                ))}
-              </MapContainer>
             </div>
-          ) : (
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            {displayProducts.length === 0 ? (
-              <div className="col-span-full rounded-xl border border-[#cddfd7] bg-white p-6 text-center text-sm font-semibold text-[#33574a]">
-                No active listings available right now. Try adjusting your filters or check back soon.
-              </div>
-            ) : null}
 
-            {displayProducts.map((product) => {
-              if (product.isEmergency) {
-                // Emergency request card (profile style, no image)
-                const createdAt = new Date(product.createdAt);
-                const hoursAgo = Math.floor((Date.now() - createdAt) / (1000 * 60 * 60));
-                return (
-                  <Card key={product._id} className="overflow-hidden border-2 border-[#d83c31] bg-[#fff7f7] p-0 xl:min-h-96">
-                    <div className="absolute top-2 right-2 bg-[#d83c31] text-white text-xs font-bold px-2 py-1 rounded">EMERGENCY</div>
-                    <div className="bg-linear-to-r from-[#1f9f6a] to-[#27b883] p-4 text-white">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <h2 className="text-xl font-black">{product.title}</h2>
-                          <p className="text-sm opacity-90 mt-1">{product.productType}</p>
+            {/* Map View */}
+            {mapView ? (
+              <div className="relative overflow-hidden rounded-xl border border-[#cddfd7] h-100 lg:h-125 xl:h-150">
+                <MapContainer center={center} zoom={9} className="h-full w-full" attributionControl={false}>
+                  <TileLayer url={ENGLISH_MAP_TILE_URL} />
+                  {mapProducts.map((product) => (
+                    <Marker 
+                      key={product._id} 
+                      icon={greenMarkerIcon} 
+                      position={[product.location.latitude, product.location.longitude]}
+                    >
+                      <Popup>
+                        <div className="p-2 min-w-50">
+                          <h3 className="font-bold text-lg mb-1">{product.title}</h3>
+                          <p className="text-[#1f9f6a] font-semibold">Ksh {Number(product.price || 0).toLocaleString()}</p>
+                          <p className="text-sm text-gray-600 mt-1">{product.location?.locationName}</p>
+                          {product.isEmergency && (
+                            <span className="inline-block mt-2 px-2 py-1 bg-red-100 text-red-700 text-xs font-bold rounded">
+                              EMERGENCY
+                            </span>
+                          )}
                         </div>
-                        <span className="rounded px-3 py-1 text-xs font-bold whitespace-nowrap bg-red-100 text-red-700">🔴 Open</span>
-                      </div>
-                    </div>
-                    <div className="p-4 space-y-3">
-                      <div className="flex items-center gap-2 text-sm">
-                        <AlertCircle size={16} className="text-[#d83c31]" />
-                        <span className="font-bold text-[#1f1f1f]">Need: {product.quantity}</span>
-                      </div>
-                      {product.description && (
-                        <p className="text-sm text-[#666]">{product.description}</p>
-                      )}
-                      <div className="flex items-center gap-2 text-xs text-[#999]">
-                        <Clock size={14} />
-                        <span>{hoursAgo === 0 ? 'Just now' : `${hoursAgo} hour${hoursAgo !== 1 ? 's' : ''} ago`}</span>
-                      </div>
-                      <div className="rounded-lg border border-[#e0e0e0] p-2 bg-[#f8f8f8]">
-                        <p className="text-xs font-bold text-[#2f6152]">Posted by</p>
-                        <p className="text-sm font-bold text-[#1f1f1f] mt-1">{product.sellerId?.name}</p>
-                        {product.sellerId?.phoneNumber && (
-                          <p className="text-xs text-[#666] mt-1">📞 {product.sellerId.phoneNumber}</p>
-                        )}
-                      </div>
-                      <Button
-                        type="button"
-                        className="w-full bg-[#1f9f6a] font-bold"
-                        onClick={() => { setSelectedProduct(product); setShowModal(true); }}
-                      >
-                        View Emergency
-                      </Button>
-                    </div>
-                  </Card>
-                );
-              }
-              // ...existing code for normal product card...
-              const whatsappNumber = normalizePhoneForWhatsApp(product?.sellerId?.phoneNumber);
-              const whatsappHref = whatsappNumber ? `https://wa.me/${whatsappNumber}` : '#';
-              const unit = String(product.quantity || 'bag').toLowerCase().includes('kg')
-                ? 'kg'
-                : 'bag';
+                      </Popup>
+                    </Marker>
+                  ))}
+                </MapContainer>
+              </div>
+            ) : (
+              /* Grid View */
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {displayProducts.length === 0 ? (
+                  <div className="col-span-full rounded-xl border border-[#cddfd7] bg-white p-8 text-center">
+                    <p className="text-lg font-semibold text-[#33574a]">
+                      No active listings available right now.
+                    </p>
+                    <p className="text-sm text-gray-500 mt-2">
+                      Try adjusting your filters or check back soon.
+                    </p>
+                  </div>
+                ) : (
+                  displayProducts.map((product) => {
+                    if (product.isEmergency) {
+                      const createdAt = new Date(product.createdAt);
+                      const hoursAgo = Math.floor((Date.now() - createdAt) / (1000 * 60 * 60));
+                      return (
+                        <Card key={product._id} className="relative overflow-hidden border-2 border-[#d83c31] bg-[#fff7f7] hover:shadow-lg transition-shadow">
+                          <div className="absolute top-3 right-3 bg-[#d83c31] text-white text-xs font-bold px-3 py-1 rounded-full z-10">
+                            EMERGENCY
+                          </div>
+                          <div className="bg-linear-to-r from-[#1f9f6a] to-[#27b883] p-5 text-white">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <h3 className="text-xl font-black">{product.title}</h3>
+                                <p className="text-sm opacity-90 mt-1">{product.productType}</p>
+                              </div>
+                              <span className="px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-full">
+                                🔴 Open
+                              </span>
+                            </div>
+                          </div>
+                          <div className="p-5 space-y-4">
+                            <div className="flex items-center gap-2 text-sm">
+                              <AlertCircle size={18} className="text-[#d83c31]" />
+                              <span className="font-bold">Need: {product.quantity}</span>
+                            </div>
+                            {product.description && (
+                              <p className="text-sm text-gray-600 line-clamp-2">{product.description}</p>
+                            )}
+                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                              <Clock size={14} />
+                              <span>{hoursAgo === 0 ? 'Just now' : `${hoursAgo} hour${hoursAgo !== 1 ? 's' : ''} ago`}</span>
+                            </div>
+                            <div className="rounded-lg border border-gray-200 p-3 bg-gray-50">
+                              <p className="text-xs font-bold text-[#2f6152]">Posted by</p>
+                              <p className="text-sm font-bold mt-1">{product.sellerId?.name || 'Anonymous'}</p>
+                              {product.sellerId?.phoneNumber && (
+                                <p className="text-xs text-gray-600 mt-1 flex items-center gap-1">
+                                  <Phone size={12} />
+                                  {product.sellerId.phoneNumber}
+                                </p>
+                              )}
+                            </div>
+                            <Button
+                              type="button"
+                              className="w-full bg-[#1f9f6a] hover:bg-[#168055] font-bold py-3"
+                              onClick={() => { setSelectedProduct(product); setShowModal(true); }}
+                            >
+                              View Emergency Request
+                            </Button>
+                          </div>
+                        </Card>
+                      );
+                    }
 
-              return (
-                <article key={product._id} className="overflow-hidden rounded-xl border border-[#cddfd7] bg-white xl:min-h-96">
-                  <div className="flex h-40 xl:h-56 w-full items-center justify-center bg-[#f3f8f5] p-0">
-                    <img src={product.imageUrl} alt={product.title} className="h-full w-full object-cover" />
-                  </div>
-                  <div className="space-y-1 p-2.5 xl:p-4">
-                    <p className="text-3xl leading-none font-black text-[#102f24]">{product.title}</p>
-                    <p className="text-2xl leading-none font-black text-[#112e23]">
-                      Ksh {Number(product.price || 0).toLocaleString()}/{unit}
-                    </p>
-                    <p className="flex items-center gap-1 text-sm font-semibold text-[#476f62]">
-                      <MapPin size={13} /> {product.location?.locationName || 'Juja, 12km'}
-                    </p>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      <Button
-                        type="button"
-                        className="flex-1 h-10 rounded-lg bg-[#1f9f6a] text-white font-bold"
-                        onClick={() => { setSelectedProduct(product); setShowModal(true); }}
-                      >
-                        View Crop
-                      </Button>
-                      {whatsappNumber ? (
-                        <a href={whatsappHref} target="_blank" rel="noreferrer" className="flex-1">
-                          <button
-                            type="button"
-                            className="h-10 w-full rounded-lg bg-[#1f9f6a] px-3 text-sm font-black text-white flex items-center justify-center gap-2"
-                          >
-                            <MessageCircle size={16} /> WhatsApp
-                          </button>
-                        </a>
-                      ) : (
-                        <button
-                          type="button"
-                          className="h-10 w-full rounded-lg bg-[#d4e3dd] px-3 text-sm font-black text-[#4b6f62]"
-                          disabled
-                        >
-                          Request Quote
-                        </button>
-                      )}
-                      {product?.sellerId?.phoneNumber && (
-                        <a href={`tel:${product.sellerId.phoneNumber}`} className="flex-1">
-                          <button
-                            type="button"
-                            className="h-10 w-full rounded-lg bg-[#1f9f6a] px-3 text-sm font-black text-white flex items-center justify-center gap-2"
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h0a2.25 2.25 0 002.25-2.25v-2.386a2.25 2.25 0 00-2.007-2.244l-3.342-.418a2.25 2.25 0 00-2.348 1.31l-.7 1.4a12.042 12.042 0 01-5.372-5.372l1.4-.7a2.25 2.25 0 001.31-2.348l-.418-3.342A2.25 2.25 0 006.886 2.25H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
-                            </svg>
-                            Call Seller
-                          </button>
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-          )}
-          {/* Crop Modal (moved outside map loop) */}
-          <Dialog open={showModal} onClose={() => setShowModal(false)} className="relative z-50">
-            <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
-            <div className="fixed inset-0 flex items-center justify-center p-4">
-              <Dialog.Panel className="w-full max-w-2xl rounded-xl bg-white p-6 shadow-xl">
-                <Dialog.Title className="text-2xl font-black mb-2">{selectedProduct?.title}</Dialog.Title>
-                <div className="flex flex-col md:flex-row gap-4">
-                  <div className="flex-1">
+                    const whatsappNumber = normalizePhoneForWhatsApp(product?.sellerId?.phoneNumber);
+                    const whatsappHref = whatsappNumber ? `https://wa.me/${whatsappNumber}` : '#';
+                    const unit = String(product.quantity || 'bag').toLowerCase().includes('kg') ? 'kg' : 'bag';
+
+                    return (
+                      <article key={product._id} className="overflow-hidden rounded-xl border border-[#cddfd7] bg-white hover:shadow-lg transition-shadow">
+                        <div className="h-48 bg-[#f3f8f5]">
+                          <img 
+                            src={product.imageUrl || '/placeholder-crop.jpg'} 
+                            alt={product.title} 
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                        <div className="p-4 space-y-3">
+                          <h3 className="text-2xl font-black text-[#102f24]">{product.title}</h3>
+                          <p className="text-xl font-black text-[#1f9f6a]">
+                            Ksh {Number(product.price || 0).toLocaleString()}/{unit}
+                          </p>
+                          <p className="flex items-center gap-1 text-sm font-semibold text-[#476f62]">
+                            <MapPin size={14} />
+                            {product.location?.locationName || 'Location not specified'}
+                          </p>
+                          <div className="grid grid-cols-2 gap-2 pt-2">
+                            <Button
+                              type="button"
+                              className="bg-[#1f9f6a] hover:bg-[#168055] text-white font-bold py-2"
+                              onClick={() => { setSelectedProduct(product); setShowModal(true); }}
+                            >
+                              View Details
+                            </Button>
+                            {whatsappNumber ? (
+                              <a href={whatsappHref} target="_blank" rel="noreferrer" className="block">
+                                <Button className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white font-bold py-2 flex items-center justify-center gap-2">
+                                  <MessageCircle size={16} />
+                                  WhatsApp
+                                </Button>
+                              </a>
+                            ) : (
+                              <Button
+                                className="w-full bg-gray-200 text-gray-600 font-bold py-2 cursor-not-allowed"
+                                disabled
+                              >
+                                No Contact
+                              </Button>
+                            )}
+                          </div>
+                          {product?.sellerId?.phoneNumber && (
+                            <a href={`tel:${product.sellerId.phoneNumber}`} className="block">
+                              <Button className="w-full bg-[#1f9f6a] hover:bg-[#168055] text-white font-bold py-2 flex items-center justify-center gap-2">
+                                <Phone size={16} />
+                                Call Seller
+                              </Button>
+                            </a>
+                          )}
+                        </div>
+                      </article>
+                    );
+                  })
+                )}
+              </div>
+            )}
+          </section>
+
+          {/* Right Sidebar - Additional Info (Desktop Only) */}
+          <aside className="hidden xl:block space-y-6">
+            <div className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-5 sticky top-4">
+              <h3 className="text-xl font-black text-[#1f9f6a] mb-4">Market Insights</h3>
+              <div className="space-y-4">
+                <div className="bg-white rounded-lg p-3">
+                  <p className="text-sm font-semibold text-[#476f62]">Total Listings</p>
+                  <p className="text-2xl font-black text-[#1f9f6a]">{displayProducts.length}</p>
+                </div>
+                <div className="bg-white rounded-lg p-3">
+                  <p className="text-sm font-semibold text-[#476f62]">Emergency Requests</p>
+                  <p className="text-2xl font-black text-[#d83c31]">{emergencyRequests.length}</p>
+                </div>
+                <div className="bg-white rounded-lg p-3">
+                  <p className="text-sm font-semibold text-[#476f62]">Active Farmers</p>
+                  <p className="text-2xl font-black text-[#1f9f6a]">
+                    {new Set(products.map(p => p.sellerId?._id)).size}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        {/* Product Modal */}
+        <Dialog open={showModal} onClose={() => setShowModal(false)} className="relative z-50">
+          <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
+          <div className="fixed inset-0 flex items-center justify-center p-4">
+            <Dialog.Panel className="w-full max-w-3xl rounded-xl bg-white shadow-xl">
+              <div className="p-6">
+                <Dialog.Title className="text-2xl font-black mb-4">
+                  {selectedProduct?.title}
+                </Dialog.Title>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Images */}
+                  <div>
                     {selectedProduct?.imageUrls && selectedProduct.imageUrls.length > 0 ? (
                       <div className="grid grid-cols-2 gap-2">
                         {selectedProduct.imageUrls.map((img, idx) => (
@@ -496,46 +584,96 @@ export const MarketplacePage = () => {
                         ))}
                       </div>
                     ) : (
-                      <img src={selectedProduct?.imageUrl} alt={selectedProduct?.title} className="w-full h-40 object-cover rounded-lg" />
+                      <img 
+                        src={selectedProduct?.imageUrl || '/placeholder-crop.jpg'} 
+                        alt={selectedProduct?.title} 
+                        className="w-full h-48 object-cover rounded-lg"
+                      />
                     )}
                   </div>
-                  <div className="flex-1 space-y-2">
-                    <p className="text-lg font-bold">Price: <span className="text-[#1f9f6a]">Ksh {Number(selectedProduct?.price || 0).toLocaleString()}</span></p>
-                    <p className="text-md font-semibold">Quantity: {selectedProduct?.quantity}</p>
-                    <p className="text-md font-semibold">Type: {selectedProduct?.productType}</p>
-                    <p className="text-md font-semibold">Location: {selectedProduct?.location?.locationName}</p>
-                    <p className="text-md">{selectedProduct?.description}</p>
-                    <div className="flex flex-wrap gap-2 mt-4">
-                      <Button onClick={() => setShowModal(false)} className="bg-gray-200 text-gray-800">Close</Button>
-                      {selectedProduct?.sellerId?.phoneNumber && (
-                        <>
-                          <a href={`https://wa.me/${normalizePhoneForWhatsApp(selectedProduct.sellerId.phoneNumber)}`} target="_blank" rel="noreferrer">
-                            <Button className="bg-[#1f9f6a] text-white">WhatsApp Seller</Button>
-                          </a>
-                          <a href={`tel:${selectedProduct.sellerId.phoneNumber}`}>
-                            <Button className="bg-[#1f9f6a] text-white">Call Seller</Button>
-                          </a>
-                          <Button
-                            className="bg-[#1f9f6a] text-white"
-                            onClick={() => {
-                              navigator.clipboard.writeText(selectedProduct.sellerId.phoneNumber).then(() => {
-                                toast.success('Number copied');
-                              });
-                            }}
-                          >
-                            Copy Number
-                          </Button>
-                        </>
-                      )}
+
+                  {/* Details */}
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-sm text-gray-500">Price</p>
+                      <p className="text-3xl font-black text-[#1f9f6a]">
+                        Ksh {Number(selectedProduct?.price || 0).toLocaleString()}
+                      </p>
                     </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-gray-500">Quantity</p>
+                        <p className="font-semibold">{selectedProduct?.quantity}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Type</p>
+                        <p className="font-semibold capitalize">{selectedProduct?.productType}</p>
+                      </div>
+                    </div>
+
+                    {selectedProduct?.location && (
+                      <div>
+                        <p className="text-sm text-gray-500">Location</p>
+                        <p className="font-semibold flex items-center gap-1">
+                          <MapPin size={16} className="text-[#1f9f6a]" />
+                          {selectedProduct.location.locationName || 'Not specified'}
+                        </p>
+                      </div>
+                    )}
+
+                    {selectedProduct?.description && (
+                      <div>
+                        <p className="text-sm text-gray-500">Description</p>
+                        <p className="text-sm">{selectedProduct.description}</p>
+                      </div>
+                    )}
+
+                    {selectedProduct?.isEmergency && (
+                      <div className="bg-red-50 p-3 rounded-lg">
+                        <p className="text-red-600 font-bold">⚠️ Emergency Request</p>
+                      </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    {selectedProduct?.sellerId?.phoneNumber && (
+                      <div className="flex flex-wrap gap-3 pt-4">
+                        <a href={`https://wa.me/${normalizePhoneForWhatsApp(selectedProduct.sellerId.phoneNumber)}`} target="_blank" rel="noreferrer" className="flex-1">
+                          <Button className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white font-bold">
+                            <MessageCircle size={18} className="mr-2" />
+                            WhatsApp
+                          </Button>
+                        </a>
+                        <a href={`tel:${selectedProduct.sellerId.phoneNumber}`} className="flex-1">
+                          <Button className="w-full bg-[#1f9f6a] hover:bg-[#168055] text-white font-bold">
+                            <Phone size={18} className="mr-2" />
+                            Call
+                          </Button>
+                        </a>
+                        <Button
+                          className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold"
+                          onClick={() => {
+                            navigator.clipboard.writeText(selectedProduct.sellerId.phoneNumber);
+                            toast.success('Number copied to clipboard');
+                          }}
+                        >
+                          Copy Number
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
-              </Dialog.Panel>
-            </div>
-          </Dialog>
-        </section>
 
-        {/* Removed Local Market Tips and Actions cards for buyers */}
+                {/* Close Button */}
+                <div className="mt-6 flex justify-end">
+                  <Button onClick={() => setShowModal(false)} className="bg-gray-200 hover:bg-gray-300 text-gray-800">
+                    Close
+                  </Button>
+                </div>
+              </div>
+            </Dialog.Panel>
+          </div>
+        </Dialog>
       </div>
     </div>
   );
