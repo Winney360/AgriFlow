@@ -230,7 +230,7 @@ export const MarketplacePage = () => {
                 <span className="text-sm text-[#6b8d80]">Preview</span>
               </div>
               <div className="relative h-48 overflow-hidden rounded-xl border border-[#d2e4db] lg:h-56">
-                <MapContainer center={center} zoom={10} className="h-full w-full" attributionControl={false}>
+                <MapContainer center={center} zoom={10} className="h-full w-full z-0" attributionControl={false} style={{zIndex: 0, position: 'relative'}}>
                   <TileLayer url={ENGLISH_MAP_TILE_URL} />
                   {mapView
                     ? mapProducts.slice(0, 4).map((product) => (
