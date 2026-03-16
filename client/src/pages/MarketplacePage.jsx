@@ -167,8 +167,8 @@ export const MarketplacePage = () => {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_2.5fr] xl:grid-cols-[15rem_1fr_14rem]">
-        <aside className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-2 sm:p-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_2.5fr] xl:grid-cols-[15rem_1fr_14rem] max-w-screen-2xl mx-auto">
+        <aside className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-2 sm:p-3 sticky top-4 self-start h-fit">
           <h1 className="text-[3rem] leading-[0.95] font-black tracking-tight text-[#1f9f6a] xl:hidden">
             Explore the Local Market.
           </h1>
@@ -252,7 +252,7 @@ export const MarketplacePage = () => {
               disabled={geoBusy}
             >
               <LocateFixed size={15} /> {geoBusy ? 'Finding...' : 'Find Near Me'}
-            </Button>
+              </Button>
 
             <div className="mt-2 flex items-center justify-end">
               <label className="flex items-center gap-2 text-sm font-black text-[#255143]">
@@ -277,7 +277,7 @@ export const MarketplacePage = () => {
           </div>
         </aside>
 
-        <section className="space-y-3">
+        <section className="space-y-3 min-w-0">
           <h1 className="hidden text-[4.2rem] leading-[0.9] font-black tracking-tight text-[#102d22] xl:block">
             Explore the Local Market.
             <br />
@@ -305,7 +305,7 @@ export const MarketplacePage = () => {
 
           <div>
             <p className="text-sm font-black text-[#244f41]">QUICK CATEGORY TAGS</p>
-            <div className="mt-2 flex flex-wrap gap-2">
+            <div className="mt-2 flex flex-wrap gap-2 xl:gap-3">
               {categoryTags.map((tag) => (
                 <button
                   key={tag.value}
@@ -339,7 +339,7 @@ export const MarketplacePage = () => {
           </div>
 
           {mapView ? (
-            <div className="relative isolate overflow-hidden rounded-xl border border-[#cddfd7] h-60 sm:h-80 md:h-120">
+            <div className="relative isolate overflow-hidden rounded-xl border border-[#cddfd7] h-60 sm:h-80 md:h-120 xl:h-128">
               <MapContainer center={center} zoom={9} className="h-full w-full" attributionControl={false}>
                 <TileLayer url={ENGLISH_MAP_TILE_URL} />
                 {mapProducts.map((product) => (
@@ -369,7 +369,7 @@ export const MarketplacePage = () => {
                 const createdAt = new Date(product.createdAt);
                 const hoursAgo = Math.floor((Date.now() - createdAt) / (1000 * 60 * 60));
                 return (
-                  <Card key={product._id} className="overflow-hidden border-2 border-[#d83c31] bg-[#fff7f7] p-0">
+                  <Card key={product._id} className="overflow-hidden border-2 border-[#d83c31] bg-[#fff7f7] p-0 xl:min-h-96">
                     <div className="absolute top-2 right-2 bg-[#d83c31] text-white text-xs font-bold px-2 py-1 rounded">EMERGENCY</div>
                     <div className="bg-linear-to-r from-[#1f9f6a] to-[#27b883] p-4 text-white">
                       <div className="flex items-start justify-between gap-3">
@@ -418,11 +418,11 @@ export const MarketplacePage = () => {
                 : 'bag';
 
               return (
-                <article key={product._id} className="overflow-hidden rounded-xl border border-[#cddfd7] bg-white">
-                  <div className="flex h-40 w-full items-center justify-center bg-[#f3f8f5] p-0">
+                <article key={product._id} className="overflow-hidden rounded-xl border border-[#cddfd7] bg-white xl:min-h-96">
+                  <div className="flex h-40 xl:h-56 w-full items-center justify-center bg-[#f3f8f5] p-0">
                     <img src={product.imageUrl} alt={product.title} className="h-full w-full object-cover" />
                   </div>
-                  <div className="space-y-1 p-2.5">
+                  <div className="space-y-1 p-2.5 xl:p-4">
                     <p className="text-3xl leading-none font-black text-[#102f24]">{product.title}</p>
                     <p className="text-2xl leading-none font-black text-[#112e23]">
                       Ksh {Number(product.price || 0).toLocaleString()}/{unit}
