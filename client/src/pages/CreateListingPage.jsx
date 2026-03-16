@@ -23,15 +23,18 @@ import { Button } from '../components/ui/button';
 const LocationPicker = ({ selected, setSelected }) => {
   useMapEvents({
     click(event) {
+      // Debug log
+      console.log('Map clicked at:', event.latlng);
       setSelected([event.latlng.lat, event.latlng.lng]);
     },
   });
 
-  if (!selected) {
-    return null;
-  }
+  // Always render a marker if possible, fallback to Nairobi if undefined
+  const markerPos = selected && Array.isArray(selected) && selected.length === 2
+    ? selected
+    : [-1.286389, 36.817223];
 
-  return <Marker position={selected} icon={greenMarkerIcon} />;
+  return <Marker position={markerPos} icon={greenMarkerIcon} />;
 };
 
 const DRAFT_STORAGE_KEY = 'cropconnect_create_listing_draft';
@@ -109,7 +112,18 @@ export const CreateListingPage = () => {
   const [form, setForm] = useState(DEFAULT_FORM_STATE);
   const [locationMode, setLocationMode] = useState('map');
   
-  const marker = useMemo(() => [form.latitude, form.longitude], [form.latitude, form.longitude]);
+  // Always provide a valid marker array
+  const marker = useMemo(() => {
+    if (
+      typeof form.latitude === 'number' &&
+      typeof form.longitude === 'number' &&
+      !isNaN(form.latitude) &&
+      !isNaN(form.longitude)
+    ) {
+      return [form.latitude, form.longitude];
+    }
+    return [-1.286389, 36.817223];
+  }, [form.latitude, form.longitude]);
 
   const productSuggestions = [
     'Hybrid Maize (White)',
@@ -1115,9 +1129,15 @@ export const CreateListingPage = () => {
                     />
                     <LocationPicker
                       selected={marker}
-                      setSelected={(next) =>
-                        setForm((prev) => ({ ...prev, latitude: next[0], longitude: next[1] }))
-                      }
+                      setSelected={(next) => {
+                        // Debug log
+                        console.log('Setting marker and form lat/lng:', next);
+                        setForm((prev) => ({
+                          ...prev,
+                          latitude: next[0],
+                          longitude: next[1],
+                        }));
+                      }}
                     />
                   </MapContainer>
                 </div>

@@ -136,13 +136,24 @@ export const MarketplacePage = () => {
   }, [mapProducts]);
 
   const onCategoryTag = (tag) => {
-    setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((item) => item !== tag) : [...prev, tag],
-    );
+    if (tag === 'all') {
+      setSelectedTags(['all']);
+    } else {
+      setSelectedTags((prev) => {
+        const next = prev.includes(tag)
+          ? prev.filter((item) => item !== tag)
+          : [...prev.filter((t) => t !== 'all'), tag];
+        return next.length === 0 ? ['all'] : next;
+      });
+    }
   };
 
   const onApplyFilters = () => {
-    const mergedSearch = [filters.search, ...selectedTags].filter(Boolean).join(' ');
+    let tagsToUse = selectedTags;
+    if (selectedTags.includes('all')) {
+      tagsToUse = [];
+    }
+    const mergedSearch = [filters.search, ...tagsToUse].filter(Boolean).join(' ');
     const params = Object.fromEntries(
       Object.entries({ ...filters, search: mergedSearch }).filter(([, value]) => value !== ''),
     );
@@ -158,6 +169,7 @@ export const MarketplacePage = () => {
   };
 
   const categoryTags = [
+    { label: 'All', value: 'all', color: 'bg-gray-100 text-gray-800 border-gray-300' },
     { label: 'Crop', value: 'crop', color: 'bg-green-100 text-green-800 border-green-300' },
     { label: 'Livestock', value: 'livestock', color: 'bg-yellow-100 text-yellow-800 border-yellow-300' },
     { label: 'Grain', value: 'grain', color: 'bg-orange-100 text-orange-800 border-orange-300' },
@@ -476,7 +488,19 @@ export const MarketplacePage = () => {
 
                     const whatsappNumber = normalizePhoneForWhatsApp(product?.sellerId?.phoneNumber);
                     const whatsappHref = whatsappNumber ? `https://wa.me/${whatsappNumber}` : '#';
-                    const unit = String(product.quantity || 'bag').toLowerCase().includes('kg') ? 'kg' : 'bag';
+                    // Prefer product.unit, fallback to 'bag' if not present
+                    let unit = 'bag';
+                    if (product.unit && typeof product.unit === 'string') {
+                      unit = product.unit;
+                    } else if (product.quantity && typeof product.quantity === 'string') {
+                      // Try to infer from quantity string
+                      const q = product.quantity.toLowerCase();
+                      if (q.includes('kg')) unit = 'kg';
+                      else if (q.includes('ton')) unit = 'ton';
+                      else if (q.includes('piece')) unit = 'piece';
+                      else if (q.includes('bunch')) unit = 'bunch';
+                      else if (q.includes('bag')) unit = 'bag';
+                    }
 
                     return (
                       <article key={product._id} className="overflow-hidden rounded-xl border border-[#cddfd7] bg-white hover:shadow-lg transition-shadow flex flex-col xl:min-h-96 xl:max-w-105 xl:mx-auto">
@@ -487,16 +511,22 @@ export const MarketplacePage = () => {
                             className="h-full w-full object-cover"
                           />
                         </div>
-                        <div className="flex-1 p-4 xl:p-6 space-y-3 flex flex-col">
-                          <h3 className="text-2xl font-black text-[#102f24]">{product.title}</h3>
-                          <p className="text-xl font-black text-[#1f9f6a]">
-                            Ksh {Number(product.price || 0).toLocaleString()}/{unit}
-                          </p>
-                          <p className="flex items-center gap-1 text-sm font-semibold text-[#476f62]">
-                            <MapPin size={14} />
-                            {product.location?.locationName || 'Location not specified'}
-                          </p>
-                          <div className="grid grid-cols-2 gap-2 pt-2">
+                        <div className="flex flex-col flex-1 p-4 xl:p-6 gap-2">
+                          {/* Row 1: Name */}
+                          <div className="flex items-center min-h-10">
+                            <h3 className="text-2xl font-black text-[#102f24] truncate w-full">{product.title}</h3>
+                          </div>
+                          {/* Row 2: Price */}
+                          <div className="flex items-center min-h-9">
+                            <p className="text-xl font-black text-[#1f9f6a]">Ksh {Number(product.price || 0).toLocaleString()}/{unit}</p>
+                          </div>
+                          {/* Row 3: Location */}
+                          <div className="flex items-center min-h-8">
+                            <MapPin size={14} className="mr-1" />
+                            <span className="text-sm font-semibold text-[#476f62] truncate">{product.location?.locationName || 'Location not specified'}</span>
+                          </div>
+                          {/* Row 4: View Details & WhatsApp */}
+                          <div className="grid grid-cols-2 gap-2 min-h-9">
                             <Button
                               type="button"
                               className="bg-[#1f9f6a] hover:bg-[#168055] text-white font-bold py-2"
@@ -520,15 +550,17 @@ export const MarketplacePage = () => {
                               </Button>
                             )}
                           </div>
-                          {product?.sellerId?.phoneNumber && (
-                            <a href={`tel:${product.sellerId.phoneNumber}`} className="block">
-                              <Button className="w-full bg-[#1f9f6a] hover:bg-[#168055] text-white font-bold py-2 flex items-center justify-center gap-2">
-                                <Phone size={16} />
-                                Call Seller
-                              </Button>
-                            </a>
-                          )}
-                          <div className="mt-auto" />
+                          {/* Row 5: Call Seller (always at bottom) */}
+                          <div className="mt-auto">
+                            {product?.sellerId?.phoneNumber && (
+                              <a href={`tel:${product.sellerId.phoneNumber}`} className="block">
+                                <Button className="w-full bg-[#1f9f6a] hover:bg-[#168055] text-white font-bold py-2 flex items-center justify-center gap-2">
+                                  <Phone size={16} />
+                                  Call Seller
+                                </Button>
+                              </a>
+                            )}
+                          </div>
                         </div>
                       </article>
                     );
