@@ -279,7 +279,6 @@ export const CreateListingPage = () => {
 
     try {
       localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draftPayload));
-      toast.success('Draft saved. You can continue later.');
     } catch {
       try {
         localStorage.setItem(
@@ -296,9 +295,8 @@ export const CreateListingPage = () => {
             wasSavedAsDraft: true,
           }),
         );
-        toast.info('Draft saved, but some images were too large to keep offline.');
       } catch {
-        toast.error('Could not save draft on this device.');
+        // Ignore storage failures in background autosave.
       }
     }
   }, [draftImages, editId, form, productSearch, unit]);
