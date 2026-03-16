@@ -549,7 +549,7 @@ export const MarketplacePage = () => {
                         <div className="flex flex-col flex-1 p-4 xl:p-6 gap-2">
                           {/* Row 1: Name */}
                           <div className="flex items-center min-h-10">
-                            <h3 className="text-2xl font-black text-[#102f24] truncate w-full">{product.title}</h3>
+                             <h3 className="text-lg font-black text-[#102f24] truncate w-full">{product.title}</h3>
                           </div>
                           {/* Row 2: Price */}
                           <div className="flex items-center min-h-9">
