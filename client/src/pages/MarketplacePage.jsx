@@ -427,7 +427,7 @@ export const MarketplacePage = () => {
 
             {/* Map View */}
             {mapView ? (
-              <div className="relative overflow-hidden rounded-xl border border-[#cddfd7] h-100 lg:h-125 xl:h-150">
+              <div className="relative overflow-hidden rounded-xl border border-[#cddfd7] h-100 lg:h-125 xl:h-150" style={{zIndex: 0, position: 'relative'}}>
                 <MapContainer center={center} zoom={9} className="h-full w-full" attributionControl={false}>
                   <TileLayer url={ENGLISH_MAP_TILE_URL} />
                   {mapProducts.map((product) => (
