@@ -104,6 +104,7 @@ export const createProduct = async (req, res, next) => {
       longitude,
       locationName,
       pathAccessibility,
+      unitLabel,
     } = req.body;
 
     const lat = Number(latitude);
@@ -142,6 +143,7 @@ export const createProduct = async (req, res, next) => {
       productType,
       quantity,
       price: numericPrice,
+      unit: unitLabel || '',
       imageUrl: primaryImageUrl,
       imageUrls,
       sellerId: req.user._id,

@@ -2,6 +2,11 @@ import mongoose from 'mongoose';
 
 const productSchema = new mongoose.Schema(
   {
+    unit: {
+      type: String,
+      trim: true,
+      default: '',
+    },
     title: {
       type: String,
       required: true,

@@ -721,17 +721,7 @@ export const MarketplacePage = () => {
 
                       const whatsappNumber = normalizePhoneForWhatsApp(product?.sellerId?.phoneNumber);
                       const whatsappHref = whatsappNumber ? `https://wa.me/${whatsappNumber}` : '#';
-                      let unit = 'bag';
-                      if (product.unit && typeof product.unit === 'string') {
-                        unit = product.unit;
-                      } else if (product.quantity && typeof product.quantity === 'string') {
-                        const q = product.quantity.toLowerCase();
-                        if (q.includes('kg')) unit = 'kg';
-                        else if (q.includes('ton')) unit = 'ton';
-                        else if (q.includes('piece')) unit = 'piece';
-                        else if (q.includes('bunch')) unit = 'bunch';
-                        else if (q.includes('bag')) unit = 'bag';
-                      }
+                      const unit = (product.unit && typeof product.unit === 'string') ? product.unit.trim() : '';
 
                       return (
                         <article key={product._id} className="overflow-hidden rounded-xl border border-[#cddfd7] bg-white hover:shadow-lg transition-shadow flex flex-col xl:min-h-96">
@@ -747,7 +737,10 @@ export const MarketplacePage = () => {
                                <h3 className="text-lg font-black text-[#102f24] truncate w-full">{product.title}</h3>
                             </div>
                             <div className="flex items-center min-h-9">
-                              <p className="text-xl font-black text-[#1f9f6a]">{formatCurrency(product.price)}/{unit}</p>
+                              <p className="text-xl font-black text-[#1f9f6a]">
+                                {formatCurrency(product.price)}
+                                {unit ? `/${unit}` : ''}
+                              </p>
                             </div>
                             <div className="flex items-center min-h-8">
                               <MapPin size={14} className="mr-1" />

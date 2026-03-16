@@ -39,7 +39,10 @@ export const ProductCard = ({ product }) => {
           </div>
         </div>
 
-        <p className="text-xl font-black text-primary">{formatCurrency(product.price)}</p>
+          <p className="text-xl font-black text-primary">
+            Ksh {product.price}
+            {product.unit ? `/${product.unit}` : ''}
+          </p>
 
         <p className="flex items-center gap-1 text-sm text-(--text-muted)">
           <MapPin size={14} />
