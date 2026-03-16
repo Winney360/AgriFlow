@@ -423,11 +423,11 @@ export const MarketplacePage = () => {
                       const createdAt = new Date(product.createdAt);
                       const hoursAgo = Math.floor((Date.now() - createdAt) / (1000 * 60 * 60));
                       return (
-                        <Card key={product._id} className="relative overflow-hidden border-2 border-[#d83c31] bg-[#fff7f7] hover:shadow-lg transition-shadow flex flex-col xl:min-h-[24rem] xl:max-w-[420px] xl:mx-auto">
+                        <Card key={product._id} className="relative overflow-hidden border-2 border-[#d83c31] bg-[#fff7f7] hover:shadow-lg transition-shadow flex flex-col xl:min-h-96 xl:max-w-105 xl:mx-auto">
                           <div className="absolute top-3 right-3 bg-[#d83c31] text-white text-xs font-bold px-3 py-1 rounded-full z-10">
                             EMERGENCY
                           </div>
-                          <div className="bg-gradient-to-r from-[#1f9f6a] to-[#27b883] p-5 text-white">
+                          <div className="bg-linear-to-r from-[#1f9f6a] to-[#27b883] p-5 text-white">
                             <div className="flex items-start justify-between">
                               <div>
                                 <h3 className="text-xl font-black">{product.title}</h3>
@@ -479,7 +479,7 @@ export const MarketplacePage = () => {
                     const unit = String(product.quantity || 'bag').toLowerCase().includes('kg') ? 'kg' : 'bag';
 
                     return (
-                      <article key={product._id} className="overflow-hidden rounded-xl border border-[#cddfd7] bg-white hover:shadow-lg transition-shadow flex flex-col xl:min-h-[24rem] xl:max-w-[420px] xl:mx-auto">
+                      <article key={product._id} className="overflow-hidden rounded-xl border border-[#cddfd7] bg-white hover:shadow-lg transition-shadow flex flex-col xl:min-h-96 xl:max-w-105 xl:mx-auto">
                         <div className="h-48 xl:h-56 bg-[#f3f8f5]">
                           <img 
                             src={product.imageUrl || '/placeholder-crop.jpg'} 
