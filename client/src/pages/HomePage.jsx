@@ -55,8 +55,9 @@ export const HomePage = () => {
     });
   }, []);
 
+  // Show all products on the map
   const listingData = useMemo(() => {
-    return products.slice(0, 10);
+    return products;
   }, [products]);
 
   const listingInsights = useMemo(() => {
