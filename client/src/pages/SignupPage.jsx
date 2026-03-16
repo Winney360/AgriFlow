@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Eye, EyeOff, Mail, MapPin, Phone, User, ShoppingBag, Sprout } from 'lucide-react';
 
@@ -256,6 +256,7 @@ export const SignupPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [signupPending, setSignupPending] = useState(false);
+  const [searchParams] = useSearchParams();
 
   const [form, setForm] = useState({
     name: '',
@@ -266,6 +267,14 @@ export const SignupPage = () => {
     locationName: '',
     role: 'buyer',
   });
+
+  // On mount, check for ?role=buyer or ?role=seller and set role accordingly
+  useEffect(() => {
+    const roleParam = searchParams.get('role');
+    if (roleParam && (roleParam === 'buyer' || roleParam === 'seller')) {
+      setForm((prev) => ({ ...prev, role: roleParam }));
+    }
+  }, [searchParams]);
 
   const onSubmit = async (event) => {
     event.preventDefault();

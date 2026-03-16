@@ -98,6 +98,11 @@ export const HomePage = () => {
     };
   }, [listingData]);
 
+  const handleFindNearYou = (e) => {
+    e.preventDefault();
+    window.location.href = '/signup?role=buyer';
+  };
+
   return (
     <div className="bg-[#f7f8f7] text-[#1f1f1f]">
       <section className="min-h-screen border-b border-[#dce3df] bg-[#f7f8f7]">
@@ -116,23 +121,18 @@ export const HomePage = () => {
               </div>
             </div>
             <div className="ml-auto flex items-center gap-2">
-
-              {!isAuthenticated && (
-                <>
-                  <Link
-                    to="/login"
-                    className="rounded-md border border-[#d8ddda] bg-white px-3 py-2 text-sm font-semibold text-[#335c4f]"
-                  >
-                    Login
-                  </Link>
-                  <Link
-                    to="/signup"
-                    className="rounded-md bg-[#2ca06e] px-3 py-2 text-sm font-semibold text-white"
-                  >
-                    Sign up
-                  </Link>
-                </>
-              )}
+              <Link
+                to="/login"
+                className="rounded-md border border-[#d8ddda] bg-white px-3 py-2 text-sm font-semibold text-[#335c4f]"
+              >
+                Login
+              </Link>
+              <Link
+                to="/signup"
+                className="rounded-md bg-[#2ca06e] px-3 py-2 text-sm font-semibold text-white"
+              >
+                Sign up
+              </Link>
             </div>
             </header>
           )}
@@ -152,12 +152,13 @@ export const HomePage = () => {
                 >
                   List Your Harvest
                 </Link>
-                <Link
-                  to="/marketplace"
+                <button
+                  onClick={handleFindNearYou}
                   className="rounded-md border border-[#9db3a7] bg-[#ecf4ee] px-5 py-2.5 text-sm font-semibold text-[#335c4f]"
+                  type="button"
                 >
                   Find Near You
-                </Link>
+                </button>
               </div>
             </div>
             <div className="relative bg-white p-2 sm:p-3 min-h-50 md:min-h-87.5">
