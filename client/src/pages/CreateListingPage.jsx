@@ -212,33 +212,35 @@ export const CreateListingPage = () => {
     if (savedDraft && !editId) {
       try {
         const draft = JSON.parse(savedDraft);
-        if (draft.form) {
-          setForm(prev => ({ ...prev, ...draft.form }));
+        if (draft.wasSavedAsDraft) {
+          if (draft.form) {
+            setForm(prev => ({ ...prev, ...draft.form }));
+          }
+          if (draft.productSearch) {
+            setProductSearch(draft.productSearch);
+          }
+          if (draft.unit) {
+            setUnit(draft.unit);
+          }
+          if (draft.draftImages && draft.draftImages.length > 0) {
+            const restoredImages = draft.draftImages.map(img => {
+              if (img.source === 'remote') {
+                return toListingImageFromRemote(img.remoteUrl);
+              } else if (img.source === 'local' && img.dataUrl) {
+                return {
+                  previewUrl: img.dataUrl,
+                  remoteUrl: '',
+                  file: null,
+                  source: 'local',
+                };
+              }
+              return null;
+            }).filter(Boolean);
+            setListingImages(restoredImages);
+            setDraftImages(draft.draftImages);
+          }
+          toast.info('Draft restored');
         }
-        if (draft.productSearch) {
-          setProductSearch(draft.productSearch);
-        }
-        if (draft.unit) {
-          setUnit(draft.unit);
-        }
-        if (draft.draftImages && draft.draftImages.length > 0) {
-          const restoredImages = draft.draftImages.map(img => {
-            if (img.source === 'remote') {
-              return toListingImageFromRemote(img.remoteUrl);
-            } else if (img.source === 'local' && img.dataUrl) {
-              return {
-                previewUrl: img.dataUrl,
-                remoteUrl: '',
-                file: null,
-                source: 'local',
-              };
-            }
-            return null;
-          }).filter(Boolean);
-          setListingImages(restoredImages);
-          setDraftImages(draft.draftImages);
-        }
-        toast.info('Draft restored');
       } catch (e) {
         console.error('Failed to restore draft', e);
       }
@@ -272,22 +274,31 @@ export const CreateListingPage = () => {
       productSearch,
       unit,
       savedAt: new Date().toISOString(),
+      wasSavedAsDraft: true,
     };
 
     try {
       localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draftPayload));
+      toast.success('Draft saved. You can continue later.');
     } catch {
       try {
         localStorage.setItem(
           DRAFT_STORAGE_KEY,
           JSON.stringify({
-            ...draftPayload,
+            form: {
+              ...form,
+              image: null,
+            },
             draftImages: [],
+            productSearch,
+            unit,
+            savedAt: new Date().toISOString(),
+            wasSavedAsDraft: true,
           }),
         );
         toast.info('Draft saved, but some images were too large to keep offline.');
       } catch {
-        // Ignore storage failures in background autosave.
+        toast.error('Could not save draft on this device.');
       }
     }
   }, [draftImages, editId, form, productSearch, unit]);
@@ -409,6 +420,7 @@ export const CreateListingPage = () => {
         productSearch,
         unit,
         savedAt: new Date().toISOString(),
+        wasSavedAsDraft: true,
       };
 
       localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draftPayload));
@@ -426,6 +438,7 @@ export const CreateListingPage = () => {
             productSearch,
             unit,
             savedAt: new Date().toISOString(),
+            wasSavedAsDraft: true,
           }),
         );
         toast.info('Draft saved, but some images were too large to keep offline.');
