@@ -428,7 +428,7 @@ export const MarketplacePage = () => {
             {/* Map View */}
             {mapView ? (
               <div className="relative overflow-hidden rounded-xl border border-[#cddfd7] h-100 lg:h-125 xl:h-150" style={{zIndex: 0, position: 'relative'}}>
-                <MapContainer center={center} zoom={9} className="h-full w-full" attributionControl={false}>
+                <MapContainer center={center} zoom={9} className="h-full w-full z-0" attributionControl={false} style={{zIndex: 0}}>
                   <TileLayer url={ENGLISH_MAP_TILE_URL} />
                   {mapProducts.map((product) => (
                     <Marker 
@@ -436,7 +436,7 @@ export const MarketplacePage = () => {
                       icon={greenMarkerIcon} 
                       position={[product.location.latitude, product.location.longitude]}
                     >
-                      <Popup>
+                      <Popup className="z-0" style={{zIndex: 0}}>
                         <div className="p-2 min-w-50">
                           <h3 className="font-bold text-lg mb-1">{product.title}</h3>
                           <p className="text-[#1f9f6a] font-semibold">{formatCurrency(product.price)}/{unit}</p>
