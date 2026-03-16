@@ -430,26 +430,40 @@ export const MarketplacePage = () => {
               <div className="relative overflow-hidden rounded-xl border border-[#cddfd7] h-100 lg:h-125 xl:h-150" style={{zIndex: 0, position: 'relative'}}>
                 <MapContainer center={center} zoom={9} className="h-full w-full z-0" attributionControl={false} style={{zIndex: 0}}>
                   <TileLayer url={ENGLISH_MAP_TILE_URL} />
-                  {mapProducts.map((product) => (
-                    <Marker 
-                      key={product._id} 
-                      icon={greenMarkerIcon} 
-                      position={[product.location.latitude, product.location.longitude]}
-                    >
-                      <Popup className="z-0" style={{zIndex: 0}}>
-                        <div className="p-2 min-w-50">
-                          <h3 className="font-bold text-lg mb-1">{product.title}</h3>
-                          <p className="text-[#1f9f6a] font-semibold">{formatCurrency(product.price)}/{unit}</p>
-                          <p className="text-sm text-gray-600 mt-1">{product.location?.locationName}</p>
-                          {product.isEmergency && (
-                            <span className="inline-block mt-2 px-2 py-1 bg-red-100 text-red-700 text-xs font-bold rounded">
-                              EMERGENCY
-                            </span>
-                          )}
-                        </div>
-                      </Popup>
-                    </Marker>
-                  ))}
+                  {mapProducts.map((product) => {
+                    // Prefer product.unit, fallback to 'bag' if not present
+                    let unit = 'bag';
+                    if (product.unit && typeof product.unit === 'string') {
+                      unit = product.unit;
+                    } else if (product.quantity && typeof product.quantity === 'string') {
+                      const q = product.quantity.toLowerCase();
+                      if (q.includes('kg')) unit = 'kg';
+                      else if (q.includes('ton')) unit = 'ton';
+                      else if (q.includes('piece')) unit = 'piece';
+                      else if (q.includes('bunch')) unit = 'bunch';
+                      else if (q.includes('bag')) unit = 'bag';
+                    }
+                    return (
+                      <Marker 
+                        key={product._id} 
+                        icon={greenMarkerIcon} 
+                        position={[product.location.latitude, product.location.longitude]}
+                      >
+                        <Popup className="z-0" style={{zIndex: 0}}>
+                          <div className="p-2 min-w-50">
+                            <h3 className="font-bold text-lg mb-1">{product.title}</h3>
+                            <p className="text-[#1f9f6a] font-semibold">{formatCurrency(product.price)}/{unit}</p>
+                            <p className="text-sm text-gray-600 mt-1">{product.location?.locationName}</p>
+                            {product.isEmergency && (
+                              <span className="inline-block mt-2 px-2 py-1 bg-red-100 text-red-700 text-xs font-bold rounded">
+                                EMERGENCY
+                              </span>
+                            )}
+                          </div>
+                        </Popup>
+                      </Marker>
+                    );
+                  })}
                 </MapContainer>
               </div>
             ) : (
