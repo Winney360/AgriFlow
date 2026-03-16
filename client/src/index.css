@@ -1,3 +1,4 @@
+@import "tailwindcss";
 /* Custom: Make Footer Quick Links underline and text green on hover */
 .footer-quick-link {
   transition: color 0.2s;
@@ -7,7 +8,7 @@
   text-decoration: underline;
   text-decoration-color: #1f9f6a !important;
 }
-@import "tailwindcss";
+
 
 :root {
   --bg: #edf6f0;
