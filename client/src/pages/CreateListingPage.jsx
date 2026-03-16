@@ -19,23 +19,89 @@ import { ENGLISH_MAP_ATTRIBUTION, ENGLISH_MAP_TILE_URL } from '../lib/mapTiles';
 import { greenMarkerIcon } from '../lib/mapMarkerIcon';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
+import { useRef } from 'react';
 
 const LocationPicker = ({ selected, setSelected }) => {
   useMapEvents({
     click(event) {
-      // Debug log
-      console.log('Map clicked at:', event.latlng);
       setSelected([event.latlng.lat, event.latlng.lng]);
     },
   });
-
-  // Always render a marker if possible, fallback to Nairobi if undefined
   const markerPos = selected && Array.isArray(selected) && selected.length === 2
     ? selected
     : [-1.286389, 36.817223];
-
   return <Marker position={markerPos} icon={greenMarkerIcon} />;
 };
+// Geocoding search for map location
+function LocationSearchBar({ onSelect }) {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const timeoutRef = useRef();
+
+  const handleSearch = async (q) => {
+    if (!q) {
+      setResults([]);
+      setShowDropdown(false);
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&addressdetails=1&limit=5`, {
+        headers: { 'User-Agent': 'CropConnect-App' }
+      });
+      const data = await res.json();
+      setResults(data);
+      setShowDropdown(true);
+    } catch {
+      setResults([]);
+      setShowDropdown(false);
+    }
+    setLoading(false);
+  };
+
+  const onInputChange = (e) => {
+    const val = e.target.value;
+    setQuery(val);
+    clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => handleSearch(val), 400);
+  };
+
+  const handleSelect = (item) => {
+    setQuery(item.display_name);
+    setShowDropdown(false);
+    setResults([]);
+    onSelect(item);
+  };
+
+  return (
+    <div className="relative mb-2">
+      <input
+        type="text"
+        className="w-full rounded-lg border border-[#c8ddd4] bg-white px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#1f9f6a]"
+        placeholder="Search for a place or address..."
+        value={query}
+        onChange={onInputChange}
+        onFocus={() => { if (results.length > 0) setShowDropdown(true); }}
+      />
+      {showDropdown && results.length > 0 && (
+        <ul className="absolute z-20 mt-1 w-full rounded-lg border border-[#c8ddd4] bg-white shadow-lg max-h-56 overflow-auto">
+          {results.map((item) => (
+            <li
+              key={item.place_id}
+              className="px-3 py-2 text-sm cursor-pointer hover:bg-[#e6f7ee]"
+              onClick={() => handleSelect(item)}
+            >
+              {item.display_name}
+            </li>
+          ))}
+        </ul>
+      )}
+      {loading && <div className="absolute right-3 top-2 text-xs text-gray-400">Searching...</div>}
+    </div>
+  );
+}
 
 const DRAFT_STORAGE_KEY = 'cropconnect_create_listing_draft';
 const MAX_LISTING_IMAGES = 4;
@@ -749,450 +815,291 @@ export const CreateListingPage = () => {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.2fr_1fr]">
-        <form
-          id="create-listing-form"
-          onSubmit={onSubmit}
-          className="rounded-2xl border border-[#cfe3da] bg-[#f7fcfa] p-4 shadow-[0_8px_22px_-16px_rgba(2,38,27,0.8)]"
-        >
-          <h1 className="text-5xl leading-none font-black tracking-tight text-[#1f9f6a]">
-            {editId ? 'Edit Listing.' : 'Create Listing.'}
-          </h1>
-
-          <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[11rem_1fr]">
-            <aside className="rounded-xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-3">
-              <p className="text-lg font-black text-[#1f9f6a]">Steps</p>
-              <div className="mt-2 space-y-2 text-sm font-bold text-[#315f50]">
-                {['Details', 'Quantity & Price', 'Visuals & Description', 'Location', 'Review & Post'].map(
-                  (step, index) => (
-                    <div key={step} className="flex items-center gap-2">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#e4f1ec] text-[#187a55]">
-                        {index + 1}
-                      </span>
-                      <span>{step}</span>
-                    </div>
-                  ),
-                )}
-              </div>
-            </aside>
-
-            <section className="space-y-4">
-              <div className="grid grid-cols-1 gap-3 lg:grid-cols-[1.05fr_1fr]">
-                <div className="rounded-xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-3">
-                  <p className="text-lg font-black text-[#1f9f6a]">Product Selection</p>
-                  <label className="mt-2 flex h-11 items-center gap-2 rounded-xl border border-[#c9ddd4] bg-[#f8fcfa] px-3">
-                    <Search size={16} className="text-[#638a7b]" />
-                    <input
-                      className="h-full w-full bg-transparent text-sm font-semibold outline-none"
-                      placeholder="Search crop"
-                      value={productSearch}
-                      onChange={(event) => setProductSearch(event.target.value)}
-                    />
-                  </label>
-
-                  <div className="mt-2 rounded-xl border border-[#dbe8e2] bg-[#fbfefd] p-2">
-                    {productSuggestions
-                      .filter((item) =>
-                        productSearch.trim()
-                          ? item.toLowerCase().includes(productSearch.toLowerCase().trim())
-                          : true,
-                      )
-                      .slice(0, 3)
-                      .map((item) => (
-                        <button
-                          key={item}
-                          type="button"
-                          onClick={() => selectSuggestion(item)}
-                          className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm font-semibold text-[#255040] hover:bg-[#eef7f3]"
-                        >
-                          <span className="h-3 w-3 rounded-sm bg-[#3bb77e]" />
-                          {item}
-                        </button>
-                      ))}
-                  </div>
-
-                  <Button
-                    type="button"
-                    className="mt-3 h-10 w-full rounded-lg bg-[#1f9f6a] text-sm font-black"
-                    onClick={() => selectSuggestion(productSearch || 'Custom Crop')}
-                  >
-                    <Plus size={15} /> Add Custom Crop
-                  </Button>
-
-                  <div className="mt-3 grid grid-cols-2 gap-2">
-                    {primaryImagePreview ? (
-                      <div className="relative flex h-32 w-full items-center justify-center rounded-xl border border-[#dbe8e2] bg-[#f4faf7] p-1.5">
-                        {listingImages.length > 0 ? (
-                          <button
-                            type="button"
-                            onClick={() => removeImageAt(0)}
-                            className="absolute right-1 top-1 z-10 text-xs font-black leading-none text-red-600 hover:text-red-700"
-                            aria-label="Remove selected image"
-                          >
-                            X
-                          </button>
-                        ) : null}
-                        <img
-                          src={primaryImagePreview}
-                          alt="Crop preview"
-                          className="h-full w-full rounded-lg object-contain"
-                        />
-                      </div>
-                    ) : (
-                      <div className="flex h-32 items-center justify-center rounded-xl border border-dashed border-[#c8ddd4] bg-[#f6fbf9] text-xs font-semibold text-[#52786a]">
-                        No image yet
-                      </div>
-                    )}
-                    <label className="flex h-32 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-[#c8ddd4] bg-[#f6fbf9] text-[#52786a]">
-                      <Upload size={16} />
-                      <span className="text-xs font-bold">Add preview</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(event) => {
-                          const file = event.target.files?.[0];
-                          if (file) {
-                            addImageFromPicker(file);
-                          }
-                          event.target.value = '';
-                        }}
-                      />
-                    </label>
-                  </div>
-
-                  <div className="mt-3 space-y-2">
-                    <Input
-                      placeholder="Headline"
-                      value={form.title || productSearch || ''}
-                      onChange={(event) => {
-                        const newTitle = event.target.value;
-                        console.log('Title changed to:', newTitle);
-                        setForm((prev) => ({ ...prev, title: newTitle }));
-                        setProductSearch(newTitle);
-                      }}
-                      required
-                      className="h-10"
-                    />
-                    <Input
-                      placeholder="Total Quantity"
-                      value={form.quantity}
-                      onChange={(event) => setForm({ ...form, quantity: event.target.value })}
-                      className="h-10"
-                      required
-                    />
-                    
-                    {/* Unit Dropdown - Only One! */}
-                    <div className="w-full">
-                      <Listbox value={unit} onChange={setUnit}>
-                        <div className="relative">
-                          <Listbox.Button className="h-10 w-full rounded-xl border border-[#c9ddd4] bg-[#f8fcfa] px-3 text-sm font-semibold text-[#193f30] text-left flex items-center justify-between">
-                            {unit}
-                            <span className="ml-2">▼</span>
-                          </Listbox.Button>
-                          <Transition as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
-                            <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                              {UNIT_OPTIONS.map((option, idx, arr) => (
-                                <Listbox.Option
-                                  key={option}
-                                  className={({ active }) => {
-                                    let base = 'cursor-pointer select-none px-4 py-2 text-sm font-semibold';
-                                    let rounded = '';
-                                    if (idx === 0) rounded += ' rounded-t-xl';
-                                    if (idx === arr.length - 1) rounded += ' rounded-b-xl';
-                                    let color = active ? 'bg-[#20a46b] text-white' : 'text-[#193f30]';
-                                    return `${base}${rounded} ${color}`;
-                                  }}
-                                  value={option}
-                                >
-                                  {option}
-                                </Listbox.Option>
-                              ))}
-                            </Listbox.Options>
-                          </Transition>
-                        </div>
-                      </Listbox>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-3">
-                  <p className="text-4xl leading-none font-black text-[#1f9f6a]">Define Your Harvest & Price.</p>
-
-                  {/* Category Dropdown */}
-                  <div className="mt-4">
-                    <label className="block text-sm font-bold text-[#2f6152] mb-1">Category</label>
-                    <Listbox value={form.category} onChange={val => setForm({ ...form, category: val })}>
-                      <div className="relative">
-                        <Listbox.Button className="h-10 w-full rounded-xl border border-[#c9ddd4] bg-[#f8fcfa] px-3 text-sm font-semibold text-[#193f30] text-left flex items-center justify-between">
-                          {CATEGORY_OPTIONS.find(opt => opt.value === form.category)?.label || 'Select Category'}
-                          <span className="ml-2">▼</span>
-                        </Listbox.Button>
-                        <Transition as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
-                          <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                            {CATEGORY_OPTIONS.map((option, idx, arr) => (
-                              <Listbox.Option
-                                key={option.value}
-                                className={({ active }) => {
-                                  let base = 'cursor-pointer select-none px-4 py-2 text-sm font-semibold';
-                                  let rounded = '';
-                                  if (idx === 0) rounded += ' rounded-t-xl';
-                                  if (idx === arr.length - 1) rounded += ' rounded-b-xl';
-                                  let color = active ? 'bg-[#20a46b] text-white' : 'text-[#193f30]';
-                                  return `${base}${rounded} ${color}`;
-                                }}
-                                value={option.value}
-                              >
-                                {option.label}
-                              </Listbox.Option>
-                            ))}
-                          </Listbox.Options>
-                        </Transition>
-                      </div>
-                    </Listbox>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-2xl font-black text-[#143629]">Quantity</p>
-                      <div className="mt-2 grid grid-cols-1 gap-2">
-                        <Input
-                          placeholder="Total Quantity"
-                          value={form.quantity}
-                          onChange={(event) => setForm({ ...form, quantity: event.target.value })}
-                          className="h-10"
-                          required
-                        />
-                      </div>
-                      {quantityError ? (
-                        <p className="mt-1 flex items-center gap-1 text-xs font-bold text-[#ba2a2a]">
-                          <AlertCircle size={13} /> {quantityError}
-                        </p>
-                      ) : null}
-                    </div>
-
-                    <div>
-                      <p className="text-2xl font-black text-[#143629]">Price (per {unit})</p>
-                      <div className="mt-2 grid grid-cols-1 gap-2">
-                        <Input
-                          type="number"
-                          placeholder="Price per Unit"
-                          value={form.price}
-                          onChange={(event) => setForm({ ...form, price: event.target.value })}
-                          className="h-10"
-                          required
-                        />
-                        <Input 
-                          value={totalValue ? `${formatCurrency(totalValue)}` : formatCurrency(0)} 
-                          readOnly 
-                          className="h-10 bg-gray-50" 
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <p className="text-sm font-black text-[#2f6152]">Road Accessibility Status</p>
-                      <select
-                        value={form.roadAccess}
-                        onChange={(event) =>
-                          setForm({ ...form, roadAccess: event.target.value })
-                        }
-                        className="mt-1 h-10 w-full rounded-xl border border-[#c9ddd4] bg-white px-3 text-sm font-semibold text-[#193f30]"
-                      >
-                        <option value="open">🟢 Road is Open</option>
-                        <option value="flooded">🔴 Road is Flooded</option>
-                        <option value="trucks_only">🟡 Trucks Only</option>
-                      </select>
-                      <p className="mt-1 text-xs text-[#4a6e60]">Help buyers know if they can reach your farm during emergencies</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-          </div>
-
-          {error && (
-            <div className="mt-3 rounded-lg border border-[#efc7c7] bg-[#fff2f2] px-3 py-2 text-sm font-semibold text-[#b11e1e]">
-              {error}
-            </div>
-          )}
-
-          <div className="mt-4 flex flex-wrap gap-2 border-t border-[#dbe9e3] pt-4">
-            <Button type="button" variant="outline" className="h-10 rounded-lg border-[#8cc8ae] text-[#1e6f4f]">
-              Next Step: Visuals & Description
-            </Button>
-          </div>
-        </form>
-
-        <section className="space-y-4">
-          <div className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-4">
-            <p className="text-4xl leading-none font-black text-[#1f9f6a]">Visuals</p>
-            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {Array.from({ length: MAX_LISTING_IMAGES }, (_, slotIndex) => {
-                const slotImage = listingImages[slotIndex] || null;
-
-                if (slotImage) {
-                  return (
-                    <div
-                      key={`image-slot-${slotIndex}`}
-                      className="relative flex h-32 w-full items-center justify-center rounded-xl border border-[#c8ddd4] bg-[#f4faf7] p-1.5"
-                    >
-                      <button
-                        type="button"
-                        onClick={() => removeImageAt(slotIndex)}
-                        className="absolute right-1 top-1 z-10 text-xs font-black leading-none text-red-600 hover:text-red-700"
-                        aria-label={`Remove image ${slotIndex + 1}`}
-                      >
-                        X
-                      </button>
-                      <img
-                        src={slotImage.previewUrl}
-                        alt={`Crop visual ${slotIndex + 1}`}
-                        className="h-full w-full rounded-lg object-contain"
-                      />
-                    </div>
-                  );
-                }
-
-                return (
-                  <label
-                    key={`image-slot-${slotIndex}`}
-                    className="flex h-32 cursor-pointer items-center justify-center rounded-xl border border-dashed border-[#c8ddd4] bg-[#f9fdfb] text-[#5a7f72]"
-                  >
-                    <Camera size={19} />
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(event) => {
-                        const file = event.target.files?.[0];
-                        if (file) {
-                          handleImageSelectionAt(slotIndex, file);
-                        }
-                        event.target.value = '';
-                      }}
-                    />
-                  </label>
-                );
-              })}
-            </div>
-            <p className="mt-2 text-sm font-bold text-[#315d4f]">
-              You can upload up to {MAX_LISTING_IMAGES} photos. Minimum required is 1.
-            </p>
-
-            <p className="mt-4 text-4xl leading-none font-black text-[#1f9f6a]">Description</p>
-            <textarea
-              placeholder="Describe your produce, trust signals, and pickup plan."
-              className="mt-3 min-h-26 w-full rounded-xl border border-[#c9ddd4] bg-white p-3 text-sm font-semibold text-[#1d4536] outline-none"
-              value={form.description}
-              onChange={(event) => setForm({ ...form, description: event.target.value })}
-              rows={4}
-            />
-          </div>
-
-          <div className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-4">
-            <p className="text-4xl leading-none font-black text-[#1f9f6a]">Location</p>
-            <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-[0.9fr_1.2fr]">
-              <div className="rounded-xl border border-[#d6e8df] bg-[#ecf6f1] p-3">
-                <p className="text-4xl leading-none font-black text-[#123225]">Set Pickup Location.</p>
-                <p className="mt-2 text-lg leading-tight font-bold text-[#2d5a4b]">
-                  GPS location acquired. Manual address and map pin supported.
-                </p>
-                <Input
-                  className="mt-3 h-10 bg-white"
-                  placeholder="Location name (e.g., Nairobi, Karen)"
-                  value={form.location}
-                  onChange={(event) => setForm({ ...form, location: event.target.value })}
-                  required
-                />
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant={locationMode === 'gps' ? 'primary' : 'outline'}
-                    className="rounded-lg"
-                    onClick={() => {
-                      setLocationMode('gps');
-                      useCurrentLocation();
-                    }}
-                  >
-                    <MapPin size={14} /> Use GPS
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant={locationMode === 'map' ? 'primary' : 'outline'}
-                    className="rounded-lg"
-                    onClick={() => setLocationMode('map')}
-                  >
-                    <List size={14} /> Pick on Map
-                  </Button>
-                </div>
-              </div>
-
-              {/* Fixed Map Container with proper z-index */}
-              <div className="overflow-hidden rounded-xl border border-[#c7ddd3] relative" style={{ zIndex: 1 }}>
-                <div className="flex items-center justify-between border-b border-[#d8e8e2] bg-white px-3 py-2 relative" style={{ zIndex: 2 }}>
-                  <p className="font-black text-[#214538]">Set Pickup Location</p>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-[#ddf3e8] px-2 py-1 text-xs font-black text-[#15714d]">
-                    <Check size={13} /> Location Set
-                  </span>
-                </div>
-                <div className="h-60 w-full relative" style={{ zIndex: 1 }}>
-                  <MapContainer 
-                    center={marker} 
-                    zoom={8} 
-                    className="h-full w-full" 
-                    attributionControl={false}
-                    style={{ 
-                      zIndex: 1,
-                      position: 'relative'
-                    }}
-                    scrollWheelZoom={false}
-                  >
-                    <TileLayer
-                      url={ENGLISH_MAP_TILE_URL}
-                    />
-                    <LocationPicker
-                      selected={marker}
-                      setSelected={(next) => {
-                        // Debug log
-                        console.log('Setting marker and form lat/lng:', next);
-                        setForm((prev) => ({
-                          ...prev,
-                          latitude: next[0],
-                          longitude: next[1],
-                        }));
-                      }}
-                    />
-                  </MapContainer>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-2 border-t border-[#d8e8e2] pt-4">
+    <form id="create-listing-form" onSubmit={onSubmit} className="space-y-4">
+      {/* Pickup Location Section */}
+      <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-[0.9fr_1.2fr]">
+        <div className="rounded-xl border border-[#d6e8df] bg-[#ecf6f1] p-3">
+          <p className="text-4xl leading-none font-black text-[#123225]">Set Pickup Location.</p>
+          <p className="mt-2 text-lg leading-tight font-bold text-[#2d5a4b]">
+            GPS location acquired. Manual address and map pin supported.
+          </p>
+          <div className="mt-3">
             <Button
               type="button"
-              variant="outline"
-              className="h-10 rounded-lg border-[#bed8cd] text-[#2f5c4d]"
-              onClick={onSaveDraft}
-              disabled={submitting}
+              className="w-full h-10 rounded-lg bg-[#1f9f6a] hover:bg-[#168055] text-white font-semibold flex items-center justify-center gap-2"
+              onClick={useCurrentLocation}
             >
-              Save Draft
-            </Button>
-            <Button
-              type="submit"
-              form="create-listing-form"
-              className="h-10 rounded-lg bg-[#1f9f6a] px-5 font-black"
-              disabled={submitting}
-            >
-              {submitting ? 'Saving...' : editId ? 'Update Listing' : 'Post Listing'}
+              <LocateFixed size={16} /> Use My Location
             </Button>
           </div>
-        </section>
+          <div className="mt-3">
+            <label className="block text-xs font-bold text-[#1f9f6a] mb-1">Location Name</label>
+            <Input
+              className="w-full rounded-lg border border-[#c8ddd4] bg-white px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#1f9f6a]"
+              placeholder="e.g. Eldoret, Nairobi, Farm Name, etc."
+              value={form.location}
+              onChange={(e) => setForm({ ...form, location: e.target.value })}
+            />
+          </div>
+          <div className="mt-3">
+            <LocationSearchBar onSelect={(item) => {
+              const lat = parseFloat(item.lat);
+              const lon = parseFloat(item.lon);
+              setForm((prev) => ({
+                ...prev,
+                latitude: lat,
+                longitude: lon,
+                location: item.display_name,
+              }));
+            }} />
+          </div>
+        </div>
+        <div className="rounded-xl border border-[#d6e8df] bg-[#ecf6f1] p-3">
+          <div className="h-64 w-full rounded-xl overflow-hidden border border-[#c8ddd4]">
+            <MapContainer center={marker} zoom={10} className="h-full w-full" attributionControl={false}>
+              <TileLayer url={ENGLISH_MAP_TILE_URL} />
+              <LocationPicker selected={marker} setSelected={(coords) => {
+                setForm((prev) => ({ ...prev, latitude: coords[0], longitude: coords[1] }));
+              }} />
+            </MapContainer>
+          </div>
+        </div>
       </div>
-    </div>
+
+      {/* Product Search and Suggestions Section */}
+      <div className="mt-4">
+        <label className="block text-sm font-bold text-[#2f6152] mb-1">Product Name</label>
+        <Input
+          value={productSearch}
+          onChange={(event) => setProductSearch(event.target.value)}
+          className="w-full rounded-lg border border-[#c8ddd4] bg-white px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#1f9f6a]"
+          placeholder="e.g. Maize, Potatoes, etc."
+        />
+        <div className="mt-2 rounded-xl border border-[#dbe8e2] bg-[#fbfefd] p-2">
+          {productSuggestions
+            .filter((item) =>
+              productSearch.trim()
+                ? item.toLowerCase().includes(productSearch.toLowerCase().trim())
+                : true,
+            )
+            .slice(0, 3)
+            .map((item) => (
+              <button
+                key={item}
+                type="button"
+                onClick={() => selectSuggestion(item)}
+                className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm font-semibold text-[#255040] hover:bg-[#eef7f3]"
+              >
+                <span className="h-3 w-3 rounded-sm bg-[#3bb77e]" />
+                {item}
+              </button>
+            ))}
+        </div>
+        <Button
+          type="button"
+          className="mt-3 h-10 w-full rounded-lg bg-[#1f9f6a] text-sm font-black"
+          onClick={() => selectSuggestion(productSearch || 'Custom Crop')}
+        >
+          <Plus size={15} /> Add Custom Crop
+        </Button>
+      </div>
+
+      {/* Image Upload Section */}
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        {primaryImagePreview ? (
+          <div className="relative flex h-32 w-full items-center justify-center rounded-xl border border-[#dbe8e2] bg-[#f4faf7] p-1.5">
+            {listingImages.length > 0 ? (
+              <button
+                type="button"
+                onClick={() => removeImageAt(0)}
+                className="absolute right-1 top-1 z-10 text-xs font-black leading-none text-red-600 hover:text-red-700"
+                aria-label="Remove selected image"
+              >
+                X
+              </button>
+            ) : null}
+            <img
+              src={primaryImagePreview}
+              alt="Crop preview"
+              className="h-full w-full rounded-lg object-contain"
+            />
+          </div>
+        ) : (
+          <div className="flex h-32 items-center justify-center rounded-xl border border-dashed border-[#c8ddd4] bg-[#f6fbf9] text-xs font-semibold text-[#52786a]">
+            No image yet
+          </div>
+        )}
+        <label className="flex h-32 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-[#c8ddd4] bg-[#f6fbf9] text-[#52786a]">
+          <Upload size={16} />
+          <span className="text-xs font-bold">Add preview</span>
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (file) {
+                addImageFromPicker(file);
+              }
+              event.target.value = '';
+            }}
+          />
+        </label>
+      </div>
+
+      {/* Headline, Quantity, and Unit Section */}
+      <div className="mt-3 space-y-2">
+        <Input
+          placeholder="Headline"
+          value={form.title || productSearch || ''}
+          onChange={(event) => {
+            const newTitle = event.target.value;
+            setForm((prev) => ({ ...prev, title: newTitle }));
+            setProductSearch(newTitle);
+          }}
+          required
+          className="h-10"
+        />
+        <Input
+          placeholder="Total Quantity"
+          value={form.quantity}
+          onChange={(event) => setForm({ ...form, quantity: event.target.value })}
+          className="h-10"
+          required
+        />
+        {/* Unit Dropdown - Only One! */}
+        <div className="w-full">
+          <Listbox value={unit} onChange={setUnit}>
+            <div className="relative">
+              <Listbox.Button className="h-10 w-full rounded-xl border border-[#c9ddd4] bg-[#f8fcfa] px-3 text-sm font-semibold text-[#193f30] text-left flex items-center justify-between">
+                {unit}
+                <span className="ml-2">▼</span>
+              </Listbox.Button>
+              <Transition as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
+                <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                  {UNIT_OPTIONS.map((option, idx, arr) => (
+                    <Listbox.Option
+                      key={option}
+                      className={({ active }) => {
+                        let base = 'cursor-pointer select-none px-4 py-2 text-sm font-semibold';
+                        let rounded = '';
+                        if (idx === 0) rounded += ' rounded-t-xl';
+                        if (idx === arr.length - 1) rounded += ' rounded-b-xl';
+                        let color = active ? 'bg-[#20a46b] text-white' : 'text-[#193f30]';
+                        return `${base}${rounded} ${color}`;
+                      }}
+                      value={option}
+                    >
+                      {option}
+                    </Listbox.Option>
+                  ))}
+                </Listbox.Options>
+              </Transition>
+            </div>
+          </Listbox>
+        </div>
+      </div>
+
+      {/* Category, Quantity, Price, Road Access Section */}
+      <div className="rounded-xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-3 mt-4">
+        <p className="text-4xl leading-none font-black text-[#1f9f6a]">Define Your Harvest & Price.</p>
+        {/* Category Dropdown */}
+        <div className="mt-4">
+          <label className="block text-sm font-bold text-[#2f6152] mb-1">Category</label>
+          <Listbox value={form.category} onChange={val => setForm({ ...form, category: val })}>
+            <div className="relative">
+              <Listbox.Button className="h-10 w-full rounded-xl border border-[#c9ddd4] bg-[#f8fcfa] px-3 text-sm font-semibold text-[#193f30] text-left flex items-center justify-between">
+                {CATEGORY_OPTIONS.find(opt => opt.value === form.category)?.label || 'Select Category'}
+                <span className="ml-2">▼</span>
+              </Listbox.Button>
+              <Transition as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
+                <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                  {CATEGORY_OPTIONS.map((option, idx, arr) => (
+                    <Listbox.Option
+                      key={option.value}
+                      className={({ active }) => {
+                        let base = 'cursor-pointer select-none px-4 py-2 text-sm font-semibold';
+                        let rounded = '';
+                        if (idx === 0) rounded += ' rounded-t-xl';
+                        if (idx === arr.length - 1) rounded += ' rounded-b-xl';
+                        let color = active ? 'bg-[#20a46b] text-white' : 'text-[#193f30]';
+                        return `${base}${rounded} ${color}`;
+                      }}
+                      value={option.value}
+                    >
+                      {option.label}
+                    </Listbox.Option>
+                  ))}
+                </Listbox.Options>
+              </Transition>
+            </div>
+          </Listbox>
+        </div>
+        <div className="space-y-4">
+          <div>
+            <p className="text-2xl font-black text-[#143629]">Quantity</p>
+            <div className="mt-2 grid grid-cols-1 gap-2">
+              <Input
+                placeholder="Total Quantity"
+                value={form.quantity}
+                onChange={(event) => setForm({ ...form, quantity: event.target.value })}
+                className="h-10"
+                required
+              />
+            </div>
+            {quantityError ? (
+              <p className="mt-1 flex items-center gap-1 text-xs font-bold text-[#ba2a2a]">
+                <AlertCircle size={13} /> {quantityError}
+              </p>
+            ) : null}
+          </div>
+          <div>
+            <p className="text-2xl font-black text-[#143629]">Price (per {unit})</p>
+            <div className="mt-2 grid grid-cols-1 gap-2">
+              <Input
+                type="number"
+                placeholder="Price per Unit"
+                value={form.price}
+                onChange={(event) => setForm({ ...form, price: event.target.value })}
+                className="h-10"
+                required
+              />
+              <Input 
+                value={totalValue ? `${formatCurrency(totalValue)}` : formatCurrency(0)} 
+                readOnly 
+                className="h-10 bg-gray-50" 
+              />
+            </div>
+          </div>
+          <div>
+            <p className="text-sm font-black text-[#2f6152]">Road Accessibility Status</p>
+            <select
+              value={form.roadAccess}
+              onChange={(event) =>
+                setForm({ ...form, roadAccess: event.target.value })
+              }
+              className="mt-1 h-10 w-full rounded-xl border border-[#c9ddd4] bg-white px-3 text-sm font-semibold text-[#193f30]"
+            >
+              <option value="open">🟢 Road is Open</option>
+              <option value="flooded">🔴 Road is Flooded</option>
+              <option value="trucks_only">🟡 Trucks Only</option>
+            </select>
+            <p className="mt-1 text-xs text-[#4a6e60]">Help buyers know if they can reach your farm during emergencies</p>
+          </div>
+        </div>
+      </div>
+
+      {error && (
+        <div className="mt-3 rounded-lg border border-[#efc7c7] bg-[#fff2f2] px-3 py-2 text-sm font-semibold text-[#b11e1e]">
+          {error}
+        </div>
+      )}
+
+      <div className="mt-4 flex flex-wrap gap-2 border-t border-[#dbe9e3] pt-4">
+        <Button type="button" variant="outline" className="h-10 rounded-lg border-[#8cc8ae] text-[#1e6f4f]">
+          Next Step: Visuals & Description
+        </Button>
+      </div>
+    </form>
   );
 };
