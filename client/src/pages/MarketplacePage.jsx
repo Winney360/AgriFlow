@@ -22,6 +22,15 @@ import { ENGLISH_MAP_ATTRIBUTION, ENGLISH_MAP_TILE_URL } from '../lib/mapTiles';
 import { greenMarkerIcon } from '../lib/mapMarkerIcon';
 import { normalizePhoneForWhatsApp } from '../lib/utils';
 
+const CURRENCY_OPTIONS = [
+  { code: 'KES', label: 'Kenyan Shilling', locale: 'en-KE', symbol: 'Ksh' },
+  { code: 'USD', label: 'US Dollar', locale: 'en-US', symbol: '$' },
+  { code: 'EUR', label: 'Euro', locale: 'en-IE', symbol: '€' },
+  { code: 'GBP', label: 'British Pound', locale: 'en-GB', symbol: '£' },
+  { code: 'INR', label: 'Indian Rupee', locale: 'en-IN', symbol: '₹' },
+  // Add more as needed
+];
+
 export const MarketplacePage = () => {
   const { user } = useAuth();
   const [products, setProducts] = useState([]);
@@ -45,6 +54,15 @@ export const MarketplacePage = () => {
     lng: '',
     radiusKm: '',
   });
+
+  const [currency, setCurrency] = useState(CURRENCY_OPTIONS[0]);
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat(currency.locale, {
+      style: 'currency',
+      currency: currency.code,
+      maximumFractionDigits: 0,
+    }).format(value || 0);
+  };
 
   // If user role changes, update mapView accordingly
   useEffect(() => {
@@ -187,6 +205,23 @@ export const MarketplacePage = () => {
             <h1 className="text-4xl leading-tight font-black tracking-tight text-[#1f9f6a] lg:hidden">
               Explore the Local Market.
             </h1>
+
+            {/* Currency Selector */}
+            <div className="mb-4">
+              <label className="block text-xs font-bold text-[#1f9f6a] mb-1">Currency</label>
+              <select
+                className="w-full rounded-lg border border-[#c8ddd4] bg-white px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#1f9f6a]"
+                value={currency.code}
+                onChange={e => {
+                  const next = CURRENCY_OPTIONS.find(opt => opt.code === e.target.value);
+                  if (next) setCurrency(next);
+                }}
+              >
+                {CURRENCY_OPTIONS.map(opt => (
+                  <option key={opt.code} value={opt.code}>{opt.label} ({opt.symbol})</option>
+                ))}
+              </select>
+            </div>
 
             {/* Map Preview Card */}
             <div className="rounded-2xl border-2 border-[#1f9f6a] bg-[#f0faf7] p-4">
@@ -404,7 +439,7 @@ export const MarketplacePage = () => {
                       <Popup>
                         <div className="p-2 min-w-50">
                           <h3 className="font-bold text-lg mb-1">{product.title}</h3>
-                          <p className="text-[#1f9f6a] font-semibold">Ksh {Number(product.price || 0).toLocaleString()}</p>
+                          <p className="text-[#1f9f6a] font-semibold">{formatCurrency(product.price)}/{unit}</p>
                           <p className="text-sm text-gray-600 mt-1">{product.location?.locationName}</p>
                           {product.isEmergency && (
                             <span className="inline-block mt-2 px-2 py-1 bg-red-100 text-red-700 text-xs font-bold rounded">
@@ -518,7 +553,7 @@ export const MarketplacePage = () => {
                           </div>
                           {/* Row 2: Price */}
                           <div className="flex items-center min-h-9">
-                            <p className="text-xl font-black text-[#1f9f6a]">Ksh {Number(product.price || 0).toLocaleString()}/{unit}</p>
+                            <p className="text-xl font-black text-[#1f9f6a]">{formatCurrency(product.price)}/{unit}</p>
                           </div>
                           {/* Row 3: Location */}
                           <div className="flex items-center min-h-8">

@@ -99,6 +99,14 @@ function hasDraftContent(form, productSearch, images) {
   return hasFormContent || hasProductSearch || hasImages;
 }
 
+const CURRENCY_OPTIONS = [
+  { code: 'KES', label: 'Kenyan Shilling', locale: 'en-KE', symbol: 'Ksh' },
+  { code: 'USD', label: 'US Dollar', locale: 'en-US', symbol: '$' },
+  { code: 'EUR', label: 'Euro', locale: 'en-IE', symbol: '€' },
+  { code: 'GBP', label: 'British Pound', locale: 'en-GB', symbol: '£' },
+  { code: 'INR', label: 'Indian Rupee', locale: 'en-IN', symbol: '₹' },
+];
+
 export const CreateListingPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -107,6 +115,14 @@ export const CreateListingPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [productSearch, setProductSearch] = useState('');
   const [unit, setUnit] = useState('Kgs');
+  const [currency, setCurrency] = useState(CURRENCY_OPTIONS[0]);
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat(currency.locale, {
+      style: 'currency',
+      currency: currency.code,
+      maximumFractionDigits: 0,
+    }).format(value || 0);
+  };
   const [draftImages, setDraftImages] = useState([]);
   const [listingImages, setListingImages] = useState([]);
   const [form, setForm] = useState(DEFAULT_FORM_STATE);
@@ -957,7 +973,7 @@ export const CreateListingPage = () => {
                           required
                         />
                         <Input 
-                          value={totalValue ? `Ksh ${totalValue.toLocaleString()}` : 'Ksh 0'} 
+                          value={totalValue ? `${formatCurrency(totalValue)}` : formatCurrency(0)} 
                           readOnly 
                           className="h-10 bg-gray-50" 
                         />
