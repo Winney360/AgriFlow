@@ -1,11 +1,18 @@
 import axios from 'axios';
 
 const normalizeApiBaseUrl = (url) => {
-  const trimmed = String(url || '').trim().replace(/\/+$/, '');
-  if (!trimmed) {
-    return 'http://localhost:5000/api';
+  const trimmed = String(url || "").trim().replace(/\/+$/, "");
+
+  if (trimmed) {
+    return trimmed.endsWith("/api") ? trimmed : `${trimmed}/api`;
   }
-  return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
+
+  // fallback based on environment
+  if (import.meta.env.DEV) {
+    return "http://localhost:5000/api";
+  }
+
+  return "https://agriflow.onrender.com/api";
 };
 
 const API_BASE_URL = normalizeApiBaseUrl(import.meta.env.VITE_API_URL);
