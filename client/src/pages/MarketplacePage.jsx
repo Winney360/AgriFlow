@@ -525,7 +525,7 @@ export const MarketplacePage = () => {
                             <div className="mt-auto">
                               <Button
                                 type="button"
-                                className="w-full bg-[#1f9f6a] hover:bg-[#168055] font-bold py-3"
+                                className="w-full bg-[#d83c31] hover:bg-[#b91c1c] font-bold py-3 text-white"
                                 onClick={() => { setSelectedProduct(product); setShowModal(true); }}
                               >
                                 View Emergency Request
